@@ -1,6 +1,5 @@
 use std::net::SocketAddr;
 
-use crate::service::fetchservice::{BasicInfo, MemoryInfo};
 use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
 use hyper::{body::Bytes, server::conn::http1, Method, Request, Response, StatusCode};
 use hyper_util::rt::TokioIo;
@@ -8,6 +7,8 @@ use middlewares::logging;
 use serde::Serialize;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
+
+use crate::service::fetchservice::{basicinfo, memoryinfo};
 
 mod middlewares;
 
@@ -36,8 +37,8 @@ async fn router(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
     match (req.method(), req.uri().path()) {
-        (&Method::GET, "/fetch") => ok(&BasicInfo::new()),
-        (&Method::GET, "/fetch/memory") => ok(&MemoryInfo::new()),
+        (&Method::GET, "/fetch") => ok(&basicinfo::BasicInfo::new()),
+        (&Method::GET, "/fetch/memory") => ok(&memoryinfo::MemoryInfo::new()),
 
         _ => {
             let mut not_found = Response::new(empty());
