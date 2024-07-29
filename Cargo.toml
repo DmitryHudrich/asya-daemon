@@ -26,4 +26,4 @@ serde = { version = "1.0", features = ["derive"] }
 tower = "0.4" # here
 colored = "2.1.0"
 chrono = "0.4.38"
-
+sysinfo = "0.30.13"

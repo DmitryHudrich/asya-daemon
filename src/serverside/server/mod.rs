@@ -1,15 +1,13 @@
 use std::net::SocketAddr;
 
+use crate::service::fetchservice::{BasicInfo, MemoryInfo};
 use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
-use hyper::{
-    body::Bytes, server::conn::http1, Method, Request, Response, StatusCode,
-};
+use hyper::{body::Bytes, server::conn::http1, Method, Request, Response, StatusCode};
 use hyper_util::rt::TokioIo;
+use middlewares::logging;
 use serde::Serialize;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
-use middlewares::logging;
-use crate::service::fetchservice::SystemFetch;
 
 mod middlewares;
 
@@ -24,7 +22,9 @@ pub async fn launch_server() -> Result<(), Box<dyn std::error::Error>> {
         tokio::spawn(async move {
             // N.B. should use hyper service_fn here, since it's required to be implemented hyper Service trait!
             let svc = hyper::service::service_fn(router);
-            let svc = ServiceBuilder::new().layer_fn(logging::Logger::new).service(svc);
+            let svc = ServiceBuilder::new()
+                .layer_fn(logging::Logger::new)
+                .service(svc);
             if let Err(err) = http1::Builder::new().serve_connection(io, svc).await {
                 warn!("server error: {}", err);
             }
@@ -36,7 +36,8 @@ async fn router(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
     match (req.method(), req.uri().path()) {
-        (&Method::GET, "/fetch") => ok(&SystemFetch::new()),
+        (&Method::GET, "/fetch") => ok(&BasicInfo::new()),
+        (&Method::GET, "/fetch/memory") => ok(&MemoryInfo::new()),
 
         _ => {
             let mut not_found = Response::new(empty());
