@@ -1,9 +1,0 @@
-@host=http://127.0.0.1:3000
-
-GET {{host}}/fetch
-accept: application/json
-
-###
-
-GET {{host}}/fetch/memory
-accept: application/json
