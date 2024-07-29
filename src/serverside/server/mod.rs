@@ -52,7 +52,11 @@ fn ok<T>(result: &T) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Er
 where
     T: Serialize,
 {
-    Ok(Response::new(full(serde_json::to_string(result).unwrap())))
+    let response = Response::builder()
+        .header("Content-Type", "application/json")
+        .body(full(serde_json::to_string(result).unwrap()))
+        .unwrap();
+    Ok(response)
 }
 
 fn empty() -> BoxBody<Bytes, hyper::Error> {

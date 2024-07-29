@@ -1,9 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 use sysinfo::MemoryRefreshKind;
-
 use sysinfo::RefreshKind;
-
 use sysinfo::System;
 
 #[derive(Serialize, Deserialize, Default)]
@@ -28,4 +26,3 @@ impl MemoryInfo {
         }
     }
 }
-
