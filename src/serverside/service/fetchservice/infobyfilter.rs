@@ -28,7 +28,7 @@ fn match_param(key: &str, value: String) -> Option<String> {
     match key {
         "siname" => System::name(),
         "sikernel_version" => System::kernel_version(),
-        "sios_version" => System::kernel_version(),
+        "sios_version" => System::os_version(),
         "sihostname" => System::host_name(),
         "mitotal" => {
             let mut system = System::new_with_specifics(
