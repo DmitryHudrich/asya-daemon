@@ -1,4 +1,4 @@
-use hyper::{Request, body::Incoming, service::Service};
+use hyper::{body::Incoming, service::Service, Request};
 
 #[derive(Debug, Clone)]
 pub struct Logger<S> {
@@ -19,9 +19,13 @@ where
     type Response = S::Response;
     type Error = S::Error;
     type Future = S::Future;
+
     fn call(&self, req: Req) -> Self::Future {
-        info!("processing request: {} {}", req.method(), req.uri().path());
+        info!(
+            "processing request: {method} {uripath}",
+            method = req.method(),
+            uripath = req.uri().path()
+        );
         self.inner.call(req)
     }
 }
-
