@@ -40,6 +40,7 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
         "miswap_total" => Value::Number(Number::from(system.total_swap())),
         "miswap_used" => Value::Number(Number::from(system.used_swap())),
         "di_test" => json!({
+        // TODO: хевен сделай пж с дисками суету
             "/": {
                 "name": "bebra",
                 "desc": "sex",
