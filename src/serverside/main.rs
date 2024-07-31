@@ -5,7 +5,7 @@ extern crate env_logger;
 use chrono::Local;
 use colored::{ColoredString, Colorize};
 use log::Level;
-use std::{env, io::Write};
+use std::{env, io::Write, str::FromStr};
 
 mod server;
 pub mod service;
@@ -20,6 +20,10 @@ async fn main() {
 fn init_logging() {
     if env::var_os("RUST_LOG").is_none() {
         log::set_max_level(log::LevelFilter::Info);
+    } else {
+        log::set_max_level(
+            log::LevelFilter::from_str(env::var_os("RUST_LOG").unwrap().to_str().unwrap()).unwrap(),
+        );
     }
 
     env_logger::Builder::from_default_env()
