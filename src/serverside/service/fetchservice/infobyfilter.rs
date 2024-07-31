@@ -1,18 +1,21 @@
-use std::collections::HashMap;
+use multimap::MultiMap;
 use sysinfo::{MemoryRefreshKind, RefreshKind, System};
 
-pub fn new(params: HashMap<String, String>) -> serde_json::Value {
-    let mut res = HashMap::new();
-    for (key, value) in params {
-        if let Some(field) = match_param(key.as_str(), value) {
-            res.insert(key, field);
+pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
+    let mut res = MultiMap::new();
+    for (key, value) in &params {
+        for element in value {
+            if let Some(field) = match_param(key.as_str(), element.as_str()) {
+                debug!("Query parsing | \n\tKey: {key}\n\tValue:{element}");
+                res.insert(key, field);
+            }
         }
     }
     serde_json::to_value(res).unwrap()
 }
 
 // TODO: Return u64 (or other type) instead String if needed.
-fn match_param(key: &str, value: String) -> Option<String> {
+fn match_param(key: &str, value: &str) -> Option<String> {
     if value != "1" {
         return None;
     }

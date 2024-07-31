@@ -102,6 +102,7 @@ dependencies = [
  "hyper",
  "hyper-util",
  "log",
+ "multimap",
  "serde",
  "serde_json",
  "sysinfo",
@@ -553,6 +554,15 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "multimap"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "defc4c55412d89136f966bbb339008b474350e5e6e78d2714439c386b3137a03"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
