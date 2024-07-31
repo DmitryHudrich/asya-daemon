@@ -1,30 +1,23 @@
 use multimap::MultiMap;
-use serde::Serialize;
-use sysinfo::{MemoryRefreshKind, RefreshKind, System};
+use serde_json::{json, Number, Value};
+use sysinfo::System;
 
 pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     let mut res = MultiMap::new();
     for (key, value) in &params {
         for element in value {
-            if let Some(field) = match_param(key.as_str(), element.as_str()) {
-                debug!("Query parsing | \n\tKey: {key}\n\tValue:{element}");
-                res.insert(key, field);
-            }
+            let val = match_param(key.as_str(), element.as_str());
+            debug!("Query parsing | \n\tKey: {key}\n\tValue:{element}");
+            res.insert(key, val);
         }
     }
     serde_json::to_value(res).unwrap()
 }
 
-#[derive(Serialize)]
-pub enum MatchParam {
-    StringRes (String),
-    U32Res (u64)
-}
-
-// TODO: Return u64 (or other type) instead String if needed.
-fn match_param(key: &str, value: &str) -> Option<MatchParam> {
+/* статистика обхвата члена */
+fn match_param(key: &str, value: &str) -> serde_json::Value {
     if value != "1" {
-        return None;
+        return Value::Null;
     }
     // Prefixes list for field names:
     // s - system (basic system info e.g. name or version)
@@ -35,56 +28,24 @@ fn match_param(key: &str, value: &str) -> Option<MatchParam> {
     // for example:
     //  "siname" means system_info_name
     //  "sikernel_version" means system_info_kernel_version
-    let system = System::new_with_specifics(
-        RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram().with_swap())
-    );
+    let system = System::new_all();
 
     match key {
-        "siname" => Some(MatchParam::StringRes(System::name().unwrap())),
-        "sikernel_version" => Some(MatchParam::U32Res(System::kernel_version().unwrap().trim().parse::<u64>().unwrap())),
-        "sios_version" => Some(MatchParam::U32Res(System::os_version().unwrap().trim().parse::<u64>().unwrap())),
-        "sihostname" => Some(MatchParam::StringRes(System::host_name().unwrap())),
-        "mitotal" => Some(MatchParam::U32Res(system.total_memory())),
-        "miused" => Some(MatchParam::U32Res(system.used_memory())),
-        "miswap_total" => Some(MatchParam::U32Res(system.total_swap())),
-        "miswap_used" => Some(MatchParam::U32Res(system.used_swap())),
-        _ => None
+        "siname" => Value::String(System::name().unwrap()),
+        "sikernel_version" => Value::String(System::kernel_version().unwrap()),
+        "sios_version" => Value::String(System::os_version().unwrap()),
+        "sihostname" => Value::String(System::host_name().unwrap()),
+        "mitotal" => Value::Number(Number::from(system.total_memory())),
+        "miused" => Value::Number(Number::from(system.used_memory())),
+        "miswap_total" => Value::Number(Number::from(system.total_swap())),
+        "miswap_used" => Value::Number(Number::from(system.used_swap())),
+        "di_test" => json!({
+            "/": {
+                "name": "bebra",
+                "desc": "sex",
+            }
+        }),
+
+        _ => Value::Null,
     }
-
-
-    // match key {
-    //     "siname" => Some(MatchParam::StringRes(System::name().unwrap())),
-    //     "sikernel_version" => Some(MatchParam::U32Res(System::kernel_version().unwrap().trim().parse::<u64>().expect("Hhbd"))),
-    //     "sios_version" => Some(MatchParam::U32Res(System::os_version().unwrap().trim().parse::<u64>().unwrap())),
-    //     "sihostname" => Some(MatchParam::StringRes(System::host_name().unwrap())),
-    //     "mitotal" => {
-    //         let mut system = System::new_with_specifics(
-    //             RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram()),
-    //         );
-    //         system.refresh_memory();
-    //         Some(MatchParam::U32Res(system.total_memory()))
-    //     },
-    //     "miused" => {
-    //         let mut system = System::new_with_specifics(
-    //             RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram()),
-    //         );
-    //         system.refresh_memory();
-    //         Some(MatchParam::U32Res(system.used_memory()))
-    //     },
-    //     "miswap_total" => {
-    //         let mut system = System::new_with_specifics(
-    //             RefreshKind::new().with_memory(MemoryRefreshKind::new().with_swap()),
-    //         );
-    //         system.refresh_memory();
-    //         Some(MatchParam::U32Res(system.total_swap()))
-    //     },
-    //     "miswap_used" => {
-    //         let mut system = System::new_with_specifics(
-    //             RefreshKind::new().with_memory(MemoryRefreshKind::new().with_swap()),
-    //         );
-    //         system.refresh_memory();
-    //         Some(MatchParam::U32Res(system.used_swap()))
-    //     },
-    //     _ => None,
-    // }
 }
