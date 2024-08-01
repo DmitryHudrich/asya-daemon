@@ -3,7 +3,10 @@ GET {{host}}/fetch/byfilters
 siname: 1
 siname: 1
 mitotal: 1
-di_test: 1
+didisks: 1
+diname: /dev/nvme0n1p3
+ditotal_space: 1
+test: 1
 
 GET {{host}}/fetch
 
