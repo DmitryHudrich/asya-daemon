@@ -1,18 +1,16 @@
-use std::collections::HashMap;
 use multimap::MultiMap;
 use serde_json::{json, Map, Number, Value};
+use std::collections::HashMap;
 use sysinfo::{Disks, System};
 
 pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     let mut res: HashMap<&String, Value> = HashMap::new();
-
     let mut needed_mnts: Vec<&String> = vec![];
     let mut mnt_map: HashMap<&String, Value> = HashMap::new();
 
     // костыль для проблемы описаной в match_param_mount()
-    let binding = Disks::new_with_refreshed_list();
     let mut mnts: Vec<String> = vec![];
-    for disk in &binding {
+    for disk in &Disks::new_with_refreshed_list() {
         mnts.push(disk.mount_point().to_str().unwrap().to_string());
     }
 
@@ -42,7 +40,7 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
                         if &key[0..4] != "mnti" || &element != mnt {
                             continue;
                         };
-                        let val = match_param_mount(mnt, key );
+                        let val = match_param_mount(mnt, key);
                         mnt_submap.insert(key, val);
                     }
                 }
@@ -58,7 +56,7 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     serde_json::to_value(res).unwrap()
 }
 
-fn match_param_mount(mount_point: &str, key: &str ) -> serde_json::Value {
+fn match_param_mount(mount_point: &str, key: &str) -> serde_json::Value {
     let binding = Disks::new_with_refreshed_list();
     let disk = binding
         .into_iter()
@@ -94,21 +92,22 @@ fn match_param_mount(mount_point: &str, key: &str ) -> serde_json::Value {
 
 /* статистика обхвата члена */
 fn match_param(key: &str, value: &str) -> serde_json::Value {
-    if value == "1" {
-        let system = System::new_all();
-        let disks = Disks::new_with_refreshed_list();
+    if value != "1" {
+        return Value::Null;
+    }
+    let system = System::new_all();
 
-        { // Prefixes list for field names:
-             // s - system (basic system info e.g. name or version)
-             // m - ram
-             // d - drive
-             // mnt - mount
-             // i - info
-             //
-             // for example:
-             //  "siname" means system_info_name
-             //  "sikernel_version" means system_info_kernel_version
-        }
+    {
+        // Prefixes list for field names:
+        // s - system (basic system info e.g. name or version)
+        // m - ram
+        // d - drive
+        // mnt - mount
+        // i - info
+        //
+        // for example:
+        //  "siname" means system_info_name
+        //  "sikernel_version" means system_info_kernel_version
         match key {
             "siname" => Value::String(System::name().unwrap()),
             "sikernel_version" => Value::String(System::kernel_version().unwrap()),
@@ -120,7 +119,7 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
             "miswap_used" => Value::Number(Number::from(system.used_swap())),
             "mntiall" => {
                 let mut disk_map: Map<String, Value> = Map::new();
-                for disk in &disks {
+                for disk in &Disks::new_with_refreshed_list() {
                     // FIXME: как будто говнокод. мне кажется,можно сделать лучше
                     let mut disk_info: Map<String, Value> = Map::new();
                     disk_info.insert("name".to_string(), json!(disk.name().to_str()));
@@ -145,11 +144,6 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
             }
             // TODO: инфу о процессорах, интернет подключениях, процессах?? я хз, почему бы и нет
             _ => Value::Null,
-        }
-    } else {
-        match key {
-            "mntitotal_space" => json!("undefined"),
-            _ => json!(null),
         }
     }
 }
