@@ -1,12 +1,19 @@
-GET {{host}}/fetch/byfilters
+GET {{host}}/fetch
 [QueryStringParams]
 siname: 1
 siname: 1
 mitotal: 1
-didisks: 1
-diname: /dev/nvme0n1p3
-ditotal_space: 1
+mntiall: 1
+mntitotal_space: /
+mntiavailable_space: /
+mntikind: /mnt
+mntitotal_space: /efi
 test: 1
+
+GET {{host}}/fetch
+[QueryStringParams]
+mntiname: /
+mntitotal_space: 1
 
 GET {{host}}/fetch
 

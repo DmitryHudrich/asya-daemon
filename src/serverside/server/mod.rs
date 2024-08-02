@@ -1,14 +1,14 @@
-use std::net::SocketAddr;
 use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
 use hyper::{body::Bytes, server::conn::http1, Method, Request, Response, StatusCode};
 use hyper_util::rt::TokioIo;
 use middlewares::logging;
-use multimap::MultiMap;
+// use multimap::MultiMap;
 use serde::Serialize;
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 
-use crate::service::fetchservice::{basicinfo, infobyfilter, memoryinfo};
+use crate::service::fetchservice::{ infobyfilter, memoryinfo};
 
 mod middlewares;
 
@@ -49,21 +49,18 @@ async fn router(
             ⡇⠀⠀⢹⣿⡧⠀⡀⠀⣀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⢰⣿
             ⡇⠀⠀⠀⢻⢰⣿⣶⣿⡿⠿⢂⣿⣿⣿⣿⣿⣿⣿⢿⣻⣿⣿⣿⡏⠀⠀
         */
-        (&Method::GET, "/fetch/byfilters") => {
+        (&Method::GET, "/fetch") => {
             let params = req
                 .uri()
                 .query()
-                .map(|v| {
-                    form_urlencoded::parse(v.as_bytes())
-                        .into_owned()
-                        .collect()
-                })
+                .map(|v| form_urlencoded::parse(v.as_bytes()).into_owned().collect())
                 .unwrap_or_default();
             ok(&infobyfilter::new(params))
         }
-        (&Method::GET, "/fetch") => ok(&basicinfo::BasicInfo::new()),
+        // (&Method::GET, "/fetch") => ok(&basicinfo::BasicInfo::new()),
         (&Method::GET, "/fetch/memory") => ok(&memoryinfo::MemoryInfo::new()),
-
+        // (&Method::GET, "fetch/mounts")
+         
         _ => {
             let mut not_found = Response::new(empty());
             *not_found.status_mut() = StatusCode::NOT_FOUND;
