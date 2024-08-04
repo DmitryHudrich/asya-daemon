@@ -60,7 +60,7 @@ async fn router(
         // (&Method::GET, "/fetch") => ok(&basicinfo::BasicInfo::new()),
         (&Method::GET, "/fetch/memory") => ok(&memoryinfo::MemoryInfo::new()),
         // (&Method::GET, "fetch/mounts")
-         
+
         _ => {
             let mut not_found = Response::new(empty());
             *not_found.status_mut() = StatusCode::NOT_FOUND;

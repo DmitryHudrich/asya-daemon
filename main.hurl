@@ -1,5 +1,6 @@
 GET {{host}}/fetch
 [QueryStringParams]
+cinfo: 1
 siname: 1
 siname: 1
 mitotal: 1

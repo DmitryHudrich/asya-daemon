@@ -1,7 +1,7 @@
 use multimap::MultiMap;
 use serde_json::{json, Map, Number, Value};
 use std::collections::HashMap;
-use sysinfo::{Disk, Disks, System};
+use sysinfo::{Disks, System};
 
 pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     let mut res: HashMap<&String, Value> = HashMap::new();
@@ -25,9 +25,8 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
             }
 
             // Processing everything else
-            let val = match_param(key.as_str(), element.as_str());
             debug!("Query parsing | \n\tKey: {key}\n\tValue:{element}");
-            res.insert(key, val);
+            res.insert(key, match_param(key.as_str(), element.as_str()));
         }
 
         // Processing mountpoints
@@ -40,8 +39,7 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
                         if &key[0..4] != "mnti" || &element != mnt {
                             continue;
                         };
-                        let val = match_param_mount(mnt, key);
-                        mnt_submap.insert(key, val);
+                        mnt_submap.insert(key, match_param_mount(mnt, key));
                     }
                 }
                 mnt_map.insert(mnt, json!(mnt_submap));
@@ -95,7 +93,8 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
     if value != "1" {
         return Value::Null;
     }
-    let system = System::new_all();
+    let mut system = System::new_all();
+    system.refresh_all();
 
     {
         // Prefixes list for field names:
@@ -104,6 +103,7 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
         // d - drive
         // mnt - mount
         // i - info
+        // c - cpu
         //
         // for example:
         //  "siname" means system_info_name
@@ -136,33 +136,12 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
                                                         })
                                                         .collect();
                 Value::Object(disk_map)
-            }
+            },
+            "cinfo" => {
+                let formatted = format!("{} - ({})", system.cpus()[0].brand().to_string(), system.cpus().len());
+                Value::String(formatted)
+                },
 
-            // "mntiall" => {
-            //     let mut disk_map: Map<String, Value> = Map::new();
-            //     for disk in &Disks::new_with_refreshed_list() {
-            //         // FIXME: как будто говнокод. мне кажется,можно сделать лучше
-            //         let mut disk_info: Map<String, Value> = Map::new();
-            //         disk_info.insert("name".to_string(), json!(disk.name().to_str()));
-            //         disk_info.insert("total_space".to_string(), json!(disk.total_space()));
-            //         disk_info.insert("available_space".to_string(), json!(disk.available_space()));
-            //         disk_info.insert("kind".to_string(), json!(disk.kind().to_string()));
-            //         disk_info.insert(
-            //             "file_system".to_string(),
-            //             json!(disk.file_system().to_str().unwrap().to_string()),
-            //         );
-            //         disk_info.insert("is_removable".to_string(), json!(disk.is_removable()));
-            //         disk_info.insert(
-            //             "used_space".to_string(),
-            //             json!(disk.total_space() - disk.available_space()),
-            //         );
-            //         disk_map.insert(
-            //             disk.mount_point().to_str().unwrap().to_string(),
-            //             Value::Object(disk_info),
-            //         );
-            //     }
-            //     Value::Object(disk_map)
-            // }
             // TODO: инфу о процессорах, интернет подключениях, процессах?? я хз, почему бы и нет
             _ => Value::Null,
         }
