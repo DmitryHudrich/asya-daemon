@@ -1,18 +1,18 @@
 use multimap::MultiMap;
 use serde_json::{json, Map, Number, Value};
 use std::collections::HashMap;
-use sysinfo::{Disks, System};
+use sysinfo::{Disk, Disks, System};
 
 pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     let mut res: HashMap<&String, Value> = HashMap::new();
     let mut needed_mnts: Vec<&String> = vec![];
     let mut mnt_map: HashMap<&String, Value> = HashMap::new();
 
-    // костыль для проблемы описаной в match_param_mount()
-    let mut mnts: Vec<String> = vec![];
-    for disk in &Disks::new_with_refreshed_list() {
-        mnts.push(disk.mount_point().to_str().unwrap().to_string());
-    }
+    let mnts: Vec<String> = Disks::new_with_refreshed_list()
+                                    .iter()
+                                    .filter_map(|disk| disk.mount_point().to_str().map(|x| x.to_string()))
+                                    .collect();
+
 
     // dbg!{&params};
     for (key, value) in &params {
@@ -49,10 +49,9 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
         }
     }
 
-    let binding = "mntimounts".to_string();
-    if !mnt_map.is_empty() {
-        res.insert(&binding, json!(mnt_map));
-    }
+
+    let binding: &String = &"mntimounts".to_string();
+    (!mnt_map.is_empty()).then(|| res.insert(binding, json!(mnt_map)));
     serde_json::to_value(res).unwrap()
 }
 
@@ -90,6 +89,7 @@ fn match_param_mount(mount_point: &str, key: &str) -> serde_json::Value {
     }
 }
 
+
 /* статистика обхвата члена */
 fn match_param(key: &str, value: &str) -> serde_json::Value {
     if value != "1" {
@@ -118,30 +118,51 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
             "miswap_total" => Value::Number(Number::from(system.total_swap())),
             "miswap_used" => Value::Number(Number::from(system.used_swap())),
             "mntiall" => {
-                let mut disk_map: Map<String, Value> = Map::new();
-                for disk in &Disks::new_with_refreshed_list() {
-                    // FIXME: как будто говнокод. мне кажется,можно сделать лучше
-                    let mut disk_info: Map<String, Value> = Map::new();
-                    disk_info.insert("name".to_string(), json!(disk.name().to_str()));
-                    disk_info.insert("total_space".to_string(), json!(disk.total_space()));
-                    disk_info.insert("available_space".to_string(), json!(disk.available_space()));
-                    disk_info.insert("kind".to_string(), json!(disk.kind().to_string()));
-                    disk_info.insert(
-                        "file_system".to_string(),
-                        json!(disk.file_system().to_str().unwrap().to_string()),
-                    );
-                    disk_info.insert("is_removable".to_string(), json!(disk.is_removable()));
-                    disk_info.insert(
-                        "used_space".to_string(),
-                        json!(disk.total_space() - disk.available_space()),
-                    );
-                    disk_map.insert(
-                        disk.mount_point().to_str().unwrap().to_string(),
-                        Value::Object(disk_info),
-                    );
-                }
+                let disk_map: Map<String, Value> = Disks::new_with_refreshed_list()
+                                                        .into_iter()
+                                                        .map(|di| {
+                                                            let disk_info = json!({
+                                                                "name": di.name().to_str(),
+                                                                "total_space": di.total_space(),
+                                                                "available_space": di.available_space(),
+                                                                "kind": di.kind().to_string(),
+                                                                "file_system": di.file_system().to_str().unwrap().to_string(),
+                                                                "is_removable": di.is_removable(),
+                                                                "used_space": di.total_space() - di.available_space()
+                                                            });
+
+                                                            let mount_point = di.mount_point().to_str().unwrap_or("None");
+                                                            (mount_point.to_string(), disk_info)
+                                                        })
+                                                        .collect();
                 Value::Object(disk_map)
             }
+
+            // "mntiall" => {
+            //     let mut disk_map: Map<String, Value> = Map::new();
+            //     for disk in &Disks::new_with_refreshed_list() {
+            //         // FIXME: как будто говнокод. мне кажется,можно сделать лучше
+            //         let mut disk_info: Map<String, Value> = Map::new();
+            //         disk_info.insert("name".to_string(), json!(disk.name().to_str()));
+            //         disk_info.insert("total_space".to_string(), json!(disk.total_space()));
+            //         disk_info.insert("available_space".to_string(), json!(disk.available_space()));
+            //         disk_info.insert("kind".to_string(), json!(disk.kind().to_string()));
+            //         disk_info.insert(
+            //             "file_system".to_string(),
+            //             json!(disk.file_system().to_str().unwrap().to_string()),
+            //         );
+            //         disk_info.insert("is_removable".to_string(), json!(disk.is_removable()));
+            //         disk_info.insert(
+            //             "used_space".to_string(),
+            //             json!(disk.total_space() - disk.available_space()),
+            //         );
+            //         disk_map.insert(
+            //             disk.mount_point().to_str().unwrap().to_string(),
+            //             Value::Object(disk_info),
+            //         );
+            //     }
+            //     Value::Object(disk_map)
+            // }
             // TODO: инфу о процессорах, интернет подключениях, процессах?? я хз, почему бы и нет
             _ => Value::Null,
         }
