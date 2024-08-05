@@ -9,10 +9,9 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     let mut mnt_map: HashMap<&String, Value> = HashMap::new();
 
     let mnts: Vec<String> = Disks::new_with_refreshed_list()
-                                    .iter()
-                                    .filter_map(|disk| disk.mount_point().to_str().map(|x| x.to_string()))
-                                    .collect();
-
+        .iter()
+        .filter_map(|disk| disk.mount_point().to_str().map(|x| x.to_string()))
+        .collect();
 
     // dbg!{&params};
     for (key, value) in &params {
@@ -46,7 +45,6 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
             }
         }
     }
-
 
     let binding: &String = &"mntimounts".to_string();
     (!mnt_map.is_empty()).then(|| res.insert(binding, json!(mnt_map)));
@@ -87,7 +85,6 @@ fn match_param_mount(mount_point: &str, key: &str) -> serde_json::Value {
     }
 }
 
-
 /* статистика обхвата члена */
 fn match_param(key: &str, value: &str) -> serde_json::Value {
     if value != "1" {
@@ -119,31 +116,36 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
             "miswap_used" => Value::Number(Number::from(system.used_swap())),
             "mntiall" => {
                 let disk_map: Map<String, Value> = Disks::new_with_refreshed_list()
-                                                        .into_iter()
-                                                        .map(|di| {
-                                                            let disk_info = json!({
-                                                                "name": di.name().to_str(),
-                                                                "total_space": di.total_space(),
-                                                                "available_space": di.available_space(),
-                                                                "kind": di.kind().to_string(),
-                                                                "file_system": di.file_system().to_str().unwrap().to_string(),
-                                                                "is_removable": di.is_removable(),
-                                                                "used_space": di.total_space() - di.available_space()
-                                                            });
+                    .into_iter()
+                    .map(|di| {
+                        let disk_info = json!({
+                            "name": di.name().to_str(),
+                            "total_space": di.total_space(),
+                            "available_space": di.available_space(),
+                            "kind": di.kind().to_string(),
+                            "file_system": di.file_system().to_str().unwrap().to_string(),
+                            "is_removable": di.is_removable(),
+                            "used_space": di.total_space() - di.available_space()
+                        });
 
-                                                            let mount_point = di.mount_point().to_str().unwrap_or("None");
-                                                            (mount_point.to_string(), disk_info)
-                                                        })
-                                                        .collect();
+                        let mount_point = di.mount_point().to_str().unwrap_or("None");
+                        (mount_point.to_string(), disk_info)
+                    })
+                    .collect();
                 Value::Object(disk_map)
-            },
+            }
             "cinfo" => {
-                let formatted = format!("{} - ({})", system.cpus()[0].brand().to_string(), system.cpus().len());
+                let formatted = format!(
+                    "{} - ({})",
+                    system.cpus()[0].brand(),
+                    system.cpus().len()
+                );
                 Value::String(formatted)
-                },
+            }
 
             // TODO: инфу о процессорах, интернет подключениях, процессах?? я хз, почему бы и нет
             _ => Value::Null,
         }
     }
 }
+
