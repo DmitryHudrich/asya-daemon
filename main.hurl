@@ -1,5 +1,9 @@
 GET {{host}}/fetch
 [QueryStringParams]
+mntitotal_space: /sdasd
+
+GET {{host}}/fetch
+[QueryStringParams]
 cinfo: 1
 siname: 1
 siname: 1

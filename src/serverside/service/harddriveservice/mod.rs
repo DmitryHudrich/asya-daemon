@@ -1,4 +1,0 @@
-fn get_driveinfo() {
-    
-}
-
