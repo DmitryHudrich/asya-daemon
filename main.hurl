@@ -1,6 +1,11 @@
+# REQUEST FOR TESTING STUFF
+
 GET {{host}}/fetch
 [QueryStringParams]
-mntitotal_space: /sdasd
+ditotal_space: /dev/watafuk
+ditotal_space: /dev/nvme0n1p3
+diused_space: /dev/nvme0n1p3
+dikind: /dev/nvme0n1p3
 
 GET {{host}}/fetch
 [QueryStringParams]
@@ -13,13 +18,5 @@ mntitotal_space: /
 mntiavailable_space: /
 mntikind: /mnt
 mntitotal_space: /efi
+diall: 1
 test: 1
-
-GET {{host}}/fetch
-[QueryStringParams]
-mntiname: /
-mntitotal_space: 1
-
-GET {{host}}/fetch
-
-GET {{host}}/fetch/memory

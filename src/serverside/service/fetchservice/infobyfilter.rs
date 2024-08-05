@@ -5,20 +5,26 @@ use sysinfo::{Disks, System};
 
 pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     let mut res: HashMap<&String, Value> = HashMap::new();
-    let mut needed_mnts: Vec<&String> = vec![];
+    let mut mnts: Vec<&String> = vec![];
     let mut mnt_map: HashMap<&String, Value> = HashMap::new();
+    let mut partitions: Vec<&String> = vec![];
+    let mut part_map: HashMap<&String, Value> = HashMap::new();
 
-    let mnts: Vec<String> = Disks::new_with_refreshed_list()
-        .iter()
-        .filter_map(|disk| disk.mount_point().to_str().map(|x| x.to_string()))
-        .collect();
-
-    // dbg!{&params};
     for (key, value) in &params {
         for element in value {
+
+            // processing all mnti query params and filling up a list of mounts that need to be processed
             if &key[0..4] == "mnti" && key != &String::from("mntiall") {
-                if !needed_mnts.contains(&element) && mnts.contains(element) {
-                    needed_mnts.push(element);
+                if !mnts.contains(&element) {
+                    mnts.push(element);
+                }
+                continue;
+            }
+
+            // processing all di query params and filling up a list of mounts that need to be processed
+            if &key[0..2] == "di" && key != &String::from("diall") {
+                if !partitions.contains(&element) {
+                    partitions.push(element);
                 }
                 continue;
             }
@@ -29,8 +35,8 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
         }
 
         // Processing mountpoints
-        if !needed_mnts.is_empty() {
-            for mnt in &needed_mnts {
+        if !mnts.is_empty() {
+            for mnt in &mnts {
                 debug!("Processing mountpoint {}", mnt);
                 let mut mnt_submap: HashMap<&String, Value> = HashMap::new();
                 for (key, value) in &params {
@@ -44,34 +50,45 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
                 mnt_map.insert(mnt, json!(mnt_submap));
             }
         }
+
+        // Processing partitions
+        if !partitions.is_empty(){
+            for part in &partitions{
+                debug!("Processing partition {}", part);
+                let mut part_submap: HashMap<&String, Value> = HashMap::new();
+                for (key, value) in &params{
+                   for element in value{
+                        if &key[0..2] != "di" || &element != part{
+                            continue;
+                        };
+                        part_submap.insert(key, match_param_part(part, key));
+                    } 
+                }
+                part_map.insert(part, json!(part_submap));
+            }
+        }
+
+
     }
 
     let binding: &String = &"mntimounts".to_string();
     (!mnt_map.is_empty()).then(|| res.insert(binding, json!(mnt_map)));
+
+    let binding: &String = &"dipartitions".to_string();
+    (!part_map.is_empty()).then(|| res.insert(binding, json!(part_map)));
+
     serde_json::to_value(res).unwrap()
 }
+
 
 fn match_param_mount(mount_point: &str, key: &str) -> serde_json::Value {
     let binding = Disks::new_with_refreshed_list();
     let disk = binding
         .into_iter()
-        .find(|&disk| disk.mount_point().to_str().unwrap() == mount_point)
-        .unwrap();
+        .find(|&disk| disk.mount_point().to_str().unwrap() == mount_point);
 
-    // если в квери вводится маунтпоинт, которого не существует, то анврап будет паниковать
-    // надо сделать так, чтобы если вводился несуществующий анврап, то можно было вернуть запрос
-    // типа так
-    //
-    // req: /fetch?mntitotal_space=/nonexistant
-    //
-    // res:
-    // {
-    //   mntimounts: {
-    //     "/nonexistant": {
-    //      mntitotal_space: null       в serde нет андефайнеда((()
-    //     }
-    //   }
-    // }
+    if disk.is_none() { return json!(null); };
+    let disk = disk.unwrap();
 
     match key {
         "mntitotal_space" => json!(disk.total_space()),
@@ -81,6 +98,27 @@ fn match_param_mount(mount_point: &str, key: &str) -> serde_json::Value {
         "mntiis_removable" => json!(disk.is_removable()),
         "mntifile_system" => json!(disk.file_system().to_str().unwrap().to_string()),
         "mntikind" => json!(disk.kind().to_string()),
+        _ => json!(null),
+    }
+}
+
+fn match_param_part(part_name: &str, key: &str) -> serde_json::Value{
+    let binding = Disks::new_with_refreshed_list();
+    let disk = binding
+        .into_iter()
+        .find(|&disk| disk.name().to_str().unwrap() == part_name);
+
+    if disk.is_none() { return json!(null); };
+    let disk = disk.unwrap();
+
+    match key {
+        "ditotal_space" => json!(disk.total_space()),
+        "diavailable_space" => json!(disk.available_space()),
+        "diused_space" => json!(disk.total_space() - disk.available_space()),
+        "diname" => json!(disk.name().to_str()),
+        "diis_removable" => json!(disk.is_removable()),
+        "difile_system" => json!(disk.file_system().to_str().unwrap().to_string()),
+        "dikind" => json!(disk.kind().to_string()),
         _ => json!(null),
     }
 }
@@ -130,6 +168,26 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
 
                         let mount_point = di.mount_point().to_str().unwrap_or("None");
                         (mount_point.to_string(), disk_info)
+                    })
+                    .collect();
+                Value::Object(disk_map)
+            }
+            "diall" => {
+                let disk_map: Map<String, Value> = Disks::new_with_refreshed_list()
+                    .into_iter()
+                    .map(|di| {
+                        let disk_info = json!({
+                            "name": di.name().to_str(),
+                            "total_space": di.total_space(),
+                            "available_space": di.available_space(),
+                            "kind": di.kind().to_string(),
+                            "file_system": di.file_system().to_str().unwrap().to_string(),
+                            "is_removable": di.is_removable(),
+                            "used_space": di.total_space() - di.available_space()
+                        });
+
+                        let name = di.name().to_str().unwrap_or("None");
+                        (name.to_string(), disk_info)
                     })
                     .collect();
                 Value::Object(disk_map)
