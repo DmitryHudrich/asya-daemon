@@ -1,81 +1,41 @@
 use multimap::MultiMap;
 use serde_json::{json, Map, Number, Value};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use sysinfo::{Disks, System};
 
+
+
 pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
-    let mut res: HashMap<&String, Value> = HashMap::new();
-    let mut mnts: Vec<&String> = vec![];
-    let mut mnt_map: HashMap<&String, Value> = HashMap::new();
-    let mut partitions: Vec<&String> = vec![];
-    let mut part_map: HashMap<&String, Value> = HashMap::new();
+    let mut res: HashMap<String, Value> = HashMap::new();
+    let mut mnt_map: HashMap<String, Value> = HashMap::new();
+    let mut part_map: HashMap<String, Value> = HashMap::new();
+    let mut mnts = HashSet::new();
+    let mut partitions = HashSet::new();
 
-    for (key, value) in &params {
-        for element in value {
-
-            // processing all mnti query params and filling up a list of mounts that need to be processed
-            if &key[0..4] == "mnti" && key != &String::from("mntiall") {
-                if !mnts.contains(&element) {
-                    mnts.push(element);
-                }
-                continue;
-            }
-
-            // processing all di query params and filling up a list of mounts that need to be processed
-            if &key[0..2] == "di" && key != &String::from("diall") {
-                if !partitions.contains(&element) {
-                    partitions.push(element);
-                }
-                continue;
-            }
-
-            // Processing everything else
-            debug!("Query parsing | \n\tKey: {key}\n\tValue:{element}");
-            res.insert(key, match_param(key.as_str(), element.as_str()));
-        }
-
-        // Processing mountpoints
-        if !mnts.is_empty() {
-            for mnt in &mnts {
-                debug!("Processing mountpoint {}", mnt);
-                let mut mnt_submap: HashMap<&String, Value> = HashMap::new();
-                for (key, value) in &params {
-                    for element in value {
-                        if &key[0..4] != "mnti" || &element != mnt {
-                            continue;
-                        };
-                        mnt_submap.insert(key, match_param_mount(mnt, key));
-                    }
-                }
-                mnt_map.insert(mnt, json!(mnt_submap));
+    for (key, values) in params {
+        for value in values {
+            if key.starts_with("mnti") && key != "mntiall" {
+                mnts.insert(value.clone());
+            } else if key.starts_with("mnti") && mnts.contains(&value) {
+                let mut entry: HashMap<String, Value> = HashMap::new();
+                entry.insert(key.clone(), match_param_mount(&value, &key));
+                mnt_map.insert(value.clone(), json!(entry));
+            } else if key.starts_with("di") && key != "diall" {
+                partitions.insert(value.clone());
+            } else if key.starts_with("di") && partitions.contains(&value) {
+                let mut entry: HashMap<String, Value> = HashMap::new();
+                entry.insert(key.clone(), match_param_part(&value, &key));
+                part_map.insert(value.clone(), json!(entry));
+            } else {
+                debug!("Query parsing | \n\tKey: {key}\n\tValue:{value}");
+                res.insert(key.clone(), match_param(key.as_str(), value.as_str()));
             }
         }
-
-        // Processing partitions
-        if !partitions.is_empty(){
-            for part in &partitions{
-                debug!("Processing partition {}", part);
-                let mut part_submap: HashMap<&String, Value> = HashMap::new();
-                for (key, value) in &params{
-                   for element in value{
-                        if &key[0..2] != "di" || &element != part{
-                            continue;
-                        };
-                        part_submap.insert(key, match_param_part(part, key));
-                    } 
-                }
-                part_map.insert(part, json!(part_submap));
-            }
-        }
-
-
     }
 
-    let binding: &String = &"mntimounts".to_string();
-    (!mnt_map.is_empty()).then(|| res.insert(binding, json!(mnt_map)));
+    (!mnt_map.is_empty()).then(|| res.insert("mntimounts".to_string(), json!(mnt_map)));
 
-    let binding: &String = &"dipartitions".to_string();
-    (!part_map.is_empty()).then(|| res.insert(binding, json!(part_map)));
+    (!part_map.is_empty()).then(|| res.insert("dipartitions".to_string(), json!(part_map)));
 
     serde_json::to_value(res).unwrap()
 }
@@ -122,6 +82,8 @@ fn match_param_part(part_name: &str, key: &str) -> serde_json::Value{
         _ => json!(null),
     }
 }
+
+
 
 /* статистика обхвата члена */
 fn match_param(key: &str, value: &str) -> serde_json::Value {
