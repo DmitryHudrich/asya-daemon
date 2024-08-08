@@ -1,53 +1,14 @@
-use multimap::MultiMap;
 use serde_json::{json, Map, Number, Value};
-use std::collections::{HashMap, HashSet};
 use sysinfo::{Disks, System};
-
-
-
-pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
-    let mut res: HashMap<String, Value> = HashMap::new();
-    let mut mnt_map: HashMap<String, Value> = HashMap::new();
-    let mut part_map: HashMap<String, Value> = HashMap::new();
-    let mut mnts = HashSet::new();
-    let mut partitions = HashSet::new();
-
-    for (key, values) in params {
-        for value in values {
-            if key.starts_with("mnti") && key != "mntiall" {
-                mnts.insert(value.clone());
-            } else if key.starts_with("mnti") && mnts.contains(&value) {
-                let mut entry: HashMap<String, Value> = HashMap::new();
-                entry.insert(key.clone(), match_param_mount(&value, &key));
-                mnt_map.insert(value.clone(), json!(entry));
-            } else if key.starts_with("di") && key != "diall" {
-                partitions.insert(value.clone());
-            } else if key.starts_with("di") && partitions.contains(&value) {
-                let mut entry: HashMap<String, Value> = HashMap::new();
-                entry.insert(key.clone(), match_param_part(&value, &key));
-                part_map.insert(value.clone(), json!(entry));
-            } else {
-                debug!("Query parsing | \n\tKey: {key}\n\tValue:{value}");
-                res.insert(key.clone(), match_param(key.as_str(), value.as_str()));
-            }
-        }
-    }
-
-    (!mnt_map.is_empty()).then(|| res.insert("mntimounts".to_string(), json!(mnt_map)));
-
-    (!part_map.is_empty()).then(|| res.insert("dipartitions".to_string(), json!(part_map)));
-
-    serde_json::to_value(res).unwrap()
-}
-
-
-fn match_param_mount(mount_point: &str, key: &str) -> serde_json::Value {
+pub fn match_mount(mount_point: &str, key: &str) -> serde_json::Value {
     let binding = Disks::new_with_refreshed_list();
     let disk = binding
         .into_iter()
         .find(|&disk| disk.mount_point().to_str().unwrap() == mount_point);
 
-    if disk.is_none() { return json!(null); };
+    if disk.is_none() {
+        return json!(null);
+    };
     let disk = disk.unwrap();
 
     match key {
@@ -62,13 +23,15 @@ fn match_param_mount(mount_point: &str, key: &str) -> serde_json::Value {
     }
 }
 
-fn match_param_part(part_name: &str, key: &str) -> serde_json::Value{
+pub fn match_param_part(part_name: &str, key: &str) -> serde_json::Value {
     let binding = Disks::new_with_refreshed_list();
     let disk = binding
         .into_iter()
         .find(|&disk| disk.name().to_str().unwrap() == part_name);
 
-    if disk.is_none() { return json!(null); };
+    if disk.is_none() {
+        return json!(null);
+    };
     let disk = disk.unwrap();
 
     match key {
@@ -83,10 +46,8 @@ fn match_param_part(part_name: &str, key: &str) -> serde_json::Value{
     }
 }
 
-
-
 /* статистика обхвата члена */
-fn match_param(key: &str, value: &str) -> serde_json::Value {
+pub fn match_param(key: &str, value: &str) -> serde_json::Value {
     if value != "1" {
         return Value::Null;
     }
@@ -155,11 +116,8 @@ fn match_param(key: &str, value: &str) -> serde_json::Value {
                 Value::Object(disk_map)
             }
             "cinfo" => {
-                let formatted = format!(
-                    "{} - ({})",
-                    system.cpus()[0].brand(),
-                    system.cpus().len()
-                );
+                let formatted =
+                    format!("{} - ({})", system.cpus()[0].brand(), system.cpus().len());
                 Value::String(formatted)
             }
 
