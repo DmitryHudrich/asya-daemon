@@ -1,5 +1,8 @@
 use serde_json::{json, Map, Number, Value};
 use sysinfo::{Disks, System};
+
+
+
 pub fn match_mount(mount_point: &str, key: &str) -> serde_json::Value {
     let binding = Disks::new_with_refreshed_list();
     let disk = binding
@@ -76,44 +79,10 @@ pub fn match_param(key: &str, value: &str) -> serde_json::Value {
             "miswap_total" => Value::Number(Number::from(system.total_swap())),
             "miswap_used" => Value::Number(Number::from(system.used_swap())),
             "mntiall" => {
-                let disk_map: Map<String, Value> = Disks::new_with_refreshed_list()
-                    .into_iter()
-                    .map(|di| {
-                        let disk_info = json!({
-                            "name": di.name().to_str(),
-                            "total_space": di.total_space(),
-                            "available_space": di.available_space(),
-                            "kind": di.kind().to_string(),
-                            "file_system": di.file_system().to_str().unwrap().to_string(),
-                            "is_removable": di.is_removable(),
-                            "used_space": di.total_space() - di.available_space()
-                        });
-
-                        let mount_point = di.mount_point().to_str().unwrap_or("None");
-                        (mount_point.to_string(), disk_info)
-                    })
-                    .collect();
-                Value::Object(disk_map)
+                Value::Object(cdiinfo('m'))
             }
             "diall" => {
-                let disk_map: Map<String, Value> = Disks::new_with_refreshed_list()
-                    .into_iter()
-                    .map(|di| {
-                        let disk_info = json!({
-                            "name": di.name().to_str(),
-                            "total_space": di.total_space(),
-                            "available_space": di.available_space(),
-                            "kind": di.kind().to_string(),
-                            "file_system": di.file_system().to_str().unwrap().to_string(),
-                            "is_removable": di.is_removable(),
-                            "used_space": di.total_space() - di.available_space()
-                        });
-
-                        let name = di.name().to_str().unwrap_or("None");
-                        (name.to_string(), disk_info)
-                    })
-                    .collect();
-                Value::Object(disk_map)
+                Value::Object(cdiinfo('d'))
             }
             "cinfo" => {
                 let formatted =
@@ -121,9 +90,34 @@ pub fn match_param(key: &str, value: &str) -> serde_json::Value {
                 Value::String(formatted)
             }
 
-            // TODO: инфу о процессорах, интернет подключениях, процессах?? я хз, почему бы и нет
+            // TODO: инфу о интернет подключениях, процессах?? я хз, почему бы и нет
             _ => Value::Null,
         }
     }
 }
 
+pub fn cdiinfo(x: char) -> Map<String, Value> {
+    Disks::new_with_refreshed_list().into_iter()
+        .filter_map(|di| {
+            let name = di.name().to_str().unwrap_or_default().to_string();
+
+            let mount_point = match x {
+                'm' => di.mount_point().to_str().unwrap_or("None").to_string(),
+                'd' => name.clone(),
+                _ => return None,
+            };
+
+            let disk_info = json!({
+                "name": name,
+                "total_space": di.total_space(),
+                "available_space": di.available_space(),
+                "kind": di.kind().to_string(),
+                "file_system": di.file_system().to_str().unwrap_or_default().to_string(),
+                "is_removable": di.is_removable(),
+                "used_space": di.total_space() - di.available_space()
+            });
+
+            Some((mount_point, disk_info))
+        })
+        .collect()
+}
