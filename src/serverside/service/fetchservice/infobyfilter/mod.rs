@@ -3,6 +3,8 @@ use param_matches::{match_mount, match_param, match_param_part};
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 
+mod param_matches;
+
 pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     let mut res: HashMap<String, Value> = HashMap::new();
     let mut mnt_map: HashMap<String, Value> = HashMap::new();
@@ -38,4 +40,3 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     serde_json::to_value(res).unwrap()
 }
 
-mod param_matches;
