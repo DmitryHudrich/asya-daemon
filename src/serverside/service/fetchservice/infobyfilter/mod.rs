@@ -12,6 +12,7 @@ pub fn new(params: MultiMap<String, String>) -> serde_json::Value {
     let mut mnts = HashSet::new();
     let mut partitions = HashSet::new();
 
+    // Values vec there for same parametre names with different values.
     for (key, values) in params {
         for value in values {
             if key.starts_with("mnti") && key != "mntiall" {
