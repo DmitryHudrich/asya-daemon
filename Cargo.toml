@@ -23,7 +23,7 @@ http-body-util = "0.1.2"
 hyper-util = { version = "0.1.6", features = ["full"] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tower = "0.4" # here
+tower = "0.5" # here
 colored = "2.1.0"
 chrono = "0.4.38"
 sysinfo = "0.31.0"

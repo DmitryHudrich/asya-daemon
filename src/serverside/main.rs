@@ -13,8 +13,9 @@ pub mod service;
 #[tokio::main]
 async fn main() {
     init_logging();
-    _ = server::launch_server().await;
+    let server_launching = server::launch_server();
     info!("Bootstrapping");
+    let _ = server_launching.await;
 }
 
 fn init_logging() {
@@ -31,8 +32,8 @@ fn init_logging() {
         .format(|buf, record| {
             writeln!(
                 buf,
-                "{}{}:\t{}",
-                Local::now().format("%d/%m/%Y %H:%M "),
+                "{} SERVER {}\t{}",
+                Local::now().format("%d/%m/%Y %H:%M"),
                 colourful_loglevel(record.level()),
                 record.args()
             )
