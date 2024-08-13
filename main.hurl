@@ -2,6 +2,10 @@
 
 GET {{host}}/fetch
 [QueryStringParams]
+ismntdiskname: /
+
+GET {{host}}/fetch
+[QueryStringParams]
 ditotal_space: /dev/watafuk
 ditotal_space: /dev/nvme0n1p3
 diused_space: /dev/nvme0n1p3

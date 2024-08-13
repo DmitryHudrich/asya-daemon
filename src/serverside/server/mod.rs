@@ -8,7 +8,9 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 
-use crate::service::fetchservice::{ infobyfilter, memoryinfo};
+use crate::service::fetchservice;
+
+//use crate::service::fetchservice::{ infobyfilter, memoryinfo};
 
 mod middlewares;
 
@@ -55,10 +57,10 @@ async fn router(
                 .query()
                 .map(|v| form_urlencoded::parse(v.as_bytes()).into_owned().collect())
                 .unwrap_or_default();
-            ok(&infobyfilter::new(params))
+            ok(&fetchservice::parse(params))
         }
         // (&Method::GET, "/fetch") => ok(&basicinfo::BasicInfo::new()),
-        (&Method::GET, "/fetch/memory") => ok(&memoryinfo::MemoryInfo::new()),
+        // (&Method::GET, "/fetch/memory") => ok(&memoryinfo::MemoryInfo::new()),
         // (&Method::GET, "fetch/mounts")
 
         _ => {
