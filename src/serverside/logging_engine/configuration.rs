@@ -31,13 +31,13 @@ pub(crate) struct LoggingParams {
     pub level: log::LevelFilter,
 
     // LOGGING_STDOUT - 1 or 0. determines should we log to stdout or not. 1 by default.
-            pub stdout: bool,
+    pub stdout: bool,
     // maybe more??????
 }
 
 impl LoggingParams {
     pub(crate) fn new() -> LoggingParams {
-        LoggingParams               {
+        LoggingParams {
             file: match env::var(LOGGING_FILE) {
                 Ok(v) if v == "0" => false,
                 Ok(_) => true,

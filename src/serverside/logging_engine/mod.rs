@@ -6,6 +6,7 @@ use lazy_static::lazy_static;
 use log::Level;
 use std::io::Write;
 
+#[allow(dead_code)]
 mod configuration;
 
 lazy_static! {
