@@ -1,14 +1,14 @@
-use colored::Colorize;
-use configuration::LoggingParams;
-use std::io::Write;
-use lazy_static::lazy_static;
 use chrono::Local;
 use colored::ColoredString;
+use colored::Colorize;
+use configuration::LoggingParams;
+use lazy_static::lazy_static;
 use log::Level;
+use std::io::Write;
 
 mod configuration;
 
-lazy_static!{
+lazy_static! {
     static ref CONFIGURATION: LoggingParams = LoggingParams::new();
 }
 

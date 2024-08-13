@@ -6,8 +6,8 @@ use serde_json::json;
 
 #[macro_use]
 mod macro_util;
-mod param_config;
 mod info;
+mod param_config;
 
 #[derive(Serialize)]
 pub struct ParamInfo {

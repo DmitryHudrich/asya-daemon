@@ -2,8 +2,8 @@
 extern crate log;
 extern crate env_logger;
 
-mod server;
 mod logging_engine;
+mod server;
 
 pub mod service;
 

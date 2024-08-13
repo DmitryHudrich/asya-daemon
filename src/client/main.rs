@@ -1,8 +1,5 @@
 use http_body_util::{BodyExt, Empty};
-use hyper::{
-    body::Bytes,
-    Request,
-};
+use hyper::{body::Bytes, Request};
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpStream;
 
@@ -50,4 +47,3 @@ async fn fetch_url(url: hyper::Uri) -> Result<String> {
     let body_bytes = res.collect().await?.to_bytes();
     Ok(String::from_utf8(body_bytes.to_vec()).unwrap())
 }
-

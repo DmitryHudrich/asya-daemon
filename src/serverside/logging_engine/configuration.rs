@@ -32,6 +32,7 @@ pub(crate) struct LoggingParams {
 
     // LOGGING_STDOUT - 1 or 0. determines should we log to stdout or not. 1 by default.
     pub stdout: bool,
+    // maybe more??????
 }
 
 impl LoggingParams {
@@ -82,4 +83,3 @@ impl LoggingParams {
         }
     }
 }
-
