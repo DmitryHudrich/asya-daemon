@@ -1,21 +1,31 @@
 use colored::Colorize;
+use configuration::LoggingParams;
 use std::io::Write;
-use std::{env, str::FromStr};
-
+use lazy_static::lazy_static;
 use chrono::Local;
 use colored::ColoredString;
 use log::Level;
 
+mod configuration;
+
+lazy_static!{
+    static ref CONFIGURATION: LoggingParams = LoggingParams::new();
+}
 
 pub fn init_logging() {
-    if env::var_os("RUST_LOG").is_none() {
-        log::set_max_level(log::LevelFilter::Info);
-    } else {
-        log::set_max_level(
-            log::LevelFilter::from_str(env::var_os("RUST_LOG").unwrap().to_str().unwrap()).unwrap(),
-        );
-    }
+    log::set_max_level(CONFIGURATION.level);
 
+    build_logger();
+
+    println!(
+        "----------------------------------------------------------------------------------------|"
+    );
+    println!("-> Log level: {}", log::max_level());
+    println!("\n");
+    info!("Logging rabotaet");
+}
+
+fn build_logger() {
     env_logger::Builder::from_default_env()
         .filter_level(log::max_level())
         .format(|buf, record| {
@@ -28,13 +38,6 @@ pub fn init_logging() {
             )
         })
         .init();
-
-    println!(
-        "----------------------------------------------------------------------------------------|"
-    );
-    println!("-> Log level: {}", log::max_level());
-    println!("\n");
-    info!("Logging rabotaet");
 }
 
 fn colourful_loglevel(level: Level) -> ColoredString {
