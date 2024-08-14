@@ -9,7 +9,7 @@ use log4rs::{
 mod configuration;
 
 pub fn init_logging() {
-    let console_pattern = match configuration::LOGGING_STDOUT.value() {
+    let console_pattern = match configuration::LOG_PLACE.value() {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
     };
