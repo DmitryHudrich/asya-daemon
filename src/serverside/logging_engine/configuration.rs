@@ -23,6 +23,8 @@ lazy_static! {
         evaluater: |_, value| Some(value),
         name: "LOG_PLACE",
     };
+
+    // TODO: this is placeholder. Variable isn't used yet.
     pub static ref LOGGING_FILESCOUNT: EnvVariable<usize> = EnvVariable {
         value: EnvValue::Default(20),
         evaluater: |name, value| {

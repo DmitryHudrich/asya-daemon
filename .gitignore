@@ -3,3 +3,4 @@ f.hurl
 .gitignore
 
 ./log/*
+./logs/*

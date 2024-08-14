@@ -1,0 +1,36 @@
+src/serverside/logging_engine/mod.rs:43: 2024-08-14 23:24:02 SERVER - TRACE > trace logging examble - - - - - - OK
+src/serverside/logging_engine/mod.rs:44: 2024-08-14 23:24:02 SERVER - DEBUG > debug logging examble - - - - - - OK
+src/serverside/logging_engine/mod.rs:45: 2024-08-14 23:24:02 SERVER - INFO > info logging examble - - - - - - - OK
+src/serverside/logging_engine/mod.rs:46: 2024-08-14 23:24:02 SERVER - WARN > warn logging examble - - - - - - - OK
+src/serverside/logging_engine/mod.rs:47: 2024-08-14 23:24:02 SERVER - ERROR > error logging examble - - - - - - OK
+------------------------------------------------------------
+src/serverside/main.rs:13: 2024-08-14 23:24:02 SERVER - INFO > Bootstrapping
+/home/eblan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-1.0.1/src/poll.rs:569: 2024-08-14 23:24:02 SERVER - TRACE > registering event source with poller: token=Token(106293459830784), interests=READABLE | WRITABLE
+src/serverside/server/mod.rs:20: 2024-08-14 23:24:02 SERVER - INFO > Start listening at 127.0.0.1:3000
+src/serverside/logging_engine/mod.rs:43: 2024-08-14 23:26:05 SERVER - TRACE > trace logging examble - - - - - - OK
+src/serverside/logging_engine/mod.rs:44: 2024-08-14 23:26:05 SERVER - DEBUG > debug logging examble - - - - - - OK
+src/serverside/logging_engine/mod.rs:45: 2024-08-14 23:26:05 SERVER - INFO >  info logging examble  - - - - - - OK
+src/serverside/logging_engine/mod.rs:46: 2024-08-14 23:26:05 SERVER - WARN >  warn logging examble  - - - - - - OK
+src/serverside/logging_engine/mod.rs:47: 2024-08-14 23:26:05 SERVER - ERROR > error logging examble - - - - - - OK
+------------------------------------------------------------
+src/serverside/main.rs:13: 2024-08-14 23:26:05 SERVER - INFO > Bootstrapping
+/home/eblan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-1.0.1/src/poll.rs:569: 2024-08-14 23:26:05 SERVER - TRACE > registering event source with poller: token=Token(108081405507584), interests=READABLE | WRITABLE
+src/serverside/server/mod.rs:20: 2024-08-14 23:26:05 SERVER - INFO > Start listening at 127.0.0.1:3000
+src/serverside/logging_engine/mod.rs:43: 2024-08-14 23:26:43 SERVER - TRACE > trace logging examble - - - - - - OK
+src/serverside/logging_engine/mod.rs:44: 2024-08-14 23:26:43 SERVER - DEBUG > debug logging examble - - - - - - OK
+src/serverside/logging_engine/mod.rs:45: 2024-08-14 23:26:43 SERVER - INFO > info logging examble  - - - - - - OK
+src/serverside/logging_engine/mod.rs:46: 2024-08-14 23:26:43 SERVER - WARN > warn logging examble  - - - - - - OK
+src/serverside/logging_engine/mod.rs:47: 2024-08-14 23:26:43 SERVER - ERROR > error logging examble - - - - - - OK
+------------------------------------------------------------
+src/serverside/main.rs:13: 2024-08-14 23:26:43 SERVER - INFO > Bootstrapping
+/home/eblan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-1.0.1/src/poll.rs:569: 2024-08-14 23:26:43 SERVER - TRACE > registering event source with poller: token=Token(104011274999808), interests=READABLE | WRITABLE
+src/serverside/server/mod.rs:20: 2024-08-14 23:26:43 SERVER - INFO > Start listening at 127.0.0.1:3000
+src/serverside/logging_engine/mod.rs:43: 2024-08-14 23:27:52 SERVER - TRACE > trace logging examble (THIS ISN'T ERROR) - - - - - - OK
+src/serverside/logging_engine/mod.rs:44: 2024-08-14 23:27:52 SERVER - DEBUG > debug logging examble (THIS ISN'T ERROR) - - - - - - OK
+src/serverside/logging_engine/mod.rs:45: 2024-08-14 23:27:52 SERVER - INFO > info  logging examble (THIS ISN'T ERROR) - - - - - - OK
+src/serverside/logging_engine/mod.rs:46: 2024-08-14 23:27:52 SERVER - WARN > warn  logging examble (THIS ISN'T ERROR) - - - - - - OK
+src/serverside/logging_engine/mod.rs:47: 2024-08-14 23:27:52 SERVER - ERROR > error logging examble (THIS ISN'T ERROR) - - - - - - OK
+------------------------------------------------------------
+src/serverside/main.rs:13: 2024-08-14 23:27:52 SERVER - INFO > Bootstrapping
+/home/eblan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/mio-1.0.1/src/poll.rs:569: 2024-08-14 23:27:52 SERVER - TRACE > registering event source with poller: token=Token(107014725687296), interests=READABLE | WRITABLE
+src/serverside/server/mod.rs:20: 2024-08-14 23:27:52 SERVER - INFO > Start listening at 127.0.0.1:3000
