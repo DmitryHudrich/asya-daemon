@@ -26,7 +26,12 @@ pub fn init_logging() {
     let config = Config::builder()
         .appender(Appender::builder().build("console", Box::new(console)))
         .appender(Appender::builder().build("file", Box::new(logfile)))
-        .build(Root::builder().appender("console").appender("file").build(configuration::LOGGING_LEVEL.value()))
+        .build(
+            Root::builder()
+                .appender("console")
+                .appender("file")
+                .build(configuration::LOGGING_LEVEL.value()),
+        )
         .unwrap();
 
     log4rs::init_config(config).unwrap();
