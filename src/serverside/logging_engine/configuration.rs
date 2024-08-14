@@ -1,85 +1,119 @@
-use std::env;
+//! Environment variables.
 
+use lazy_static::lazy_static;
 use log::LevelFilter;
 
-const LOGGING_LEVEL: &str = "RUST_LOG";
-
-const LOGGING_FILE: &str = "LOGGING_FILE";
-
-const LOGGING_FILES_COUNT: &str = "LOGGING_FILES_COUNT";
-
-const LOGGING_STDOUT: &str = "LOGGING_STDOUT";
-
-const LOGGING_FORMAT: &str = "LOGGING_FORMAT";
-
-// Env variables:
-pub(crate) struct LoggingParams {
-    // TODO:
-    // LOG_FORMAT - main info (or even server-side ui) exists separately from logging.
-    // format: String,
-
-    // LOGGING_FILE - 1 or 0.
-    // Determines should we log to file or not. 1 by default.
-    // Default name is aska.log in ./logs folder.
-    // Logs wroten in file includes modules info. */
-    pub file: bool,
-
-    // LOGGING_FILES_COUNT - max number of logs to keep. 20 by default.
-    pub files_count: usize,
-
-    // RUST_LOG - logging level. maybe name will be changed in future to ASKA_LOG or something like that.
-    pub level: log::LevelFilter,
-
-    // LOGGING_STDOUT - 1 or 0. determines should we log to stdout or not. 1 by default.
-    pub stdout: bool,
-    // maybe more??????
+lazy_static! {
+    pub static ref LOGGING_LEVEL: EnvVariable<LevelFilter> = EnvVariable {
+        value: EnvValue::Default(LevelFilter::Info),
+        evaluater: |name, value| {
+            match value.as_str() {
+                "TRACE" => Some(LevelFilter::Trace),
+                "DEBUG" => Some(LevelFilter::Debug),
+                "INFO" => Some(LevelFilter::Info),
+                "WARN" => Some(LevelFilter::Warn),
+                "ERROR" => Some(LevelFilter::Error),
+                _ => use_default(name),
+            }
+        },
+        name: "LOG_LEVEL",
+    };
+    pub static ref LOGGING_FOLDER: EnvVariable<String> = EnvVariable {
+        value: EnvValue::Default("logs".to_string()),
+        evaluater: |_, value| Some(value),
+        name: "LOG_PLACE",
+    };
+    pub static ref LOGGING_FILESCOUNT: EnvVariable<usize> = EnvVariable {
+        value: EnvValue::Default(20),
+        evaluater: |name, value| {
+            match value.parse::<usize>() {
+                Ok(number) => Some(number),
+                Err(e) => {
+                    println!("Failed to parse {name}: {}", e);
+                    use_default(name)
+                }
+            }
+        },
+        name: "LOGFILES_COUNT",
+    };
+    pub static ref LOGGING_STDOUT: EnvVariable<bool> = EnvVariable {
+        value: EnvValue::Default(true),
+        evaluater: |name, value| {
+            match value.as_str() {
+                "0" => Some(false),
+                "1" => Some(true),
+                _ => use_default(name),
+            }
+        },
+        name: "LOG_CONSOLE",
+    };
+    pub static ref LOG_PLACE: EnvVariable<bool> = EnvVariable {
+        value: EnvValue::Default(false),
+        evaluater: |name, value| {
+            match value.as_str() {
+                "0" => Some(false),
+                "1" => Some(true),
+                _ => use_default(name),
+            }
+        },
+        name: "LOG_PLACE",
+    };
 }
 
-impl LoggingParams {
-    pub(crate) fn new() -> LoggingParams {
-        LoggingParams {
-            file: match env::var(LOGGING_FILE) {
-                Ok(v) if v == "0" => false,
-                Ok(_) => true,
-                Err(err) => {
-                    warn!("LOG_FORMAT: {}", err);
-                    true
+/*------------------end of configuration-----------------------------------------------*/
+/* ------------------------------------------------------------------------------------*/
+
+fn use_default<T>(env_name: String) -> Option<T> {
+    warn!("Failed to evaluate variable '{env_name}'. Using default value.");
+    None
+}
+
+enum EnvValue<T> {
+    Some(T),
+    Default(T),
+}
+
+pub struct EnvVariable<T> {
+    value: EnvValue<T>,
+    evaluater: fn(env_name: String, value: String) -> Option<T>,
+    name: &'static str,
+}
+
+impl<T> EnvVariable<T>
+where
+    T: Clone,
+{
+    // TODO: data here isn't cached now and every call will read from env.
+    pub fn value(&self) -> T {
+        match &self.value {
+            EnvValue::Default(default_value) => match std::env::var(self.name) {
+                Ok(ok_v) => {
+                    let evaluate_result = match (self.evaluater)(String::from(self.name), ok_v) {
+                        Some(v) => v,
+                        None => {
+                            warn!(
+                                "Failed to evaluate variable '{}'. Using default value.",
+                                self.name,
+                            );
+                            default_value.clone()
+                        }
+                    };
+                    evaluate_result.clone()
                 }
-            },
-            files_count: match env::var(LOGGING_FILES_COUNT) {
-                Ok(v) => v.parse::<usize>().unwrap_or({
+                Err(e) => {
                     warn!(
-                        "LOGGING_FILES_COUNT: '{}' wasn't succesfully parsed. Using default value.",
-                        v
+                        "Failed to read variable '{}'. Error: {e}. Using default value.",
+                        self.name
                     );
-                    20
-                }),
-                Err(err) => {
-                    warn!("LOG_FORMAT: {}", err);
-                    20
+                    default_value.clone()
                 }
             },
-            level: match env::var(LOGGING_LEVEL) {
-                Ok(v) => v.parse().unwrap_or({
-                    warn!(
-                        "RUST_LOG: '{}' wasn't succesfully parsed. Using default value.",
-                        v
-                    );
-                    LevelFilter::Info
-                }),
-                Err(err) => {
-                    warn!("LOG_FORMAT: {}", err);
-                    LevelFilter::Info
-                }
-            },
-            stdout: match env::var(LOGGING_STDOUT) {
-                Ok(v) if v == "0" => false,
-                Ok(_) => true,
-                Err(err) => {
-                    warn!("LOGGING_STDOUT: {}", err);
-                    true
-                }
-            },
+
+            EnvValue::Some(v) => v.clone(),
         }
+    }
+
+    fn name(&self) -> &str {
+        self.name
     }
 }

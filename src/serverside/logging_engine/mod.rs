@@ -1,52 +1,41 @@
-use chrono::Local;
-use colored::ColoredString;
-use colored::Colorize;
-use configuration::LoggingParams;
-use lazy_static::lazy_static;
-use log::Level;
-use std::io::Write;
+use log::LevelFilter;
+use log4rs::{
+    append::{console::ConsoleAppender, file::FileAppender},
+    config::{Appender, Root},
+    encode::pattern::PatternEncoder,
+    Config,
+};
 
 #[allow(dead_code)]
 mod configuration;
 
-lazy_static! {
-    static ref CONFIGURATION: LoggingParams = LoggingParams::new();
-}
-
 pub fn init_logging() {
-    log::set_max_level(CONFIGURATION.level);
+    let console_pattern = "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n";
 
-    build_logger();
+    let console = ConsoleAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(console_pattern)))
+        .build();
 
-    println!(
-        "----------------------------------------------------------------------------------------|"
-    );
-    println!("-> Log level: {}", log::max_level());
-    println!("\n");
-    info!("Logging rabotaet");
-}
+    let logfile = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(
+            "{d(%Y-%m-%d %H:%M:%S)} {h(SERVER)} - {l} > {m}\n",
+        )))
+        .build("log/output.log")
+        .unwrap();
 
-fn build_logger() {
-    env_logger::Builder::from_default_env()
-        .filter_level(log::max_level())
-        .format(|buf, record| {
-            writeln!(
-                buf,
-                "{} SERVER {}\t{}",
-                Local::now().format("%d/%m/%Y %H:%M"),
-                colourful_loglevel(record.level()),
-                record.args()
-            )
-        })
-        .init();
-}
+    let config = Config::builder()
+        .appender(Appender::builder().build("console", Box::new(console)))
+        .appender(Appender::builder().build("file", Box::new(logfile)))
+        .build(Root::builder().appender("console").appender("file").build(configuration::LOGGING_LEVEL.value()))
+        .unwrap();
 
-fn colourful_loglevel(level: Level) -> ColoredString {
-    match level {
-        Level::Error => level.to_string().red(),
-        Level::Warn => level.to_string().yellow(),
-        Level::Info => level.to_string().blue(),
-        Level::Debug => level.to_string().cyan(),
-        Level::Trace => level.to_string().magenta(),
+    log4rs::init_config(config).unwrap();
+
+    if log_enabled!(log::Level::Trace) {
+        trace!("trace logging examble - OK");
+        debug!("debug logging examble - OK");
+        info!("info logging examble - OK");
+        warn!("warn logging examble - OK");
+        error!("error logging examble - OK");
     }
 }
