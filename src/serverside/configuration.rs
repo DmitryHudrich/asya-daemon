@@ -126,33 +126,36 @@ where
 
         match &self.value {
             EnvValue::Default(default_value) => match std::env::var(env_variable.clone()) {
-                Ok(env_var_value) => {
-                    let evaluated_result =
-                        match (self.evaluater)(env_variable.clone(), env_var_value) {
-                            Some(v) => v,
-                            None => {
-                                warn!(
-                                    "Failed to evaluate variable '{}'. Using default value.",
-                                    env_variable,
-                                );
-                                default_value.clone()
-                            }
-                        };
-                    evaluated_result.clone()
-                }
-                Err(e) => {
-                    if e != VarError::NotPresent {
-                        warn!(
-                            "Failed to read variable '{}'. Error: {e}. Using default value.",
-                            env_variable,
-                        );
-                    }
-                    default_value.clone()
-                }
+                Ok(env_var_value) => self.handle_ok(env_variable, env_var_value, default_value),
+                Err(error) => self.handle_err(error, env_variable, default_value),
             },
 
             EnvValue::Some(v) => v.clone(),
         }
+    }
+
+    fn handle_ok(&self, env_variable: String, env_var_value: String, default_value: &T) -> T {
+        let evaluated_result = match (self.evaluater)(env_variable.clone(), env_var_value) {
+            Some(v) => v,
+            None => {
+                warn!(
+                    "Failed to evaluate variable '{}'. Using default value.",
+                    env_variable,
+                );
+                default_value.clone()
+            }
+        };
+        evaluated_result.clone()
+    }
+
+    fn handle_err(&self, error: VarError, env_variable: String, default_value: &T) -> T {
+        if error != VarError::NotPresent {
+            warn!(
+                "Failed to read variable '{}'. Error: {error}. Using default value.",
+                env_variable,
+            );
+        }
+        default_value.clone()
     }
 
     fn name(&self) -> Vec<String> {
