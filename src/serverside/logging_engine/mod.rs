@@ -20,6 +20,11 @@ pub fn init_logging() {
     };
     let builded = build_config(config, logfile);
     log4rs::init_config(builded).unwrap();
+
+    log_check();
+}
+
+fn log_check() {
     if log_enabled!(log::Level::Trace) {
         trace!("trace logging examble (THIS ISN'T ERROR) - - - - - - OK");
         debug!("debug logging examble (THIS ISN'T ERROR) - - - - - - OK");
