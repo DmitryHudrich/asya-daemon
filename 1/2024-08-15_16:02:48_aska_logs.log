@@ -1,0 +1,2 @@
+src/serverside/main.rs:17: 2024-08-15 16:02:48 SERVER - INFO > Bootstrapping
+src/serverside/server/mod.rs:20: 2024-08-15 16:02:48 SERVER - INFO > Start listening at 127.0.0.1:3000

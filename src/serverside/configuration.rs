@@ -1,19 +1,35 @@
 //! Environment variables.
 
+use std::env::VarError;
+
 use lazy_static::lazy_static;
 use log::LevelFilter;
 
 lazy_static! {
+    pub static ref PORT: EnvVariable<u16> = EnvVariable {
+        value: EnvValue::Default(3000),
+        evaluater: |name, value| {
+            let port = value.as_str().parse();
+            match port {
+                Ok(port) => Some(port),
+                Err(err) => {
+                    warn!("Failed to parse port. {name}: {}", err); use_default()
+                },
+            }
+        },
+        name: "PORT",
+    };
+
     pub static ref LOGGING_LEVEL: EnvVariable<LevelFilter> = EnvVariable {
         value: EnvValue::Default(LevelFilter::Info),
-        evaluater: |name, value| {
+        evaluater: |_, value| {
             match value.as_str() {
                 "TRACE" => Some(LevelFilter::Trace),
                 "DEBUG" => Some(LevelFilter::Debug),
                 "INFO" => Some(LevelFilter::Info),
                 "WARN" => Some(LevelFilter::Warn),
                 "ERROR" => Some(LevelFilter::Error),
-                _ => use_default(name),
+                _ => use_default(),
             }
         },
         name: "LOG_LEVEL",
@@ -33,7 +49,7 @@ lazy_static! {
                 Ok(number) => Some(number),
                 Err(e) => {
                     warn!("Failed to parse {name}: {}", e);
-                    use_default(name)
+                    use_default()
                 }
             }
         },
@@ -42,11 +58,11 @@ lazy_static! {
 
     pub static ref LOGGING_STDOUT: EnvVariable<bool> = EnvVariable {
         value: EnvValue::Default(true),
-        evaluater: |name, value| {
+        evaluater: |_, value| {
             match value.as_str() {
                 "0" => Some(false),
                 "1" => Some(true),
-                _ => use_default(name),
+                _ => use_default(),
             }
         },
         name: "LOG_CONSOLE",
@@ -54,11 +70,11 @@ lazy_static! {
 
     pub static ref LOG_PLACE: EnvVariable<bool> = EnvVariable {
         value: EnvValue::Default(false),
-        evaluater: |name, value| {
+        evaluater: |_, value| {
             match value.as_str() {
                 "0" => Some(false),
                 "1" => Some(true),
-                _ => use_default(name),
+                _ => use_default(),
             }
         },
         name: "LOG_PLACE",
@@ -68,8 +84,7 @@ lazy_static! {
 /*------------------end of configuration options---------------------------------------*/
 /* ------------------------------------------------------------------------------------*/
 
-fn use_default<T>(env_name: String) -> Option<T> {
-    warn!("Failed to evaluate variable '{env_name}'. Using default value.");
+fn use_default<T>() -> Option<T> {
     None
 }
 
@@ -106,10 +121,12 @@ where
                     evaluate_result.clone()
                 }
                 Err(e) => {
-                    warn!(
-                        "Failed to read variable '{}'. Error: {e}. Using default value.",
-                        self.name
-                    );
+                    if e != VarError::NotPresent {
+                        warn!(
+                            "Failed to read variable '{}'. Error: {e}. Using default value.",
+                            self.name
+                        );
+                    }
                     default_value.clone()
                 }
             },

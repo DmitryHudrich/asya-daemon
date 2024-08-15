@@ -2,9 +2,9 @@
 extern crate log;
 
 mod logging_engine;
+mod preview;
 mod server;
 mod service;
-mod preview;
 
 #[allow(dead_code)]
 mod configuration;
