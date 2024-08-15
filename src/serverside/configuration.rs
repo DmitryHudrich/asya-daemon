@@ -18,7 +18,7 @@ lazy_static! {
                 },
             }
         },
-        name: "PORT",
+        name: vec!["NET", "PORT"],
     };
 
     pub static ref LOGGING_LEVEL: EnvVariable<LevelFilter> = EnvVariable {
@@ -33,13 +33,13 @@ lazy_static! {
                 _ => use_default(),
             }
         },
-        name: "LOG_LEVEL",
+        name: vec!["LOGGING", "LEVEL"],
     };
 
     pub static ref LOGGING_FOLDER: EnvVariable<String> = EnvVariable {
         value: EnvValue::Default("logs".to_string()),
         evaluater: |_, value| Some(value),
-        name: "LOG_FOLDER",
+        name: vec!["LOGGING", "FOLDER"]
     };
 
     // TODO: this is placeholder. Variable isn't used yet.
@@ -54,7 +54,7 @@ lazy_static! {
                 }
             }
         },
-        name: "LOGFILES_COUNT",
+        name: vec!["LOGGING", "FILESCOUNT"],
     };
 
     pub static ref LOGGING_STDOUT: EnvVariable<bool> = EnvVariable {
@@ -66,7 +66,7 @@ lazy_static! {
                 _ => use_default(),
             }
         },
-        name: "LOG_CONSOLE",
+        name: vec!["LOGGING", "STDOUT"],
     };
 
     pub static ref LOG_PLACE: EnvVariable<bool> = EnvVariable {
@@ -78,7 +78,7 @@ lazy_static! {
                 _ => use_default(),
             }
         },
-        name: "LOG_PLACE",
+        name: vec!["LOGGING", "PLACE"],
     };
 }
 
@@ -97,7 +97,7 @@ enum EnvValue<T> {
 pub struct EnvVariable<T> {
     value: EnvValue<T>,
     evaluater: fn(env_name: String, value: String) -> Option<T>,
-    name: &'static str,
+    name: Vec<&'static str>,
 }
 
 impl<T> EnvVariable<T>
@@ -111,7 +111,9 @@ where
          * я короче хз как сделать находящийся ниже вывод лога потому что логгер билдится исходя из параметров
          * конфигурации, т.е. логгировать доступ к этим параметрам нельзя потому что логгера еще не
          * суещствует во время доступа к конфигу. из за этого не получается выводить некоторые
-         * важные сообщения и все такое.
+         * важные сообщения и все такое. скорее всего мы будем вытаскивать эти значения напрямую
+         * при постройке логгера, обходя
+         * логику в этом файле.
          */
 
         // debug!(
@@ -119,26 +121,30 @@ where
         //     self.name,
         //     std::env::var(self.name).unwrap_or("ERROR DUE PARSING".to_string())
         // );
+
+        let env_variable = self.name.clone().join("_").to_uppercase();
+
         match &self.value {
-            EnvValue::Default(default_value) => match std::env::var(self.name) {
-                Ok(ok_v) => {
-                    let evaluate_result = match (self.evaluater)(String::from(self.name), ok_v) {
-                        Some(v) => v,
-                        None => {
-                            warn!(
-                                "Failed to evaluate variable '{}'. Using default value.",
-                                self.name,
-                            );
-                            default_value.clone()
-                        }
-                    };
-                    evaluate_result.clone()
+            EnvValue::Default(default_value) => match std::env::var(env_variable.clone()) {
+                Ok(env_var_value) => {
+                    let evaluated_result =
+                        match (self.evaluater)(env_variable.clone(), env_var_value) {
+                            Some(v) => v,
+                            None => {
+                                warn!(
+                                    "Failed to evaluate variable '{}'. Using default value.",
+                                    env_variable,
+                                );
+                                default_value.clone()
+                            }
+                        };
+                    evaluated_result.clone()
                 }
                 Err(e) => {
                     if e != VarError::NotPresent {
                         warn!(
                             "Failed to read variable '{}'. Error: {e}. Using default value.",
-                            self.name
+                            env_variable,
                         );
                     }
                     default_value.clone()
@@ -149,7 +155,11 @@ where
         }
     }
 
-    fn name(&self) -> &str {
+    fn name(&self) -> Vec<String> {
         self.name
+            .clone()
+            .into_iter()
+            .map(|element| element.to_string())
+            .collect()
     }
 }
