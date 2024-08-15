@@ -1,6 +1,3 @@
-[env]
-OUT_DIR = "somedir"
-
 [package]
 name = "aska"
 version = "0.1.0"
@@ -33,3 +30,4 @@ multimap = "0.10.0"
 erased-serde = "0.4"
 crossterm = "0.28.1"
 lazy_static = "1.5.0"
+toml = "0.8.19"
