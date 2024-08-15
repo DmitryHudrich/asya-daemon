@@ -13,7 +13,7 @@ lazy_static! {
             match port {
                 Ok(port) => Some(port),
                 Err(err) => {
-                    warn!("Failed to parse port. {name}: {}", err); use_default()
+                   warn!("Failed to parse port. {name}: {}", err); use_default()
                 },
             }
         },
@@ -38,7 +38,7 @@ lazy_static! {
     pub static ref LOGGING_FOLDER: EnvVariable<String> = EnvVariable {
         value: EnvValue::Default("logs".to_string()),
         evaluater: |_, value| Some(value),
-        name: "LOG_PLACE",
+        name: "LOG_FOLDER",
     };
 
     // TODO: this is placeholder. Variable isn't used yet.
