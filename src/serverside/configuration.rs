@@ -18,6 +18,7 @@ lazy_static! {
         },
         name: "LOG_LEVEL",
     };
+
     pub static ref LOGGING_FOLDER: EnvVariable<String> = EnvVariable {
         value: EnvValue::Default("logs".to_string()),
         evaluater: |_, value| Some(value),
@@ -31,13 +32,14 @@ lazy_static! {
             match value.parse::<usize>() {
                 Ok(number) => Some(number),
                 Err(e) => {
-                    println!("Failed to parse {name}: {}", e);
+                    warn!("Failed to parse {name}: {}", e);
                     use_default(name)
                 }
             }
         },
         name: "LOGFILES_COUNT",
     };
+
     pub static ref LOGGING_STDOUT: EnvVariable<bool> = EnvVariable {
         value: EnvValue::Default(true),
         evaluater: |name, value| {
@@ -49,6 +51,7 @@ lazy_static! {
         },
         name: "LOG_CONSOLE",
     };
+
     pub static ref LOG_PLACE: EnvVariable<bool> = EnvVariable {
         value: EnvValue::Default(false),
         evaluater: |name, value| {
@@ -62,7 +65,7 @@ lazy_static! {
     };
 }
 
-/*------------------end of configuration-----------------------------------------------*/
+/*------------------end of configuration options---------------------------------------*/
 /* ------------------------------------------------------------------------------------*/
 
 fn use_default<T>(env_name: String) -> Option<T> {

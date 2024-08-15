@@ -3,8 +3,7 @@ extern crate log;
 
 mod logging_engine;
 mod server;
-
-pub mod service;
+mod service;
 
 #[allow(dead_code)]
 mod configuration;
