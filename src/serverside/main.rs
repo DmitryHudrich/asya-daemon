@@ -6,6 +6,9 @@ mod server;
 
 pub mod service;
 
+#[allow(dead_code)]
+mod configuration;
+
 #[tokio::main]
 async fn main() {
     logging_engine::init_logging();

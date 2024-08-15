@@ -5,8 +5,7 @@ use log4rs::{
     Config,
 };
 
-#[allow(dead_code)]
-mod configuration;
+use crate::configuration;
 
 pub fn init_logging() {
     let console_pattern = match configuration::LOG_PLACE.value() {

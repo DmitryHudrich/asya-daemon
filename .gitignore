@@ -2,5 +2,5 @@
 f.hurl
 .gitignore
 
-./log/*
-./logs/*
+/log
+/logs
