@@ -4,6 +4,7 @@ extern crate log;
 mod logging_engine;
 mod server;
 mod service;
+mod preview;
 
 #[allow(dead_code)]
 mod configuration;
@@ -12,6 +13,7 @@ mod configuration;
 async fn main() {
     logging_engine::init_logging();
     let server_launching = server::launch_server();
+    preview::show_preview();
     info!("Bootstrapping");
     let _ = server_launching.await;
 }
