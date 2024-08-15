@@ -13,7 +13,8 @@ lazy_static! {
             match port {
                 Ok(port) => Some(port),
                 Err(err) => {
-                   warn!("Failed to parse port. {name}: {}", err); use_default()
+                    warn!("Failed to parse port. {name}: {}", err);
+                    use_default()
                 },
             }
         },
@@ -104,7 +105,20 @@ where
     T: Clone,
 {
     // TODO: data here isn't cached now and every call will read from env.
+    // TODO: read message below.
     pub fn value(&self) -> T {
+        /*
+         * я короче хз как сделать находящийся ниже вывод лога потому что логгер билдится исходя из параметров
+         * конфигурации, т.е. логгировать доступ к этим параметрам нельзя потому что логгера еще не
+         * суещствует во время доступа к конфигу. из за этого не получается выводить некоторые
+         * важные сообщения и все такое.
+         */
+
+        // debug!(
+        //     "CONFIGURATION DEBUG:EnvVariable\t\t{}: {}",
+        //     self.name,
+        //     std::env::var(self.name).unwrap_or("ERROR DUE PARSING".to_string())
+        // );
         match &self.value {
             EnvValue::Default(default_value) => match std::env::var(self.name) {
                 Ok(ok_v) => {
