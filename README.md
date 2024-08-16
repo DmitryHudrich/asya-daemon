@@ -19,10 +19,6 @@
     <br />
     <br />
     <!-- <a href="https://github.com/DmitryHudrich/Aska">View Demo</a>  //TODO -->
-    ·
-    <a href="https://github.com/DmitryHudrich/Aska/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    ·
-    <a href="https://github.com/DmitryHudrich/Aska/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
   
   ![Badge Pull Requests] 
@@ -30,6 +26,10 @@
   ![Badge Hi Mom]
   ![Badge Language]
   ![Badge License]
+  
+  **[<kbd> <br> Report Bug <br> </kbd>][Bug]**
+  **[<kbd> <br> Request Feature <br> </kbd>][Feature]**
+
 
   ---
   
@@ -142,3 +142,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [Badge Hi Mom]: https://img.shields.io/badge/Hi-mom!-ff69b4
 [Badge Language]: https://img.shields.io/github/languages/top/DmitryHudrich/Aska
 [Badge License]: https://img.shields.io/github/license/DmitryHudrich/Aska
+
+[Feature]: https://github.com/DmitryHudrich/Aska/issues/new?labels=bug&template=bug-report---.md
+[Bug]: https://github.com/DmitryHudrich/Aska/issues/new?labels=bug&template=bug-report---.md
