@@ -16,6 +16,9 @@ type Json = serde_json::Value;
 //     }
 // }
 
+
+
+
 pub fn get_total_space(value: String) -> Json {
     match identify_disk(&value, &Disks::new_with_refreshed_list()) {
         Some(disk) => json!(disk.total_space()),
@@ -68,9 +71,8 @@ pub fn get_mount(value: String) -> Json {
 fn identify_disk<'a>(
     value: &str,
     disks: &'a Disks
-    ) -> std::option::Option<&'a sysinfo::Disk> {
-    let disk = disks
+) -> std::option::Option<&'a sysinfo::Disk> {
+    disks
         .into_iter()
-        .find(|disk| disk.name().to_str().unwrap() == value);
-    disk
+        .find(|disk| disk.name().to_str().unwrap() == value)
 }
