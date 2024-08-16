@@ -1,14 +1,6 @@
 <a id="readme-top"></a>
 
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-![Rust]
-
-
 <!-- PROJECT LOGO //TODO Add lodo -->
 <br />
 <div align="center">
@@ -32,6 +24,13 @@
     ·
     <a href="https://github.com/DmitryHudrich/Aska/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
+  
+  [![Contributors][contributors-shield]][contributors-url]
+  [![Forks][forks-shield]][forks-url]
+  [![Stargazers][stars-shield]][stars-url]
+  [![Issues][issues-shield]][issues-url]
+  [![MIT License][license-shield]][license-url]
+  ![Rust]
 </div>
 
 
