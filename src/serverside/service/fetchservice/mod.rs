@@ -9,14 +9,28 @@ mod macro_util;
 mod info;
 mod param_config;
 
-#[derive(Serialize)]
+type Json = serde_json::Value;
+
+#[derive(Serialize, Debug, Clone)]
 pub struct ParamInfo {
     primary_type: String,
     secondary_type: String,
     tertiary_type: String,
     property: String,
     #[serde(skip)]
-    handler: fn(key: String) -> serde_json::Value,
+    handler: fn(key: String) -> Json,
+}
+
+impl Default for ParamInfo {
+    fn default() -> Self {
+        ParamInfo {
+            primary_type: String::new(),
+            secondary_type: String::new(),
+            tertiary_type: String::new(),
+            property: String::new(),
+            handler: |_| Json::Null,
+        }
+    }
 }
 
 impl ParamInfo {
@@ -30,53 +44,49 @@ impl ParamInfo {
     }
 }
 
-pub fn parse(params: MultiMap<String, String>) -> Vec<serde_json::Value> {
-    let mut res = vec![];
+// I made it so you pass a map of String-Vec<String> and the function
+// returns a map of String-Value.
+// So you get 1:1 correspondence of keys (except of invalid keys
+// which are filtered out)
+//
+// eg. you pass a map with keys: issys_name, ismnt_kind, bebra
+// the functions returns a map with keys: issys_name, ismnt_kind
+pub fn parse(params: MultiMap<String, String>) -> HashMap<String, Json> {
+    let mut res: HashMap<String, Json> = HashMap::new();
+    let available_params = param_config::get_available_params();
 
-    for available_param in param_config::get_available_params() {
-        let full_name = available_param.full_name();
+    'outer: for (param_key, param_values) in &params {
+        let matching_param = available_params
+            .clone() // FIXME: dorogo pizdec
+            .into_iter()
+            .find(|el| &el.full_name() == param_key);
 
-        for (param_key, param_values) in &params {
-            let mut values_to_res = HashMap::new();
-            for param_value in param_values {
-                if param_key == &full_name {
-                    values_to_res.insert(
-                        param_value,
-                        (available_param.handler)(param_value.to_owned()),
-                    );
+        // If a param given in query is invalid, then skip
+        if matching_param.is_none() {
+            continue;
+        }
+
+        let handler = matching_param.unwrap_or_default().handler;
+
+        let mut sub_res = None;
+        let mut tmp = HashMap::new();
+
+        for value in param_values {
+            if let Ok(val) = value.parse::<u32>() {
+                if val == 1 {
+                    sub_res = Some(handler(param_key.to_string()));
+                    continue;
                 }
+                // if value is 0 or any other number, then skip
+                continue 'outer;
             }
-            match_param_valuepair(values_to_res, param_key, &mut res);
-        }
-    }
 
+            tmp.insert(value.to_string(), handler(value.to_string()));
+            sub_res = Some(json!(tmp));
+        }
+        res.insert(param_key.clone(), json!(sub_res.unwrap_or_default()));
+    }
     res
-}
-
-fn match_param_valuepair(
-    values_to_res: HashMap<&String, serde_json::Value>,
-    param_key: &String,
-    res: &mut Vec<serde_json::Value>,
-) {
-    match values_to_res.len() {
-        0 => {
-            // Just ignore the param.
-        }
-        1 => {
-            let json_value = json!(
-            {
-                param_key: {
-                    values_to_res.keys().next().unwrap().to_owned():
-                        values_to_res.values().next().unwrap().to_owned()
-                }
-            });
-            res.push(json_value);
-        }
-        2.. => {
-            let json_value = json!({param_key: values_to_res});
-            res.push(json_value);
-        }
-    }
 }
 
 /*
@@ -86,4 +96,27 @@ fn match_param_valuepair(
 ⣿⣿⡟⠀⢸⣿⣿⣿⣿⡟⠀⣰⣶⠀⢸⡏⠀⣼⣿⡟⠀⢠⣿⣿⣿
 ⣿⣿⣇⠀⠸⡿⠟⢻⠏⠀⠘⠛⠁⣠⣾⣇⠀⠿⠏⠀⣠⣿⣿⣿⣿
 ⣿⣿⣿⣷⣤⣤⣶⣾⣷⣴⣦⣤⣶⣿⣿⣿⣦⣤⣴⣾⣿⣿⣿⣿⣿
+*/
+
+/*
+               +
+               #
+              ###
+             #####
+             ######
+            ; #####;
+           +##.#####
+          +##########
+         #############;
+        ###############+
+       #######   #######
+     .######;     ;###;`".
+    .#######;     ;#####.
+    #########.   .########`
+   ######'           '######
+  ;####                 ####;
+  ##'                     '##
+ #'                         `#
+
+          =АР ЧЛИНУКС=
 */
