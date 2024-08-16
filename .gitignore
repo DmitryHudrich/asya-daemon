@@ -1,3 +1,6 @@
 /target
 f.hurl
 .gitignore
+
+/log
+/logs

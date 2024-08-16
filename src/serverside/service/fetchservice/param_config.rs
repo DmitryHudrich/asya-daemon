@@ -5,7 +5,7 @@ use crate::service::fetchservice::info;
 use super::ParamInfo;
 
 const T_INFO: &str = "i";
-const T_COMMAND: &str = "c";
+// const T_COMMAND: &str = "c";
 
 const ST_SOFTWARE: &str = "s";
 const ST_HARDWARE: &str = "h";
@@ -99,7 +99,7 @@ pub fn get_available_params() -> Vec<ParamInfo> {
                     "_usedswp", info::hardware::ram::get_used_swap;
                 ];
                 DEST_CPU: [
-
+                     "name", |_| json!("");
                 ]
             ];
         ];

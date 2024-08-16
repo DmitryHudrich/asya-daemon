@@ -1,51 +1,66 @@
-use colored::Colorize;
-use configuration::LoggingParams;
-use std::io::Write;
-use lazy_static::lazy_static;
-use chrono::Local;
-use colored::ColoredString;
-use log::Level;
+use log4rs::{
+    append::{console::ConsoleAppender, file::FileAppender},
+    config::{Appender, Root},
+    encode::pattern::PatternEncoder,
+    Config,
+};
 
-mod configuration;
-
-lazy_static!{
-    static ref CONFIGURATION: LoggingParams = LoggingParams::new();
-}
+use crate::configuration;
 
 pub fn init_logging() {
-    log::set_max_level(CONFIGURATION.level);
+    let console_pattern = match configuration::get().logging().place() {
+        true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
+        false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
+    };
+    let console = enable_console(console_pattern);
+    let logfile = enable_file();
+    let config = match configuration::get().logging().stdout() {
+        true => Config::builder().appender(Appender::builder().build("console", Box::new(console))),
+        false => Config::builder(),
+    };
+    let builded = build_config(config, logfile);
+    log4rs::init_config(builded).unwrap();
 
-    build_logger();
-
-    println!(
-        "----------------------------------------------------------------------------------------|"
-    );
-    println!("-> Log level: {}", log::max_level());
-    println!("\n");
-    info!("Logging rabotaet");
+    log_check();
 }
 
-fn build_logger() {
-    env_logger::Builder::from_default_env()
-        .filter_level(log::max_level())
-        .format(|buf, record| {
-            writeln!(
-                buf,
-                "{} SERVER {}\t{}",
-                Local::now().format("%d/%m/%Y %H:%M"),
-                colourful_loglevel(record.level()),
-                record.args()
-            )
-        })
-        .init();
-}
-
-fn colourful_loglevel(level: Level) -> ColoredString {
-    match level {
-        Level::Error => level.to_string().red(),
-        Level::Warn => level.to_string().yellow(),
-        Level::Info => level.to_string().blue(),
-        Level::Debug => level.to_string().cyan(),
-        Level::Trace => level.to_string().magenta(),
+fn log_check() {
+    if log_enabled!(log::Level::Trace) {
+        trace!("trace logging examble (THIS ISN'T ERROR) - - - - - - OK");
+        debug!("debug logging examble (THIS ISN'T ERROR) - - - - - - OK");
+        info!("info  logging examble (THIS ISN'T ERROR) - - - - - - OK");
+        warn!("warn  logging examble (THIS ISN'T ERROR) - - - - - - OK");
+        error!("error logging examble (THIS ISN'T ERROR) - - - - - - OK\n------------------------------------------------------------");
     }
+}
+
+fn build_config(config: log4rs::config::runtime::ConfigBuilder, logfile: FileAppender) -> Config {
+    config
+        .appender(Appender::builder().build("file", Box::new(logfile)))
+        .build(
+            Root::builder()
+                .appender("console")
+                .appender("file")
+                .build(configuration::get().logging().level().to_owned()),
+        )
+        .unwrap()
+}
+
+fn enable_file() -> FileAppender {
+    FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(
+            "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} {h(SERVER)} - {l} > {m}\n",
+        )))
+        .build(format!(
+            "{}/{}aska_logs.log",
+            configuration::get().logging().folder(),
+            chrono::Local::now().format("%Y-%m-%d_%H:%M:%S_")
+        ))
+        .unwrap()
+}
+
+fn enable_console(console_pattern: &str) -> ConsoleAppender {
+    ConsoleAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(console_pattern)))
+        .build()
 }

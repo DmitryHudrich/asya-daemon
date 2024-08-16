@@ -8,14 +8,14 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 
-use crate::service::fetchservice;
+use crate::{configuration, service::fetchservice};
 
 //use crate::service::fetchservice::{ infobyfilter, memoryinfo};
 
 mod middlewares;
 
 pub async fn launch_server() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([127, 0, 0, 1], configuration::get().net().port()));
     let listener = TcpListener::bind(addr).await?;
     info!("Start listening at {}", addr.to_string());
 
@@ -59,10 +59,9 @@ async fn router(
                 .unwrap_or_default();
             ok(&fetchservice::parse(params))
         }
-        // (&Method::GET, "/fetch") => ok(&basicinfo::BasicInfo::new()),
+        (&Method::GET, "/ping") => ok(&"pong"),
         // (&Method::GET, "/fetch/memory") => ok(&memoryinfo::MemoryInfo::new()),
         // (&Method::GET, "fetch/mounts")
-
         _ => {
             let mut not_found = Response::new(empty());
             *not_found.status_mut() = StatusCode::NOT_FOUND;

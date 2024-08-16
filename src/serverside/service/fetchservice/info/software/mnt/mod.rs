@@ -6,6 +6,7 @@ type Json = serde_json::Value;
 pub fn get_drive(value: String) -> Json {
     let disks = Disks::new_with_refreshed_list();
     let disk = identify_disk(&value, &disks);
+
     match disk {
         Some(disk) => json!(disk.name().to_str().unwrap()),
         None => Json::Null,
