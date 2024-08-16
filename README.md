@@ -13,7 +13,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/DmitryHudrich/Aska">
-    <img src="Readme/images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Aska</h3>
@@ -159,7 +159,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [license-shield]: https://img.shields.io/github/license/DmitryHudrich/Aska.svg?style=for-the-badge
 [license-url]: https://github.com/DmitryHudrich/Aska/blob/main/LICENSE
 [linkedin-url]: https://linkedin.com/in/linkedin_username
-[product-screenshot]: Readme/images/screenshot.png
+[product-screenshot]: images/screenshot.png
 
 [Rust]:  	https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white
 [Views]: https://img.shields.io/github/watchers/DmitryHudrich/Aska.svg
