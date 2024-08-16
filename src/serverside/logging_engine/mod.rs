@@ -8,7 +8,6 @@ use log4rs::{
 use crate::configuration;
 
 pub fn init_logging() {
-    println!("Logging config: {:?}", configuration::get().logging());
     let console_pattern = match configuration::get().logging().place() {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",

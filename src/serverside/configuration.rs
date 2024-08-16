@@ -17,9 +17,6 @@ lazy_static! {
             toml::de::from_str::<Config>(utils::load_file("AskaConfig.toml").unwrap().as_str())
                 .unwrap();
         let env_config = from_env::<Config>().unwrap();
-        println!("TOML: {:#?}", toml_config);
-        println!("ENV: {:#?}", env_config);
-
         merge_struct::merge(&toml_config, &env_config).unwrap()
     };
 }
