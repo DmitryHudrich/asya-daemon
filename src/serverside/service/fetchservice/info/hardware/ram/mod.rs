@@ -4,45 +4,31 @@ use sysinfo::{MemoryRefreshKind, RefreshKind, System};
 type Json = serde_json::Value;
 
 pub fn get_total_memory(_: String) -> Json {
-    let sys = system();
-    let res = sys.total_memory();
-    json!(res)
+    json!(system().total_memory())
 }
 
 pub fn get_used_memory(_: String) -> Json {
-    let sys = system();
-    let res = sys.used_memory();
-    json!(res)
+   json!(system().used_memory())
 }
 
 pub fn get_free_memory(_: String) -> Json {
-    let sys = system();
-    let res = sys.free_memory();
-    json!(res)
+   json!(system().free_memory())
 }
 
 pub fn get_available_memory(_: String) -> Json {
-    let sys = system();
-    let res = sys.available_memory();
-    json!(res)
+   json!(system().available_memory())
 }
 
 pub fn get_total_swap(_: String) -> Json {
-    let sys = system();
-    let res = sys.total_swap();
-    json!(res)
+   json!(system().total_swap())
 }
 
 pub fn get_used_swap(_: String) -> Json {
-    let sys = system();
-    let res = sys.used_swap();
-    json!(res)
+       json!(system().used_swap())
 }
 
 pub fn get_free_swap(_: String) -> Json {
-    let sys = system();
-    let res = sys.free_swap();
-    json!(res)
+       json!(system().free_swap())
 }
 
 fn system() -> sysinfo::System {
