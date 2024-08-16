@@ -84,3 +84,19 @@ impl Logging {
         self.stdout.unwrap()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::get;
+
+    #[test] // Should not paniced
+    fn config_getters() {
+        let config = get();
+        _ = config.net().port();
+        _ = config.logging().place();
+        _ = config.logging().level();
+        _ = config.logging().filescount();
+        _ = config.logging().stdout();
+        _ = config.logging().folder();
+    }
+}

@@ -7,7 +7,6 @@ mod server;
 mod service;
 mod utils;
 
-#[allow(dead_code)]
 mod configuration;
 
 #[tokio::main]

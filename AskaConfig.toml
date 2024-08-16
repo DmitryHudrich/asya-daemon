@@ -2,7 +2,7 @@
 port = 3000
 
 [logging]
-place = true
+place = false
 level = "info"
 folder = "logs"
 filescount = 10
