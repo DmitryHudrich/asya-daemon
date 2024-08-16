@@ -50,7 +50,7 @@ pub struct Net {
 
 impl Net {
     pub fn port(&self) -> u16 {
-        self.port.unwrap_or_else(||use_default("port", 3000))
+        self.port.unwrap_or_else(|| use_default("port", 3000))
     }
 }
 
@@ -65,26 +65,27 @@ pub struct Logging {
 
 impl Logging {
     pub fn place(&self) -> bool {
-        self.place.unwrap_or_else(||use_default("place", false))
+        self.place.unwrap_or_else(|| use_default("place", false))
     }
 
     pub fn level(&self) -> LevelFilter {
         self.level
-            .unwrap_or_else(||use_default("level", LevelFilter::Info))
+            .unwrap_or_else(|| use_default("level", LevelFilter::Info))
     }
 
     pub fn folder(&self) -> String {
         self.folder
             .clone()
-            .unwrap_or_else(||use_default("folder", String::from("logs")))
+            .unwrap_or_else(|| use_default("folder", String::from("logs")))
     }
 
     pub fn filescount(&self) -> usize {
-        self.filescount.unwrap_or_else(||use_default("filescount", 10))
+        self.filescount
+            .unwrap_or_else(|| use_default("filescount", 10))
     }
 
     pub fn stdout(&self) -> bool {
-        self.stdout.unwrap_or_else(||use_default("stdout", true))
+        self.stdout.unwrap_or_else(|| use_default("stdout", true))
     }
 }
 
@@ -131,7 +132,7 @@ mod tests {
         };
 
         assert_eq!(config_with_default_port.net().port(), 3000);
-        assert_eq!(config_without_port.net().port(), 3000);   
+        assert_eq!(config_without_port.net().port(), 3000);
         assert_eq!(config_wit_custom_port.net().port(), 2000);
     }
 
@@ -168,7 +169,10 @@ mod tests {
             c
         };
 
-        assert_eq!(config_with_default_level.logging().level(), LevelFilter::Info);
+        assert_eq!(
+            config_with_default_level.logging().level(),
+            LevelFilter::Info
+        );
         assert_eq!(config_without_level.logging().level(), LevelFilter::Info);
         assert_eq!(config_with_warn.logging().level(), LevelFilter::Warn);
     }
