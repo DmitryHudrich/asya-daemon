@@ -7,6 +7,10 @@ use serde_env::from_env;
 
 use crate::utils;
 
+/*
+* Нужно как то уменьшить весь этот бойлерплейт из геттеров, глаза мазолит. может быть макросами?
+*/
+
 lazy_static! {
     static ref ENV: Config = {
         let toml_config =
