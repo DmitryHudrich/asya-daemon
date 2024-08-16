@@ -1,6 +1,6 @@
 # REQUEST FOR TESTING STUFF
 
-GET {{host}}/fetch
+GET http://127.0.0.1:3001/fetch
 [QueryStringParams]
 issys_name: 1
 issys_kernelv: 1
@@ -10,7 +10,7 @@ issys_osvlong: 1
 issys_uptime: 1
 issys_distroid: 1
 
-GET {{host}}/fetch
+GET http://127.0.0.1:3001/fetch
 [QueryStringParams]
 ihram_totalmem: 1
 ihram_usedmem: 1
@@ -20,7 +20,7 @@ ihram_totalswp: 1
 ihram_freeswp: 1
 ihram_usedswp: 1
 
-GET {{host}}/fetch
+GET http://127.0.0.1:3001/fetch
 [QueryStringParams]
 ihcpu_name: 1
 ihcpu_cores: 1

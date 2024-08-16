@@ -125,6 +125,7 @@ mod tests {
             c.net.as_mut().unwrap().port = None;
             c
         };
+
         let config_wit_custom_port = {
             let mut c = default_config();
             c.net.as_mut().unwrap().port = Some(2000);
