@@ -1,5 +1,3 @@
-use serde_json::json;
-
 use crate::service::fetchservice::info;
 
 use super::ParamInfo;
@@ -98,7 +96,12 @@ pub fn get_available_params() -> Vec<ParamInfo> {
                     "_usedswp", info::hardware::ram::get_used_swap;
                 ];
                 DEST_CPU: [
-                     "name", |_| json!("");
+                     "_name", info::hardware::cpu::get_name;
+                     "_cores", info::hardware::cpu::get_core_count;
+                     "_brand", info::hardware::cpu::get_brand;
+                     "_vendor", info::hardware::cpu::get_vendor;
+                     "_usage", info::hardware::cpu::get_global_usage;
+                     "_freq", info::hardware::cpu::get_frequency;
                 ]
             ];
         ];
