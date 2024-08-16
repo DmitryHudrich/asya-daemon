@@ -70,5 +70,5 @@ fn identify_disk<'a>(value: &str, disks: &'a Disks) -> std::option::Option<&'a s
     let disk = disks
         .into_iter()
         .find(|disk| disk.mount_point().to_str().unwrap() == value);
-    disk 
+    disk
 }
