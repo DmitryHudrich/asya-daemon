@@ -2,25 +2,20 @@
 
 GET {{host}}/fetch
 [QueryStringParams]
-ismntdiskname: /
+issys_name: 1
+issys_kernelv: 1
+issys_hostname: 1
+issys_osv: 1
+issys_osvlong: 1
+issys_uptime: 1
+issys_distroid: 1
 
 GET {{host}}/fetch
 [QueryStringParams]
-ditotal_space: /dev/watafuk
-ditotal_space: /dev/nvme0n1p3
-diused_space: /dev/nvme0n1p3
-dikind: /dev/nvme0n1p3
-
-GET {{host}}/fetch
-[QueryStringParams]
-cinfo: 1
-siname: 1
-siname: 1
-mitotal: 1
-mntiall: 1
-mntitotal_space: /
-mntiavailable_space: /
-mntikind: /mnt
-mntitotal_space: /efi
-diall: 1
-test: 1
+ihram_totalmem: 1
+ihram_usedmem: 1
+ihram_freemem: 1
+ihram_availmem: 1
+ihram_totalswp: 1
+ihram_freeswp: 1
+ihram_usedswp: 1
