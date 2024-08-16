@@ -17,7 +17,10 @@ lazy_static! {
             toml::de::from_str::<Config>(utils::load_file("AskaConfig.toml").unwrap().as_str())
                 .unwrap();
         let env_config = from_env::<Config>().unwrap();
-        serde_merge::omerge(toml_config, env_config).unwrap()
+        println!("TOML: {:#?}", toml_config);
+        println!("ENV: {:#?}", env_config);
+
+        merge_struct::merge(&toml_config, &env_config).unwrap()
     };
 }
 
@@ -70,8 +73,8 @@ impl Logging {
         self.level.unwrap()
     }
 
-    pub fn folder(&self) -> String {
-        self.folder.clone().unwrap()
+    pub fn folder(&self) -> &String {
+        self.folder.as_ref().expect("bebra")
     }
 
     pub fn filescount(&self) -> usize {
