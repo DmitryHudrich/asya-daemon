@@ -5,6 +5,7 @@ mod logging_engine;
 mod preview;
 mod server;
 mod service;
+mod utils;
 
 #[allow(dead_code)]
 mod configuration;

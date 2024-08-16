@@ -8,13 +8,13 @@ use log4rs::{
 use crate::configuration;
 
 pub fn init_logging() {
-    let console_pattern = match configuration::LOG_PLACE.value() {
+    let console_pattern = match configuration::get().logging().place() {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
     };
     let console = enable_console(console_pattern);
     let logfile = enable_file();
-    let config = match configuration::LOGGING_STDOUT.value() {
+    let config = match configuration::get().logging().stdout() {
         true => Config::builder().appender(Appender::builder().build("console", Box::new(console))),
         false => Config::builder(),
     };
@@ -41,7 +41,7 @@ fn build_config(config: log4rs::config::runtime::ConfigBuilder, logfile: FileApp
             Root::builder()
                 .appender("console")
                 .appender("file")
-                .build(configuration::LOGGING_LEVEL.value()),
+                .build(configuration::get().logging().level().to_owned()),
         )
         .unwrap()
 }
@@ -53,7 +53,7 @@ fn enable_file() -> FileAppender {
         )))
         .build(format!(
             "{}/{}aska_logs.log",
-            configuration::LOGGING_FOLDER.value(),
+            configuration::get().logging().folder(),
             chrono::Local::now().format("%Y-%m-%d_%H:%M:%S_")
         ))
         .unwrap()

@@ -1,0 +1,10 @@
+[net]
+port = 1488
+
+[logging]
+place = true
+level = "info"
+folder = "logs"
+filescount = 10
+stdout = true
+

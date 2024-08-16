@@ -5,7 +5,7 @@ use crate::service::fetchservice::info;
 use super::ParamInfo;
 
 const T_INFO: &str = "i";
-const T_COMMAND: &str = "c";
+// const T_COMMAND: &str = "c";
 
 const ST_SOFTWARE: &str = "s";
 const ST_HARDWARE: &str = "h";
@@ -19,12 +19,12 @@ pub fn get_available_params() -> Vec<ParamInfo> {
             ST_SOFTWARE: [
                 DEST_MNT: [
                     "diskname", info::software::mnt::get_diskname_by_mountpoint;
-                    "size", |value| json!("");
+                    "size", |_| json!("");
                 ];
             ];
             ST_HARDWARE: [
                 DEST_DRIVE: [
-                     "name", |value| json!("");
+                     "name", |_| json!("");
                 ]
             ];
         ];

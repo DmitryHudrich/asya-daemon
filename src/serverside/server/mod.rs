@@ -15,7 +15,7 @@ use crate::{configuration, service::fetchservice};
 mod middlewares;
 
 pub async fn launch_server() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = SocketAddr::from(([127, 0, 0, 1], configuration::PORT.value()));
+    let addr = SocketAddr::from(([127, 0, 0, 1], configuration::get().net().port()));
     let listener = TcpListener::bind(addr).await?;
     info!("Start listening at {}", addr.to_string());
 
