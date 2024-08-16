@@ -1,5 +1,5 @@
 [net]
-port = 1488
+port = 3000
 
 [logging]
 place = true
