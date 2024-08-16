@@ -18,8 +18,11 @@ hyper = { version = "1.4.1", features = ["full"] }
 tokio = { version = "1.39.2", features = ["full"] }
 http-body-util = "0.1.2"
 hyper-util = { version = "0.1.6", features = ["full"] }
+
+serde-env = "0.2.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
+
 tower = "0.4"
 colored = "2.1.0"
 chrono = "0.4.38"
@@ -28,6 +31,5 @@ form_urlencoded = "1.2.1"
 multimap = "0.10.0"
 lazy_static = "1.5.0"
 toml = "0.8.19"
-serde-env = "0.2.0"
 merge-struct = "0.1.0"
-derive-getters = { version = "0.5.0", features = ["auto_copy_getters"] }
+clap = { version = "4.5.16", features = ["derive"] }
