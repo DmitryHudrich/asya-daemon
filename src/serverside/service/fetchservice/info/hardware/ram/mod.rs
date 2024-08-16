@@ -24,11 +24,11 @@ pub fn get_total_swap(_: String) -> Json {
 }
 
 pub fn get_used_swap(_: String) -> Json {
-       json!(system().used_swap())
+   json!(system().used_swap())
 }
 
 pub fn get_free_swap(_: String) -> Json {
-       json!(system().free_swap())
+   json!(system().free_swap())
 }
 
 fn system() -> sysinfo::System {
