@@ -31,9 +31,7 @@ pub fn get_frequency(_: String) -> Json {
 }
 
 fn system() -> sysinfo::System {
-    System::new_with_specifics(
-        RefreshKind::new().with_cpu(CpuRefreshKind::everything()),
-    )
+    System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything()))
 }
 
 // FIXME:

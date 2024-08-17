@@ -8,27 +8,27 @@ pub fn get_total_memory(_: String) -> Json {
 }
 
 pub fn get_used_memory(_: String) -> Json {
-   json!(system().used_memory())
+    json!(system().used_memory())
 }
 
 pub fn get_free_memory(_: String) -> Json {
-   json!(system().free_memory())
+    json!(system().free_memory())
 }
 
 pub fn get_available_memory(_: String) -> Json {
-   json!(system().available_memory())
+    json!(system().available_memory())
 }
 
 pub fn get_total_swap(_: String) -> Json {
-   json!(system().total_swap())
+    json!(system().total_swap())
 }
 
 pub fn get_used_swap(_: String) -> Json {
-   json!(system().used_swap())
+    json!(system().used_swap())
 }
 
 pub fn get_free_swap(_: String) -> Json {
-   json!(system().free_swap())
+    json!(system().free_swap())
 }
 
 fn system() -> sysinfo::System {
