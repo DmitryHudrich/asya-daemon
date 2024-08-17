@@ -24,3 +24,7 @@ GET http://127.0.0.1:3001/fetch
 [QueryStringParams]
 ihcpu_name: 1
 ihcpu_cores: 1
+
+GET http://127.0.0.1:3001/fetch
+[QueryStringParams]
+ihwtr_weather: 1

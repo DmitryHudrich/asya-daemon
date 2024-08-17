@@ -22,11 +22,12 @@ tokio = { version = "1.39.2", features = ["full"] }
 http-body-util = "0.1.2"
 hyper-util = { version = "0.1.6", features = ["full"] }
 
+reqwest = { version = "0.12.5", features = ["native-tls-vendored"] }
+
 serde-env = "0.2.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 
-tower = "0.4"
 colored = "2.1.0"
 chrono = "0.4.38"
 sysinfo = "0.31.0"

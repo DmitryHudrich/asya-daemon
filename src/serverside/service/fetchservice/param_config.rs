@@ -3,7 +3,7 @@ use crate::service::fetchservice::info;
 use super::ParamInfo;
 
 const T_INFO: &str = "i";
-// const T_COMMAND: &str = "c";
+const T_COMMAND: &str = "c";
 
 const ST_SOFTWARE: &str = "s";
 const ST_HARDWARE: &str = "h";
@@ -75,6 +75,9 @@ pub fn get_available_params() -> Vec<ParamInfo> {
                     "_uptime", info::software::sys::get_uptime_seconds;
                     "_distroid", info::software::sys::get_distro_id;
                 ];
+                DEST_WTR: [
+                    "_weather", info::software::wtr::get_wthr
+                ]
             ];
             ST_HARDWARE: [
                 DEST_DRIVE: [
