@@ -53,13 +53,12 @@ impl ParamInfo {
 // the functions returns a map with keys: issys_name, ismnt_kind
 pub fn parse(params: MultiMap<String, String>) -> HashMap<String, Json> {
     let mut res: HashMap<String, Json> = HashMap::new();
-    let available_params = param_config::get_available_params();
 
     'outer: for (param_key, param_values) in &params {
-        let matching_param = available_params
-            .clone() // FIXME: dorogo pizdec
-            .into_iter()
-            .find(|el| &el.full_name() == param_key);
+        let mut matching_param= None;
+        for param in param_config::get_available_params(){
+            if &param.full_name() == param_key { matching_param = Some(param) }
+        }
 
         // If a param given in query is invalid, then skip
         if matching_param.is_none() {
