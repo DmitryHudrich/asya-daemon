@@ -1,15 +1,16 @@
 #[macro_use]
 extern crate log;
 
-mod logging_engine;
-mod preview;
-mod server;
-mod service;
-mod utils;
+pub mod logging_engine;
+pub mod preview;
+pub mod server;
+pub mod service;
+pub mod utils;
 
 mod configuration;
 
 #[tokio::main]
+#[allow(dead_code)] // for benchmarks
 async fn main() {
     logging_engine::init_logging();
     let server_launching = server::launch_server();
