@@ -74,9 +74,6 @@ pub fn get_available_params() -> Vec<ParamInfo> {
                     "_osvlong", info::software::sys::get_long_os_version;
                     "_uptime", info::software::sys::get_uptime_seconds;
                     "_distroid", info::software::sys::get_distro_id;
-                ];
-                DEST_WTR: [
-                    "_weather", info::software::wtr::get_wthr
                 ]
             ];
             ST_HARDWARE: [
