@@ -125,6 +125,7 @@ dependencies = [
  "log4rs",
  "merge-struct",
  "multimap",
+ "rand",
  "serde",
  "serde-env",
  "serde_json",

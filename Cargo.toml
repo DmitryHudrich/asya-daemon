@@ -36,6 +36,7 @@ lazy_static = "1.5.0"
 toml = "0.8.19"
 merge-struct = "0.1.0"
 clap = { version = "4.5.16", features = ["derive"] }
+rand = "0.8.5"
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
