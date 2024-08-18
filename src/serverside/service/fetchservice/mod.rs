@@ -54,10 +54,10 @@ impl ParamInfo {
 pub fn parse(params: MultiMap<String, String>) -> HashMap<String, Json> {
     let mut res: HashMap<String, Json> = HashMap::new();
 
-    'outer: for (param_key, param_values) in &params {
+    'outer: for (param_key, param_values) in params {
         let mut matching_param = None;
         for param in param_config::get_available_params() {
-            if &param.full_name() == param_key {
+            if param.full_name() == param_key {
                 matching_param = Some(param)
             }
         }
@@ -85,7 +85,7 @@ pub fn parse(params: MultiMap<String, String>) -> HashMap<String, Json> {
             tmp.insert(value.to_string(), handler(value.to_string()));
             sub_res = Some(json!(tmp));
         }
-        res.insert(param_key.clone(), json!(sub_res.unwrap_or_default()));
+        res.insert(param_key, json!(sub_res.unwrap_or_default()));
     }
     res
 }

@@ -1,4 +1,4 @@
-use criterion::BenchmarkId;
+use criterion::{black_box, BenchmarkId};
 use criterion::{criterion_group, criterion_main, Criterion};
 use multimap::multimap;
 use multimap::MultiMap;
@@ -45,8 +45,8 @@ fn get_params() -> MultiMap<String, String> {
 
 pub fn parse_all_params(c: &mut Criterion) {
     let params = get_params();
-    c.bench_with_input(BenchmarkId::new("parse all params", ""), &params, |b, p| {
-        b.iter(|| parse(p.clone()))
+    c.bench_with_input(BenchmarkId::new("parse_all_params", ""), &params, |b, p| {
+        b.iter(|| parse(black_box(p).clone()))
     });
 }
 

@@ -3,7 +3,7 @@ use crate::service::fetchservice::info;
 use super::ParamInfo;
 
 const T_INFO: &str = "i";
-const T_COMMAND: &str = "c";
+// const T_COMMAND: &str = "c";
 
 const ST_SOFTWARE: &str = "s";
 const ST_HARDWARE: &str = "h";
