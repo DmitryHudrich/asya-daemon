@@ -23,8 +23,8 @@ pub fn init_logging() {
         true => Config::builder().appender(Appender::builder().build("console", Box::new(console))),
         false => Config::builder(),
     };
-    let builded = build_config(config, logfile);
-    log4rs::init_config(builded).unwrap();
+    let built = build_config(config, logfile);
+    log4rs::init_config(built).unwrap();
 
     if configuration::get().logging().stdout() {
         println!("-- logging bootstrapping >> configured log level: {}", configuration::get().logging().level());
