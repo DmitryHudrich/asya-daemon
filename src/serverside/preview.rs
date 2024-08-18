@@ -1,6 +1,7 @@
 use rand::Rng;
 
-const PREVIEWS: [&'static str; 15] = [
+fn get_preview<'a>() -> &'a str {
+    let previews = vec![
     r"
   ___    _____   _   __   ___
  / _ \  /  ___| | | / /  / _ \
@@ -165,9 +166,13 @@ o88o     o8888o 8  88888P'  o888o  o888o o88o     o8888o
 ",
 ];
 
+    previews[rand::thread_rng().gen_range(0..previews.len())]
+
+}
+
 pub fn show_preview() {
     println!(
         "{}",
-        PREVIEWS[rand::thread_rng().gen_range(0..PREVIEWS.len())]
+        get_preview()
     );
 }
