@@ -26,11 +26,11 @@ pub fn init_logging() {
 
 fn log_check() {
     if log_enabled!(log::Level::Trace) {
-        trace!("trace logging examble (THIS ISN'T ERROR) - - - - - - OK");
-        debug!("debug logging examble (THIS ISN'T ERROR) - - - - - - OK");
-        info!("info  logging examble (THIS ISN'T ERROR) - - - - - - OK");
-        warn!("warn  logging examble (THIS ISN'T ERROR) - - - - - - OK");
-        error!("error logging examble (THIS ISN'T ERROR) - - - - - - OK\n------------------------------------------------------------");
+        trace!("trace logging example (THIS ISN'T ERROR) - - - - - - OK");
+        debug!("debug logging example (THIS ISN'T ERROR) - - - - - - OK");
+        info!("info  logging example (THIS ISN'T ERROR) - - - - - - OK");
+        warn!("warn  logging example (THIS ISN'T ERROR) - - - - - - OK");
+        error!("error logging example (THIS ISN'T ERROR) - - - - - - OK\n------------------------------------------------------------");
     }
 }
 
