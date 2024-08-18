@@ -8,7 +8,7 @@ use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 
-use crate::{configuration, service::fetchservice};
+use crate::{configuration, polling, service::fetchservice};
 
 //use crate::service::fetchservice::{ infobyfilter, memoryinfo};
 
@@ -60,6 +60,8 @@ async fn router(
             ok(&fetchservice::parse(params))
         }
         (&Method::GET, "/ping") => ok(&"pong"),
+        (&Method::GET, "/polling") => ok(&polling::return_command().await),
+        // todo (&Method::GET, "/helth") =>
         // (&Method::GET, "/fetch/memory") => ok(&memoryinfo::MemoryInfo::new()),
         // (&Method::GET, "fetch/mounts")
         _ => {
