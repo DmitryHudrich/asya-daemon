@@ -65,6 +65,7 @@ pub struct Logging {
 
 impl Logging {
     pub fn place(&self) -> bool {
+        debug!("getting config property: logging.place");
         self.place.unwrap_or_else(|| use_default("place", false))
     }
 

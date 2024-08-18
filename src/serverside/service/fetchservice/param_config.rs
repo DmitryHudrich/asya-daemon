@@ -3,7 +3,7 @@ use crate::service::fetchservice::info;
 use super::ParamInfo;
 
 const T_INFO: &str = "i";
-const T_COMMAND: &str = "c";
+// const T_COMMAND: &str = "c";
 
 const ST_SOFTWARE: &str = "s";
 const ST_HARDWARE: &str = "h";
@@ -14,45 +14,6 @@ const DEST_RAM: &str = "ram";
 const DEST_CPU: &str = "cpu";
 const DEST_SYSTEM: &str = "sys";
 
-// TODO:
-// fix this
-//  [
-//   {
-//     "issys_name": {
-//       "1": "EndeavourOS"
-//     }
-//   },
-//   {
-//     "issys_kernelv": {
-//       "1": "6.10.4-arch2-1"
-//     }
-//   },
-//   {
-//     "issys_hostname": {
-//       "1": "endvr"
-//     }
-//   },
-//   {
-//     "issys_osv": {
-//       "1": "rolling"
-//     }
-//   },
-//   {
-//     "issys_osvlong": {
-//       "1": "Linux rolling EndeavourOS"
-//     }
-//   },
-//   {
-//     "issys_uptime": {
-//       "1": 6633
-//     }
-//   },
-//   {
-//     "issys_distroid": {
-//       "1": "endeavouros"
-//     }
-//   }
-//  ]
 pub fn get_available_params() -> Vec<ParamInfo> {
     paraminfo!(
         T_INFO: [

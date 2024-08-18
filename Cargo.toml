@@ -44,6 +44,15 @@ criterion = { version = "0.5.1", features = ["html_reports"] }
 name = "main"
 harness = false
 
+[profile.dev]
+lto = "off"
+opt-level = 0
+incremental = true
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+
 [profile.profiling]
 inherits = "release"
 debug = true

@@ -2,14 +2,12 @@ use std::collections::HashMap;
 
 use multimap::MultiMap;
 use serde::Serialize;
-use serde_json::json;
+use serde_json::{json, Value};
 
 #[macro_use]
 mod macro_util;
 mod info;
 mod param_config;
-
-type Json = serde_json::Value;
 
 #[derive(Serialize, Debug, Clone)]
 pub struct ParamInfo {
@@ -18,7 +16,7 @@ pub struct ParamInfo {
     tertiary_type: String,
     property: String,
     #[serde(skip)]
-    handler: fn(key: String) -> Json,
+    handler: fn(key: String) -> Value,
 }
 
 impl Default for ParamInfo {
@@ -28,7 +26,7 @@ impl Default for ParamInfo {
             secondary_type: String::new(),
             tertiary_type: String::new(),
             property: String::new(),
-            handler: |_| Json::Null,
+            handler: |_| Value::Null,
         }
     }
 }
@@ -51,13 +49,13 @@ impl ParamInfo {
 //
 // eg. you pass a map with keys: issys_name, ismnt_kind, bebra
 // the functions returns a map with keys: issys_name, ismnt_kind
-pub fn parse(params: MultiMap<String, String>) -> HashMap<String, Json> {
-    let mut res: HashMap<String, Json> = HashMap::new();
+pub fn parse(params: MultiMap<String, String>) -> HashMap<String, Value> {
+    let mut res: HashMap<String, Value> = HashMap::new();
 
-    'outer: for (param_key, param_values) in &params {
+    'outer: for (param_key, param_values) in params {
         let mut matching_param = None;
         for param in param_config::get_available_params() {
-            if &param.full_name() == param_key {
+            if param.full_name() == param_key {
                 matching_param = Some(param)
             }
         }
@@ -85,7 +83,7 @@ pub fn parse(params: MultiMap<String, String>) -> HashMap<String, Json> {
             tmp.insert(value.to_string(), handler(value.to_string()));
             sub_res = Some(json!(tmp));
         }
-        res.insert(param_key.clone(), json!(sub_res.unwrap_or_default()));
+        res.insert(param_key, json!(sub_res.unwrap_or_default()));
     }
     res
 }

@@ -8,6 +8,11 @@ use log4rs::{
 use crate::configuration;
 
 pub fn init_logging() {
+    if configuration::get().logging().stdout() {
+        println!("-- logging bootstrapping >> logging enabled with stdout, but not configured yet,");
+        println!("                            so you can't see some logs or see them incorrectly.");
+    }
+
     let console_pattern = match configuration::get().logging().place() {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
@@ -20,6 +25,14 @@ pub fn init_logging() {
     };
     let builded = build_config(config, logfile);
     log4rs::init_config(builded).unwrap();
+
+    if configuration::get().logging().stdout() {
+        println!("-- logging bootstrapping >> configured log level: {}", configuration::get().logging().level());
+        println!("-- logging bootstrapping >> write log place: {}", configuration::get().logging().place());
+        println!("-- logging bootstrapping >> folder: {}", configuration::get().logging().folder());
+        println!("-- logging bootstrapping >> stdout: {}", configuration::get().logging().stdout());
+        println!("-- logging bootstrapping >> bootstrapped logging system successfully. now you can see all logs with configured level in your terminal.");
+    }
 
     log_check();
 }
