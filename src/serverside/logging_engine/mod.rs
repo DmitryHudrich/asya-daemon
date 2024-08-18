@@ -54,7 +54,7 @@ fn enable_file() -> FileAppender {
         .build(format!(
             "{}/{}aska_logs.log",
             configuration::get().logging().folder(),
-            chrono::Local::now().format("%Y-%m-%d_%H:%M:%S_")
+            chrono::Local::now().format("%Y-%m-%d_%H-%M-%S_")
         ))
         .unwrap()
 }
