@@ -18,5 +18,5 @@ message KeyValue {
 }
 
 service SignalService {
-  rpc SendSignal(Signal) returns (Signal);
+  rpc HandleSignal(Signal) returns (Signal);
 }

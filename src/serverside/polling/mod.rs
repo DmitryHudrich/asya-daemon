@@ -5,7 +5,6 @@ lazy_static! {
     static ref CLIENT: reqwest::Client = reqwest::Client::new();
 }
 
-
 pub struct Signal {
     status: u8,
     content: Option<SignalContent>,

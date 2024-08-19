@@ -3,18 +3,18 @@ use http_body_util::Full;
 
 use http_body_util::Empty;
 
+use http_body_util::combinators::BoxBody;
+use hyper::body::Bytes;
 use hyper::server::conn::http1;
 use hyper::Method;
-use serde::Serialize;
-use hyper::StatusCode;
-use hyper::body::Bytes;
-use http_body_util::combinators::BoxBody;
-use hyper::Response;
 use hyper::Request;
-use tower::ServiceBuilder;
+use hyper::Response;
+use hyper::StatusCode;
 use hyper_util::rt::TokioIo;
-use tokio::net::TcpListener;
+use serde::Serialize;
 use std::net::SocketAddr;
+use tokio::net::TcpListener;
+use tower::ServiceBuilder;
 
 use crate::configuration;
 use crate::server::middlewares::logging;
@@ -98,4 +98,3 @@ pub(crate) fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
         .map_err(|never| match never {})
         .boxed()
 }
-
