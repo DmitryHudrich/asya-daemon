@@ -60,7 +60,6 @@ async fn router(
             ok(&fetchservice::parse(params))
         }
         (&Method::GET, "/ping") => ok(&"pong"),
-        (&Method::GET, "/polling") => ok(&polling::return_command().await),
         // todo (&Method::GET, "/helth") =>
         // (&Method::GET, "/fetch/memory") => ok(&memoryinfo::MemoryInfo::new()),
         // (&Method::GET, "fetch/mounts")

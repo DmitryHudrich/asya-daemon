@@ -37,6 +37,7 @@ toml = "0.8.19"
 merge-struct = "0.1.0"
 clap = { version = "4.5.16", features = ["derive"] }
 rand = "0.8.5"
+reqwest = "0.12.5"
 queues = "1.1.0"
 
 [dev-dependencies]

@@ -1,3 +1,5 @@
+use tokio::join;
+
 #[macro_use]
 extern crate log;
 
@@ -7,6 +9,7 @@ pub mod preview;
 pub mod server;
 pub mod service;
 pub mod utils;
+pub mod workers;
 
 mod configuration;
 
@@ -15,9 +18,10 @@ mod configuration;
 async fn main() {
     preview::show_preview();
     logging_engine::init_logging();
+    let workers_launching = workers::bootstrap_all();
     let server_launching = server::launch_server();
     info!("Bootstrapping");
-    let _ = server_launching.await;
+    _ = join!(workers_launching, server_launching);
 }
 
 /*

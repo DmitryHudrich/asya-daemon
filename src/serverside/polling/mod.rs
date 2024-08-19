@@ -1,34 +1,55 @@
-use std::ops::DerefMut;
-
 use lazy_static::lazy_static;
-use queues::{queue, IsQueue, Queue};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tokio::sync::Mutex;
 
 lazy_static! {
-    static ref COMMAND_QUEUE: Mutex<Queue<Command>> = Mutex::new(queue![]);
+    static ref CLIENT: reqwest::Client = reqwest::Client::new();
 }
 
 #[derive(Clone, Serialize, Deserialize, Default)]
-pub struct Command {
+pub struct Signal {
     status: u8,
-    content: Option<CommandContent>,
+    content: Option<SignalContent>,
+}
+
+impl Signal {
+    pub async fn info(content: SignalContent) {
+        signal(20, content).await
+    }
+
+    pub async fn error(content: SignalContent) {
+        signal(10, content).await
+    }
+
+    pub async fn command(content: SignalContent) {
+        signal(0, content).await
+    }
+}
+
+async fn signal(status: u8, content: SignalContent) {
+    let signal = Signal {
+        status,
+        content: Some(content),
+    };
+
+    send_command(signal).await;
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct CommandContent {
+pub struct SignalContent {
     command: String,
     additional: Value,
 }
 
-pub async fn return_command() -> Command {
-    let mut mg = COMMAND_QUEUE.lock().await;
-    let command_queue = mg.deref_mut();
-    match command_queue.remove() {
-        Ok(v) => v,
-        Err(_) => Command::default(),
+impl SignalContent {
+    pub fn new(command: String) -> SignalContent {
+        SignalContent {
+            command,
+            additional: Value::Null,
+        }
     }
 }
 
-pub fn send_command() {}
+async fn send_command(signal: Signal) {
+      
+}
