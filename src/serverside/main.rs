@@ -13,9 +13,9 @@ mod configuration;
 #[tokio::main]
 #[allow(dead_code)] // for benchmarks
 async fn main() {
+    preview::show_preview();
     logging_engine::init_logging();
     let server_launching = server::launch_server();
-    preview::show_preview();
     info!("Bootstrapping");
     let _ = server_launching.await;
 }
