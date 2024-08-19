@@ -1,5 +1,5 @@
 use main::signal_service_server::{SignalService, SignalServiceServer};
-use main::signal_service_client::SignalServiceClient;
+// use main::signal_service_client::SignalServiceClient;
 use main::{Signal, SignalContent};
 
 use tokio::join;
@@ -14,24 +14,22 @@ pub async fn start() {
     _ = join!(server())
 }
 
-async fn client() -> Result<(), Box<dyn std::error::Error>> {
-    let mut client = SignalServiceClient::connect("http://[::1]:50051").await?;
-
-    let request = tonic::Request::new(Signal {
-            status: 0,
-            content: Some(SignalContent {
-                command: String::from("bebra"),
-                additional: vec![],
-            }),
-        });
-
-
-    let response = client.handle_signal(request).await?;
-
-    println!("RESPONSE={:?}", response);
-
-    Ok(())
-}
+// async fn client() -> Result<(), Box<dyn std::error::Error>> {
+//     let mut client = SignalServiceClient::connect("http://[::1]:50051").await?;
+//
+//     let request = tonic::Request::new(Signal {
+//             status: 0,
+//             content: Some(SignalContent {
+//                 command: String::from("bebra"),
+//                 additional: vec![],
+//             }),
+//         });
+//
+//
+//     let response = client.handle_signal(request).await?;
+//
+//     Ok(())
+// }
 
 async fn server() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse().unwrap();
@@ -59,6 +57,7 @@ impl SignalService for MySignal {
         // default yet
         let reply = Signal {
             status: 0,
+            endpoint: String::from("bebra"),
             content: Some(SignalContent {
                 command: String::from("bebra"),
                 additional: vec![],

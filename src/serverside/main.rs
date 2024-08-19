@@ -4,7 +4,6 @@ use tokio::join;
 extern crate log;
 
 pub mod logging_engine;
-pub mod polling;
 pub mod preview;
 pub mod server;
 pub mod service;

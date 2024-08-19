@@ -4,7 +4,8 @@ package signal_service;
 
 message Signal {
   uint32 status = 1;
-  SignalContent content = 2;
+  string endpoint = 2;
+  SignalContent content = 3;
 }
 
 message SignalContent {
