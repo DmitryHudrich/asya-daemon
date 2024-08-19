@@ -10,8 +10,8 @@
       systems = [ "x86_64-linux" ];
       perSystem = { config, self', pkgs, lib, system, ... }:
         let
-          runtimeDeps = with pkgs; [ alsa-lib speechd ];
-          buildDeps = with pkgs; [ pkg-config rustPlatform.bindgenHook ];
+          runtimeDeps = with pkgs; [ alsa-lib speechd openssl pkg-config ];
+          buildDeps = with pkgs; [ pkg-config rustPlatform.bindgenHook openssl protobuf ];
           devDeps = with pkgs; [ gdb ];
 
           cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
