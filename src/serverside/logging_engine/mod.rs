@@ -12,15 +12,12 @@ pub fn init_logging() {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
     };
-    let console = enable_console(console_pattern);
-    let logfile = enable_file();
     let config = match configuration::get().logging().stdout() {
-        true => Config::builder().appender(Appender::builder().build("console", Box::new(console))),
+        true => Config::builder().appender(Appender::builder().build("console", Box::new(enable_console(console_pattern)))),
         false => Config::builder(),
     };
-    let built = build_config(config, logfile);
 
-    log4rs::init_config(built).unwrap();
+    log4rs::init_config(build_config(config, enable_file())).unwrap();
 
     info!("Logging level: {}", configuration::get().logging().level());
     info!("Logging to: {}", configuration::get().logging().folder());
