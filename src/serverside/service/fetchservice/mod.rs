@@ -49,7 +49,7 @@ impl ParamInfo {
 //
 // eg. you pass a map with keys: issys_name, ismnt_kind, bebra
 // the functions returns a map with keys: issys_name, ismnt_kind
-pub fn parse(params: MultiMap<String, String>) -> HashMap<String, Value> {
+pub fn parse(params: MultiMap<String, String>) -> HashMap<String, serde_json::Value> {
     let mut res: HashMap<String, Value> = HashMap::new();
 
     'outer: for (param_key, param_values) in params {

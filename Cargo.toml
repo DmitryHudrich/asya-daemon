@@ -39,7 +39,12 @@ clap = { version = "4.5.16", features = ["derive"] }
 rand = "0.8.5"
 reqwest = "0.12.5"
 queues = "1.1.0"
+
 tonic = "0.12.1"
+bytes = "1.7.1"
+prost = "0.13.1"
+prost-derive = "0.13.1"
+
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
@@ -60,3 +65,6 @@ lto = "fat"
 [profile.profiling]
 inherits = "release"
 debug = true
+
+[build-dependencies]
+tonic-build = "0.12.1"

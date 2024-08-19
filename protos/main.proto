@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package signal_service;
+
+message Signal {
+  uint32 status = 1;
+  SignalContent content = 2;
+}
+
+message SignalContent {
+  string command = 1;
+  repeated KeyValue additional = 2;
+}
+
+message KeyValue {
+  string key = 1;
+  string value = 2;
+}
+
+service SignalService {
+  rpc SendSignal(Signal) returns (Signal);
+}
