@@ -50,6 +50,4 @@ impl SignalContent {
     }
 }
 
-async fn send_command(signal: Signal) {
-      
-}
+async fn send_command(signal: Signal) {}

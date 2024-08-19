@@ -5,7 +5,7 @@ use middlewares::logging;
 // use multimap::MultiMap;
 use serde::Serialize;
 use std::net::SocketAddr;
-use tokio::net::TcpListener;
+use tokio::{join, net::TcpListener};
 use tower::ServiceBuilder;
 
 use crate::{configuration, polling, service::fetchservice};
@@ -15,10 +15,17 @@ use crate::{configuration, polling, service::fetchservice};
 mod middlewares;
 
 pub async fn launch_server() -> Result<(), Box<dyn std::error::Error>> {
+    join!(http(), grpc())
+}
+
+async fn grpc() -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
+}
+
+async fn http() -> Result<(), Box<dyn std::error::Error>> {
     let addr = SocketAddr::from(([127, 0, 0, 1], configuration::get().net().port()));
     let listener = TcpListener::bind(addr).await?;
     info!("Start listening at {}", addr.to_string());
-
     loop {
         let (stream, _) = listener.accept().await?;
         let io = TokioIo::new(stream);

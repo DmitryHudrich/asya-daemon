@@ -39,6 +39,7 @@ clap = { version = "4.5.16", features = ["derive"] }
 rand = "0.8.5"
 reqwest = "0.12.5"
 queues = "1.1.0"
+tonic = "0.12.1"
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
