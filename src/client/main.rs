@@ -11,7 +11,7 @@ async fn main() {
 }
 
 async fn print_fetch() {
-    let fetch = set_connection("http://localhost:3000/fetch".parse::<hyper::Uri>().unwrap())
+    let fetch = set_connection("http://localhost:3001/fetch".parse::<hyper::Uri>().unwrap())
         .await
         .unwrap();
     println!("FETCH: {}", fetch);

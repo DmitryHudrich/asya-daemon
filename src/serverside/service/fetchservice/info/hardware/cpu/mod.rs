@@ -4,34 +4,38 @@ use sysinfo::{CpuRefreshKind, RefreshKind, System};
 type Json = serde_json::Value;
 
 pub fn get_global_usage(_: String) -> Json {
-    json!(system().global_cpu_usage())
+    json!(system(|sys| sys.global_cpu_usage()))
 }
 
 pub fn get_brand(_: String) -> Json {
-    json!(system().cpus()[0].brand())
+    json!(system(|sys| sys.cpus()[0].brand().to_string()))
 }
 
 pub fn get_core_count(_: String) -> Json {
-    json!(system().cpus().len())
+    json!(system(|sys| sys.cpus().len()))
 }
 
 pub fn get_vendor(_: String) -> Json {
-    json!(system().cpus()[0].vendor_id())
+    json!(system(|sys| sys.cpus()[0].vendor_id().to_string()))
 }
 
 pub fn get_name(_: String) -> Json {
-    json!(system().cpus()[0].name())
+    json!(system(|sys| sys.cpus()[0].name().to_string()))
 }
 
 // TODO:
 // я не уверен, что это вообще возвращает. каждый раз, когда я собираю
 // данные о частоте процессора, она всегда разная. как это работает?
 pub fn get_frequency(_: String) -> Json {
-    json!(system().cpus()[0].frequency())
+    json!(system(|sys| sys.cpus()[0].frequency()))
 }
 
-fn system() -> sysinfo::System {
-    System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything()))
+fn system<T, F>(f: T) -> F
+where
+    T: FnOnce(&sysinfo::System) -> F
+{
+    let sys = System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything()));
+    f(&sys)
 }
 
 // FIXME:
