@@ -34,8 +34,7 @@ fn system<T, F>(f: T) -> F
 where
     T: FnOnce(&sysinfo::System) -> F
 {
-    let sys = System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything()));
-    f(&sys)
+    f(&System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything())))
 }
 
 // FIXME:
