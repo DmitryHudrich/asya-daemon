@@ -1,72 +1,59 @@
-use serde_json::json;
-use sysinfo::Disks;
+use serde_json::{json, Value};
+use sysinfo::{Disks, Disk};
 
-type Json = serde_json::Value;
 
 // А нахуя?
 // Запрос: получить имя диска /dev/sda1
 // Ответ: /dev/sda1
 //
-// pub fn get_name(value: String) -> Json {
+// pub fn get_name(value: String) -> Value {
 //     let disks = Disks::new_with_refreshed_list();
 //     let disk = identify_disk(&value, &disks);
 //     match disk {
 //         Some(disk) => json!(disk.name().to_str().unwrap()),
-//         None => Json::Null,
+//         None => Value::Null,
 //     }
 // }
 
-pub fn get_total_space(value: String) -> Json {
-    match identify_disk(&value, &Disks::new_with_refreshed_list()) {
-        Some(disk) => json!(disk.total_space()),
-        None => Json::Null,
-    }
+pub fn get_total_space(value: String) -> Value {
+    identify_disk(&value, &Disks::new_with_refreshed_list())
+        .map_or(Value::Null, |d| json!(d.total_space()))
 }
 
-pub fn get_available_space(value: String) -> Json {
-    match identify_disk(&value, &Disks::new_with_refreshed_list()) {
-        Some(disk) => json!(disk.available_space()),
-        None => Json::Null,
-    }
+pub fn get_available_space(value: String) -> Value {
+    identify_disk(&value, &Disks::new_with_refreshed_list())
+        .map_or(Value::Null, |d| json!(d.available_space()))
 }
 
-pub fn get_used_space(value: String) -> Json {
-    match identify_disk(&value, &Disks::new_with_refreshed_list()) {
-        Some(disk) => json!(disk.total_space() - disk.available_space()),
-        None => Json::Null,
-    }
+
+pub fn get_used_space(value: String) -> Value {
+    identify_disk(&value, &Disks::new_with_refreshed_list())
+        .map_or(Value::Null, |d| json!(d.total_space() - d.available_space()))
 }
 
-pub fn get_kind(value: String) -> Json {
-    match identify_disk(&value, &Disks::new_with_refreshed_list()) {
-        Some(disk) => json!(disk.kind().to_string()),
-        None => Json::Null,
-    }
+pub fn get_kind(value: String) -> Value {
+    identify_disk(&value, &Disks::new_with_refreshed_list())
+        .map_or(Value::Null, |d| json!(d.kind().to_string()))
 }
 
-pub fn get_file_system(value: String) -> Json {
-    match identify_disk(&value, &Disks::new_with_refreshed_list()) {
-        Some(disk) => json!(disk.file_system().to_str().unwrap_or_default()),
-        None => Json::Null,
-    }
+pub fn get_file_system(value: String) -> Value {
+    identify_disk(&value, &Disks::new_with_refreshed_list())
+        .map_or(Value::Null, |d| json!(d.file_system().to_str().unwrap_or_default()))
 }
 
-pub fn get_is_removable(value: String) -> Json {
-    match identify_disk(&value, &Disks::new_with_refreshed_list()) {
-        Some(disk) => json!(disk.is_removable()),
-        None => Json::Null,
-    }
+pub fn get_is_removable(value: String) -> Value {
+    identify_disk(&value, &Disks::new_with_refreshed_list())
+        .map_or(Value::Null, |d| json!(d.is_removable()))
 }
 
-pub fn get_mount(value: String) -> Json {
+pub fn get_mount(value: String) -> Value {
     match identify_disk(&value, &Disks::new_with_refreshed_list()) {
         Some(disk) => json!(disk.mount_point()),
-        None => Json::Null,
+        None => Value::Null,
     }
 }
 
-fn identify_disk<'a>(value: &str, disks: &'a Disks) -> std::option::Option<&'a sysinfo::Disk> {
-    disks
-        .into_iter()
-        .find(|disk| disk.name().to_str().unwrap() == value)
+fn identify_disk<'a>(value: &str, disks: &'a Disks) -> Option<&'a Disk> {
+    disks.into_iter()
+        .find(|&disk| disk.mount_point().to_str().unwrap() == value)
 }

@@ -1,5 +1,5 @@
 use serde_json::{json, Value};
-use sysinfo::Disks;
+use sysinfo::{Disks, Disk };
 
 
 pub fn get_drive(value: String) -> Value {
@@ -37,7 +37,7 @@ pub fn get_is_removable(value: String) -> Value {
         .map_or(Value::Null, |d| json!(d.is_removable()))
 }
 
-fn identify_disk<'a>(value: &str, disks: &'a Disks) -> std::option::Option<&'a sysinfo::Disk> {
+fn identify_disk<'a>(value: &str, disks: &'a Disks) -> Option<&'a Disk> {
     disks.into_iter()
         .find(|&disk| disk.mount_point().to_str().unwrap() == value)
 }
