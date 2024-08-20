@@ -31,7 +31,7 @@ pub fn get_frequency(_: String) -> Value {
 
 fn system<T, F>(f: T) -> F
 where
-    T: FnOnce(&sysinfo::System) -> F
+    T: FnOnce(&System) -> F
 {
     f(&System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything())))
 }
