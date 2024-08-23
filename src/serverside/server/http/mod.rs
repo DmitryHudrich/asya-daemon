@@ -17,8 +17,10 @@ use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 
 use crate::configuration;
-use crate::server::middlewares::logging;
 use crate::service::fetchservice;
+use middlewares::logging;
+
+mod middlewares;
 
 pub(crate) async fn start() -> Result<(), Box<dyn std::error::Error>> {
     let addr = SocketAddr::from(([127, 0, 0, 1], configuration::get().net().port()));

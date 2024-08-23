@@ -9,6 +9,8 @@ issys_osv: 1
 issys_osvlong: 1
 issys_uptime: 1
 issys_distroid: 1
+ismnt_drive: /
+ismnt_drive: /home
 
 GET {{host}}/fetch
 [QueryStringParams]

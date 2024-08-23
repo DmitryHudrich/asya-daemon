@@ -43,6 +43,7 @@ tonic = "0.12.1"
 bytes = "1.7.1"
 prost = "0.13.1"
 prost-derive = "0.13.1"
+tonic-reflection = "0.12.1"
 
 
 [dev-dependencies]

@@ -3,7 +3,7 @@ use sysinfo::{Disks, Disk };
 
 
 pub fn get_drive(value: String) -> Value {
-    identify_disk(&value, |di| di.name().to_owned())
+    identify_disk(&value, |di| di.name().to_str().unwrap().to_owned())
 }
 
 pub fn get_total_space(value: String) -> Value {

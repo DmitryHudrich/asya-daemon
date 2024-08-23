@@ -17,10 +17,9 @@ mod configuration;
 async fn main() {
     preview::show_preview();
     logging_engine::init_logging();
-    let workers_launching = workers::bootstrap_all();
     let server_launching = server::launch_server();
     info!("Bootstrapping");
-    _ = join!(workers_launching, server_launching);
+    _ = server_launching.await;
 }
 
 /*
