@@ -1,6 +1,5 @@
 use serde_json::{json, Value};
-use sysinfo::{Disks, Disk};
-
+use sysinfo::{Disk, Disks};
 
 // А нахуя?
 // Запрос: получить имя диска /dev/sda1
@@ -22,7 +21,6 @@ pub fn get_total_space(value: String) -> Value {
 pub fn get_available_space(value: String) -> Value {
     identify_disk(&value, |di| di.available_space())
 }
-
 
 pub fn get_used_space(value: String) -> Value {
     identify_disk(&value, |di| di.total_space() - di.available_space())
@@ -49,7 +47,8 @@ where
     F: Fn(&Disk) -> T,
     T: serde::Serialize,
 {
-    Disks::new_with_refreshed_list().into_iter()
+    Disks::new_with_refreshed_list()
+        .into_iter()
         .find(|disk| disk.mount_point().to_str().unwrap_or_default() == value)
         .map_or(Value::Null, |d| json!(f(&d)))
 }

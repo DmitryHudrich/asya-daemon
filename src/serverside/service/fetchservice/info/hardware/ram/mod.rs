@@ -1,7 +1,6 @@
 use serde_json::{json, Value};
 use sysinfo::{MemoryRefreshKind, RefreshKind, System};
 
-
 pub fn get_total_memory(_: String) -> Value {
     json!(system(|sys| sys.total_memory()))
 }
@@ -31,9 +30,10 @@ pub fn get_free_swap(_: String) -> Value {
 }
 
 fn system<T, F>(f: T) -> F
-where T: FnOnce(&System) -> F
+where
+    T: FnOnce(&System) -> F,
 {
-    f(&System::new_with_specifics(
-        RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram().with_swap()),
-    ))
+    f(&System::new_with_specifics(RefreshKind::new().with_memory(
+        MemoryRefreshKind::new().with_ram().with_swap(),
+    )))
 }

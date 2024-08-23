@@ -13,13 +13,12 @@ use crate::utils;
 
 lazy_static! {
     static ref ENV: Config = {
-        let toml_config =
-            toml::de::from_str::<Config>(utils::load_file(utils::shell_args()
-                                                            .config
-                                                            .as_str()
-                                                        ).unwrap()
-                                                        .as_str())
-                                                        .unwrap();
+        let toml_config = toml::de::from_str::<Config>(
+            utils::load_file(utils::shell_args().config.as_str())
+                .unwrap()
+                .as_str(),
+        )
+        .unwrap();
         merge_struct::merge(&toml_config, &from_env::<Config>().unwrap()).unwrap()
     };
 }

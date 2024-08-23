@@ -13,7 +13,9 @@ pub fn init_logging() {
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
     };
     let config = match configuration::get().logging().stdout() {
-        true => Config::builder().appender(Appender::builder().build("console", Box::new(enable_console(console_pattern)))),
+        true => Config::builder().appender(
+            Appender::builder().build("console", Box::new(enable_console(console_pattern))),
+        ),
         false => Config::builder(),
     };
 

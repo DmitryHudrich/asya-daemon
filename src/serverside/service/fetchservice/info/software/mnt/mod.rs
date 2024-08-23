@@ -1,6 +1,5 @@
 use serde_json::{json, Value};
-use sysinfo::{Disks, Disk };
-
+use sysinfo::{Disk, Disks};
 
 pub fn get_drive(value: String) -> Value {
     identify_disk(&value, |di| di.name().to_str().unwrap().to_owned())
@@ -30,13 +29,13 @@ pub fn get_is_removable(value: String) -> Value {
     identify_disk(&value, |di| di.is_removable())
 }
 
-
 fn identify_disk<T, F>(value: &str, f: F) -> Value
 where
     F: Fn(&Disk) -> T,
     T: serde::Serialize,
 {
-    Disks::new_with_refreshed_list().into_iter()
+    Disks::new_with_refreshed_list()
+        .into_iter()
         .find(|disk| disk.mount_point().to_str().unwrap_or_default() == value)
         .map_or(Value::Null, |d| json!(f(&d)))
 }
