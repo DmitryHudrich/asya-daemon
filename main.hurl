@@ -26,7 +26,3 @@ GET {{host}}/fetch
 [QueryStringParams]
 ihcpu_name: 1
 ihcpu_cores: 1
-
-GET {{host}}/fetch
-[QueryStringParams]
-ihwtr_weather: 1

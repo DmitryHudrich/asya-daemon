@@ -1,4 +1,5 @@
 use tonic::{async_trait, Request, Response, Status};
+use sysinfo::{Disk, Disks};
 
 tonic::include_proto!("fetch_is_mnt");
 

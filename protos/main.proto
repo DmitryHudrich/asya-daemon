@@ -4,3 +4,4 @@ package signal_service;
 
 import "fetch/info/software/mnt.proto";
 import public "fetch/info/software/sys.proto";
+import public "fetch/info/hardware/cpu.proto";

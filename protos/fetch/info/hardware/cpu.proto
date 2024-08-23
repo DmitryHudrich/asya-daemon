@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package fetch_is_cpu;
+
+message GlobalUsageInfo {
+  uint32 global_usage = 1;
+}
+
+message BrandInfo {
+  string brand = 1;
+}
+
+message CoreCountInfo {
+  uint32 core_count = 1;
+}
+
+message VendorInfo {
+  string vendor = 1;
+}
+
+message NameInfo {
+  string name = 1;
+}
+
+message FrequencyInfo {
+  uint64 frequency = 1;
+}
+
+message CpuRequest {
+  string hruhru = 1;
+}
+
+service Cpu {
+  rpc GlobalUsage(CpuRequest) returns (GlobalUsageInfo) {}
+  rpc Brand(CpuRequest) returns (BrandInfo) {}
+  rpc CoreCount(CpuRequest) returns (CoreCountInfo) {}
+  rpc Vendor(CpuRequest) returns (VendorInfo) {}
+  rpc Name(CpuRequest) returns (NameInfo) {}
+  rpc Frequency(CpuRequest) returns (FrequencyInfo) {}
+}
