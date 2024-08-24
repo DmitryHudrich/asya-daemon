@@ -1,3 +1,5 @@
+use tokio::join;
+
 #[macro_use]
 extern crate log;
 
@@ -16,8 +18,9 @@ async fn main() {
     preview::show_preview();
     logging_engine::init_logging();
     let server_launching = server::launch_server();
+    let workers_launching = workers::bootstrap_all();
     info!("Bootstrapping");
-    _ = server_launching.await;
+    _ = join!(server_launching, workers_launching);
 }
 
 /*
