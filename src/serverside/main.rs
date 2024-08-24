@@ -1,5 +1,3 @@
-use tokio::join;
-
 #[macro_use]
 extern crate log;
 

@@ -21,7 +21,7 @@ impl mnt_server::Mnt for MntRealization {
 
     async fn total_space(
         &self,
-        request: tonic::Request<MntRequest>,
+        _: tonic::Request<MntRequest>,
     ) -> std::result::Result<tonic::Response<TotalSpaceInfo>, Status> {
         Ok(Response::new(TotalSpaceInfo {
             mount: "bebra".to_owned(),

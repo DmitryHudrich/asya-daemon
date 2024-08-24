@@ -7,10 +7,6 @@ use serde_env::from_env;
 
 use crate::utils;
 
-/*
-* Нужно как то уменьшить весь этот бойлерплейт из геттеров, глаза мазолит. может быть макросами?
-*/
-
 lazy_static! {
     static ref ENV: Config = {
         let toml_config = toml::de::from_str::<Config>(
@@ -80,10 +76,10 @@ impl Logging {
             .unwrap_or_else(|| use_default("folder", String::from("logs")))
     }
 
-    pub fn filescount(&self) -> usize {
-        self.filescount
-            .unwrap_or_else(|| use_default("filescount", 10))
-    }
+    // pub fn filescount(&self) -> usize {
+    //     self.filescount
+    //         .unwrap_or_else(|| use_default("filescount", 10))
+    // }
 
     pub fn stdout(&self) -> bool {
         self.stdout.unwrap_or_else(|| use_default("stdout", true))
@@ -113,7 +109,7 @@ mod tests {
         _ = config.net().port();
         _ = config.logging().place();
         _ = config.logging().level();
-        _ = config.logging().filescount();
+        // _ = config.logging().filescount();
         _ = config.logging().stdout();
         _ = config.logging().folder();
     }
@@ -197,24 +193,24 @@ mod tests {
         assert_eq!(config_wit_custom_folder.logging().folder(), "aska_logs");
     }
 
-    #[test]
-    fn filescount() {
-        let config_with_default_filescount = default_config();
-        let config_without_filescount = {
-            let mut c = default_config();
-            c.logging.as_mut().unwrap().filescount = None;
-            c
-        };
-        let config_wit_custom_filescount = {
-            let mut c = default_config();
-            c.logging.as_mut().unwrap().filescount = Some(15);
-            c
-        };
-
-        assert_eq!(config_with_default_filescount.logging().filescount(), 10);
-        assert_eq!(config_without_filescount.logging().filescount(), 10);
-        assert_eq!(config_wit_custom_filescount.logging().filescount(), 15);
-    }
+    // #[test]
+    // fn filescount() {
+    //     let config_with_default_filescount = default_config();
+    //     let config_without_filescount = {
+    //         let mut c = default_config();
+    //         c.logging.as_mut().unwrap().filescount = None;
+    //         c
+    //     };
+    //     let config_wit_custom_filescount = {
+    //         let mut c = default_config();
+    //         c.logging.as_mut().unwrap().filescount = Some(15);
+    //         c
+    //     };
+    //
+    //     assert_eq!(config_with_default_filescount.logging().filescount(), 10);
+    //     assert_eq!(config_without_filescount.logging().filescount(), 10);
+    //     assert_eq!(config_wit_custom_filescount.logging().filescount(), 15);
+    // }
 
     #[test]
     fn stdout() {

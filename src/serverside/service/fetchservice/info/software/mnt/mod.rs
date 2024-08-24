@@ -37,5 +37,5 @@ where
     Disks::new_with_refreshed_list()
         .into_iter()
         .find(|disk| disk.mount_point().to_str().unwrap_or_default() == value)
-        .map_or(Value::Null, |d| json!(f(&d)))
+        .map_or(Value::Null, |d| json!(f(d)))
 }
