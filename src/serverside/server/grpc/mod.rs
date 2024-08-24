@@ -2,6 +2,8 @@ use fetches::{hardware, software};
 use tokio::join;
 use tonic::transport::Server;
 
+use crate::configuration;
+
 pub mod fetches;
 
 pub async fn start() {
@@ -9,7 +11,7 @@ pub async fn start() {
 }
 
 async fn server() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "[::1]:50051".parse().unwrap();
+    let addr = format!("[::1]:{}", configuration::get().net().grpc_port()).parse().unwrap();
 
     info!("GRPC Server listening on {}", addr);
 
