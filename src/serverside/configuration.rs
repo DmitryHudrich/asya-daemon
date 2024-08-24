@@ -41,12 +41,12 @@ impl Config {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Net {
-    port: Option<u16>,
+    http_port: Option<u16>,
 }
 
 impl Net {
-    pub fn port(&self) -> u16 {
-        self.port.unwrap_or_else(|| use_default("port", 3000))
+    pub fn http_port(&self) -> u16 {
+        self.http_port.unwrap_or_else(|| use_default("port", 3000))
     }
 }
 
@@ -106,7 +106,7 @@ mod tests {
     #[test] // Should not paniced
     fn config_getters() {
         let config = get();
-        _ = config.net().port();
+        _ = config.net().http_port();
         _ = config.logging().place();
         _ = config.logging().level();
         // _ = config.logging().filescount();
@@ -119,19 +119,19 @@ mod tests {
         let config_with_default_port = default_config();
         let config_without_port = {
             let mut c = default_config();
-            c.net.as_mut().unwrap().port = None;
+            c.net.as_mut().unwrap().http_port = None;
             c
         };
 
         let config_wit_custom_port = {
             let mut c = default_config();
-            c.net.as_mut().unwrap().port = Some(2000);
+            c.net.as_mut().unwrap().http_port = Some(2000);
             c
         };
 
-        assert_eq!(config_with_default_port.net().port(), 3000);
-        assert_eq!(config_without_port.net().port(), 3000);
-        assert_eq!(config_wit_custom_port.net().port(), 2000);
+        assert_eq!(config_with_default_port.net().http_port(), 3000);
+        assert_eq!(config_without_port.net().http_port(), 3000);
+        assert_eq!(config_wit_custom_port.net().http_port(), 2000);
     }
 
     #[test]
@@ -233,7 +233,7 @@ mod tests {
 
     fn default_config() -> Config {
         Config {
-            net: Some(Net { port: Some(3000) }),
+            net: Some(Net { http_port: Some(3000) }),
             logging: Some(Logging {
                 place: Some(false),
                 level: Some(log::LevelFilter::Info),

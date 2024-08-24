@@ -23,7 +23,7 @@ use middlewares::logging;
 mod middlewares;
 
 pub(crate) async fn start() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = SocketAddr::from(([127, 0, 0, 1], configuration::get().net().port()));
+    let addr = SocketAddr::from(([127, 0, 0, 1], configuration::get().net().http_port()));
     let listener = TcpListener::bind(addr).await?;
     info!("Start listening at {}", addr.to_string());
     loop {

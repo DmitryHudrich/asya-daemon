@@ -1,5 +1,5 @@
 [net]
-port = 3001
+http_port = 3001
 
 [logging]
 place = false
