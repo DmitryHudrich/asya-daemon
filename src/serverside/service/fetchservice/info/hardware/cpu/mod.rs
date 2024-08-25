@@ -1,3 +1,5 @@
+use std::u64;
+
 use serde_json::{json, Value};
 use sysinfo::{CpuRefreshKind, RefreshKind, System};
 
@@ -27,6 +29,11 @@ pub fn get_name(_: String) -> Value {
 pub fn get_frequency(_: String) -> Value {
     json!(system(|sys| sys.cpus()[0].frequency()))
 }
+
+pub fn get_frequency_u64(_: String) -> u64 {
+    system(|sys| sys.cpus()[0].frequency())
+}
+
 
 fn system<T, F>(f: T) -> F
 where
