@@ -12,6 +12,8 @@ use hyper::Method;
 use hyper::Request;
 use hyper::Response;
 use hyper::StatusCode;
+use hyper::Version;
+use hyper_util::rt::TokioExecutor;
 use hyper_util::rt::TokioIo;
 use serde::Serialize;
 use std::marker::PhantomData;
@@ -19,6 +21,7 @@ use std::net::SocketAddr;
 use std::pin::Pin;
 use std::task::Context;
 use std::task::Poll;
+use tokio::join;
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 
@@ -28,34 +31,41 @@ use middlewares::logging;
 
 mod middlewares;
 
-#[derive(Clone, Copy, Debug)]
-struct LocalExec;
+pub(crate) async fn start() {
+    join!(http1_start(), http2_start());
+}
 
-impl<F> hyper::rt::Executor<F> for LocalExec
-where
-    F: std::future::Future + 'static, // not requiring `Send`
-{
-    fn execute(&self, fut: F) {
-        // This will spawn into the currently running `LocalSet`.
-        tokio::task::spawn_local(fut);
+async fn http2_start() {
+    let addr = SocketAddr::from(([127, 0, 0, 1], 1488));
+    let listener = TcpListener::bind(addr).await.unwrap();
+    info!("Start listening at {}", addr.to_string());
+    loop {
+        let (stream, _) = listener.accept().await.unwrap();
+
+        let io = TokioIo::new(stream);
+        tokio::spawn(async move {
+            let svc = hyper::service::service_fn(router);
+            let svc = ServiceBuilder::new()
+                .layer_fn(logging::Logger::new)
+                .service(svc);
+            if let Err(err) = http2::Builder::new(TokioExecutor::new())
+                .serve_connection(io, svc)
+                .await
+            {
+                warn!("server error: {}", err);
+            }
+        });
     }
 }
 
-pub(crate) async fn start() -> Result<(), Box<dyn std::error::Error>> {
+async fn http1_start() {
     let addr = SocketAddr::from(([127, 0, 0, 1], configuration::get().net().http_port()));
-    let listener = TcpListener::bind(addr).await?;
-
-    let http2_addr = SocketAddr::from(([127, 0, 0, 1], 5549));
-    let http2_listener = TcpListener::bind(http2_addr).await?;
-
+    let listener = TcpListener::bind(addr).await.unwrap();
     info!("Start listening at {}", addr.to_string());
-    info!("Start listening HTTP2 at {}", http2_addr.to_string());
     loop {
-        let (stream, _) = listener.accept().await?;
-        let (http2_stream, _) = http2_listener.accept().await?;
+        let (stream, _) = listener.accept().await.unwrap();
 
         let io = TokioIo::new(stream);
-        let http2_io = TokioIo::new(http2_stream);
         tokio::spawn(async move {
             let svc = hyper::service::service_fn(router);
             let svc = ServiceBuilder::new()
@@ -65,24 +75,10 @@ pub(crate) async fn start() -> Result<(), Box<dyn std::error::Error>> {
                 warn!("server error: {}", err);
             }
         });
-
-        tokio::spawn(async move {
-            let svc = hyper::service::service_fn(http2_router);
-            let svc = ServiceBuilder::new()
-                .layer_fn(logging::Logger::new)
-                .service(svc);
-            debug!("http2 spawned");
-            if let Err(err) = http2::Builder::new(LocalExec)
-                .serve_connection(http2_io, svc)
-                .await
-            {
-                warn!("server error: {}", err);
-            }
-        });
     }
 }
 
-struct Body {
+pub(crate) struct Body {
     // Our Body type is !Send and !Sync:
     _marker: PhantomData<*const ()>,
     data: Option<Bytes>,
@@ -109,56 +105,56 @@ impl HttpBody for Body {
     }
 }
 
-pub async fn http2_router(
-    req: Request<hyper::body::Incoming>,
-) -> Result<Response<Body>, hyper::Error> {
-    match (req.method(), req.uri().path()) {
-        (&Method::GET, "/fetch/cpu/frequency") => {
-            debug!("http2 cpu freq");
-            Ok::<_, hyper::Error>(Response::new(Body::from("BEBRA".to_string())))
-        }
-        _ => {
-            let mut not_found = Response::new(Body::from("".to_string()));
-            *not_found.status_mut() = StatusCode::NOT_FOUND;
-            Ok(not_found)
-        }
-    }
-}
-
 pub(crate) async fn router(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-    match (req.method(), req.uri().path()) {
-        /*
-            ⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣿⠏⣿⣿⣿⣿⣿⣁⠀⠀⠀⠛⠙⠛⠋      апиха снизу, команда, кайфуйте
-            ⡿⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⣰⣿⣿⣿⣿⡄⠘⣿⣿⣿⣿⣷⠄
-            ⡇⠀⠀⠀⠀⠀⠀⠀⠸⠇⣼⣿⣿⣿⣿⣿⣷⣄⠘⢿⣿⣿⣿⣅
-            ⠁⠀⠀⠀⣴⣿⠀⣐⣣⣸⣿⣿⣿⣿⣿⠟⠛⠛⠀⠌⠻⣿⣿⣿⡄
-            ⠀⠀⠀⣶⣮⣽⣰⣿⡿⢿⣿⣿⣿⣿⣿⡀⢿⣤⠄⢠⣄⢹⣿⣿⣿⡆
-            ⠀⠀⠀⣿⣿⣿⣿⣿⡘⣿⣿⣿⣿⣿⣿⠿⣶⣶⣾⣿⣿⡆⢻⣿⣿⠃⢠⠖⠛⣛⣷
-            ⠀⠀⢸⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣮⣝⡻⠿⠿⢃⣄⣭⡟⢀⡎⣰⡶⣪⣿
-            ⠀⠀⠘⣿⣿⣿⠟⣛⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⡿⢁⣾⣿⢿⣿⣿⠏
-            ⠀⠀⠀⣻⣿⡟⠘⠿⠿⠎⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣵⣿⣿⠧⣷⠟⠁
-            ⡇⠀⠀⢹⣿⡧⠀⡀⠀⣀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⢰⣿
-            ⡇⠀⠀⠀⢻⢰⣿⣶⣿⡿⠿⢂⣿⣿⣿⣿⣿⣿⣿⢿⣻⣿⣿⣿⡏⠀⠀
-        */
-        (&Method::GET, "/fetch") => {
-            let params = req
-                .uri()
-                .query()
-                .map(|v| form_urlencoded::parse(v.as_bytes()).into_owned().collect())
-                .unwrap_or_default();
-            ok(&fetchservice::parse(params))
-        }
-        (&Method::GET, "/ping") => ok(&"pong"),
-        // todo (&Method::GET, "/helth") =>
-        // (&Method::GET, "/fetch/memory") => ok(&memoryinfo::MemoryInfo::new()),
-        // (&Method::GET, "fetch/mounts")
-        _ => {
-            let mut not_found = Response::new(empty());
-            *not_found.status_mut() = StatusCode::NOT_FOUND;
-            Ok(not_found)
-        }
+    match req.version() {
+        Version::HTTP_2 => match (req.method(), req.uri().path()) {
+            (&Method::GET, "/ping_http2") => ok(&"ebat v zhopu"),
+            (&Method::GET, "/fetch") => {
+                let params = req
+                    .uri()
+                    .query()
+                    .map(|v| form_urlencoded::parse(v.as_bytes()).into_owned().collect())
+                    .unwrap_or_default();
+                ok(&fetchservice::parse(params))
+            }
+            _ => {
+                let mut not_found = Response::new(empty());
+                *not_found.status_mut() = StatusCode::NOT_FOUND;
+                Ok(not_found)
+            }
+        },
+        _ => match (req.method(), req.uri().path()) {
+            /*
+                ⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣿⠏⣿⣿⣿⣿⣿⣁⠀⠀⠀⠛⠙⠛⠋      апиха снизу, команда, кайфуйте
+                ⡿⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⣰⣿⣿⣿⣿⡄⠘⣿⣿⣿⣿⣷⠄
+                ⡇⠀⠀⠀⠀⠀⠀⠀⠸⠇⣼⣿⣿⣿⣿⣿⣷⣄⠘⢿⣿⣿⣿⣅
+                ⠁⠀⠀⠀⣴⣿⠀⣐⣣⣸⣿⣿⣿⣿⣿⠟⠛⠛⠀⠌⠻⣿⣿⣿⡄
+                ⠀⠀⠀⣶⣮⣽⣰⣿⡿⢿⣿⣿⣿⣿⣿⡀⢿⣤⠄⢠⣄⢹⣿⣿⣿⡆
+                ⠀⠀⠀⣿⣿⣿⣿⣿⡘⣿⣿⣿⣿⣿⣿⠿⣶⣶⣾⣿⣿⡆⢻⣿⣿⠃⢠⠖⠛⣛⣷
+                ⠀⠀⢸⣿⣿⣿⣿⣿⣿⣾⣿⣿⣿⣿⣿⣿⣮⣝⡻⠿⠿⢃⣄⣭⡟⢀⡎⣰⡶⣪⣿
+                ⠀⠀⠘⣿⣿⣿⠟⣛⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣿⣿⣿⡿⢁⣾⣿⢿⣿⣿⠏
+                ⠀⠀⠀⣻⣿⡟⠘⠿⠿⠎⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣵⣿⣿⠧⣷⠟⠁
+                ⡇⠀⠀⢹⣿⡧⠀⡀⠀⣀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⢰⣿
+                ⡇⠀⠀⠀⢻⢰⣿⣶⣿⡿⠿⢂⣿⣿⣿⣿⣿⣿⣿⢿⣻⣿⣿⣿⡏⠀⠀
+            */
+            (&Method::GET, "/fetch") => {
+                let params = req
+                    .uri()
+                    .query()
+                    .map(|v| form_urlencoded::parse(v.as_bytes()).into_owned().collect())
+                    .unwrap_or_default();
+                ok(&fetchservice::parse(params))
+            }
+            (&Method::GET, "/ping") => ok(&"pong"),
+            // todo (&Method::GET, "/helth") =>
+            _ => {
+                let mut not_found = Response::new(empty());
+                *not_found.status_mut() = StatusCode::NOT_FOUND;
+                Ok(not_found)
+            }
+        },
     }
 }
 
