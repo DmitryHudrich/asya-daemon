@@ -76,7 +76,7 @@ pub(crate) async fn router(
                 .unwrap_or_default();
             ok_json(&fetchservice::parse(params))
         }
-        (&Method::GET, "/prototest") => {
+        (&Method::GET, "/fetch_proto") => {
             let a = FrequencyInfo {
                 frequency: {
                     let nws = &System::new_with_specifics(
