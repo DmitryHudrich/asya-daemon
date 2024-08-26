@@ -37,7 +37,6 @@ async fn http1_start() {
     info!("HTTP1 Start listening at {}", addr.to_string());
     loop {
         let (stream, _) = listener.accept().await.unwrap();
-
         let io = TokioIo::new(stream);
         tokio::spawn(async move {
             let svc = hyper::service::service_fn(router);
@@ -98,7 +97,8 @@ pub(crate) async fn router(
 }
 
 pub(crate) fn ok_proto<T>(result: T) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error>
-where T: Message,
+where
+    T: Message,
 {
     let response = Response::builder()
         .header("Content-Type", "application/x-protobuf")
