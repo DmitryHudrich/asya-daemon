@@ -74,7 +74,7 @@ pub(crate) async fn router(
                 .query()
                 .map(|v| form_urlencoded::parse(v.as_bytes()).into_owned().collect())
                 .unwrap_or_default();
-            ok(&fetchservice::parse(params))
+            ok_json(&fetchservice::parse(params))
         }
         (&Method::GET, "/prototest") => {
             let a = FrequencyInfo {
@@ -85,14 +85,9 @@ pub(crate) async fn router(
                     nws.cpus()[0].frequency()
                 },
             };
-            let buf = a.encode_to_vec();
-            let response = Response::builder()
-                .header("Content-Type", "application/x-protobuf")
-                .body(full(buf))
-                .unwrap();
-            Ok(response)
+            ok_proto(a)
         }
-        (&Method::GET, "/ping") => ok(&"pong"),
+        (&Method::GET, "/ping") => ok_json(&"pong"),
         // todo (&Method::GET, "/helth") =>
         _ => {
             let mut not_found = Response::new(empty());
@@ -102,7 +97,17 @@ pub(crate) async fn router(
     }
 }
 
-pub(crate) fn ok<T>(result: &T) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error>
+pub(crate) fn ok_proto<T>(result: T) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error>
+where T: Message,
+{
+    let response = Response::builder()
+        .header("Content-Type", "application/x-protobuf")
+        .body(full(result.encode_to_vec()))
+        .unwrap();
+    Ok(response)
+}
+
+pub(crate) fn ok_json<T>(result: &T) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error>
 where
     T: Serialize,
 {
