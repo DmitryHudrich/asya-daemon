@@ -6,10 +6,8 @@ extern crate log;
 pub mod logging_engine;
 pub mod preview;
 pub mod server;
-pub mod service;
-pub mod utils;
 pub mod workers;
-
+pub mod utils;
 mod configuration;
 
 #[tokio::main]

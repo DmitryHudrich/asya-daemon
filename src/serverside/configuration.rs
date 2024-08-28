@@ -49,9 +49,6 @@ impl Net {
     pub fn http_port(&self) -> u16 {
         self.http_port.unwrap_or_else(|| use_default("http_port", 3001))
     }
-    pub fn grpc_port(&self) -> u16 {
-        self.grpc_port.unwrap_or_else(|| use_default("grpc_port", 50051))
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
