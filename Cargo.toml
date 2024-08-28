@@ -49,9 +49,9 @@ tonic-reflection = "0.12.1"
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
 
-[[bench]]
-name = "main"
-harness = false
+# [[bench]]
+# name = "main"
+# harness = false
 
 [profile.dev]
 lto = "off"
