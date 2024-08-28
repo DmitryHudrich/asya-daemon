@@ -1,31 +1,39 @@
-use http_body_util::BodyExt;
-use http_body_util::Full;
+use http_body_util::{ BodyExt
+                    , Full
+                    , Empty
+                    };
 
-use http_body_util::Empty;
+use hyper::{ Method
+           , Request
+           , Response
+           , StatusCode
+           , body::Bytes
+           , server::conn::http1
+           };
+
+use tokio::{ join
+           , net::TcpListener
+           };
 
 use http_body_util::combinators::BoxBody;
-use hyper::body::Bytes;
-use hyper::server::conn::http1;
-use hyper::Method;
-use hyper::Request;
-use hyper::Response;
-use hyper::StatusCode;
 use hyper_util::rt::TokioIo;
 use prost::Message;
 use serde::Serialize;
 use std::net::SocketAddr;
-use sysinfo::{CpuRefreshKind, RefreshKind, System};
-use tokio::join;
-use tokio::net::TcpListener;
+
 use tower::ServiceBuilder;
 
 use crate::configuration;
-use crate::service::fetchservice;
 use middlewares::logging;
 
-mod middlewares;
+pub mod middlewares;
+pub mod services;
 
-tonic::include_proto!("fetch_is_cpu");
+use services::fetches::{ software::{sys, mnt}
+                       , hardware::{cpu, drv, ram}
+                       };
+
+tonic::include_proto!("fetches");
 
 pub(crate) async fn start() {
     join!(http1_start());
@@ -67,25 +75,17 @@ pub(crate) async fn router(
             ⡇⠀⠀⢹⣿⡧⠀⡀⠀⣀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⢰⣿
             ⡇⠀⠀⠀⢻⢰⣿⣶⣿⡿⠿⢂⣿⣿⣿⣿⣿⣿⣿⢿⣻⣿⣿⣿⡏⠀⠀
         */
+
         (&Method::GET, "/fetch") => {
-            let params = req
-                .uri()
-                .query()
-                .map(|v| form_urlencoded::parse(v.as_bytes()).into_owned().collect())
-                .unwrap_or_default();
-            ok_json(&fetchservice::parse(params))
+            ok_proto(SuperFetch {
+                cpu: cpu::get_cpu_fetch(),
+                sys: sys::get_sys_fetch(),
+                mnt: mnt::get_mnt_fetch(&req.uri().query().unwrap_or("").to_string()),
+                drv: drv::get_drv_fetch(&req.uri().query().unwrap_or("").to_string()),
+                ram: ram::get_ram_fetch()
+            })
         }
-        (&Method::GET, "/fetch_proto") => {
-            let a = FrequencyInfo {
-                frequency: {
-                    let nws = &System::new_with_specifics(
-                        RefreshKind::new().with_cpu(CpuRefreshKind::everything()),
-                    );
-                    nws.cpus()[0].frequency()
-                },
-            };
-            ok_proto(a)
-        }
+
         (&Method::GET, "/ping") => ok_json(&"pong"),
         // todo (&Method::GET, "/helth") =>
         _ => {
