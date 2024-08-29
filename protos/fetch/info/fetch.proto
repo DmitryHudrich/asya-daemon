@@ -35,7 +35,7 @@ message MntFetch {
 
 message DrvFetch {
   optional uint64 total_space = 1;
-  optional uint64 avaible_space = 2;
+  optional uint64 available_space = 2;
   optional uint64 used_space = 3;
   optional string kind = 4;
   optional string file_system = 5;
@@ -47,7 +47,7 @@ message RamFetch {
   optional uint64 total_memory = 1;
   optional uint64 used_memory = 2;
   optional uint64 free_memory = 3;
-  optional uint64 avaible_memory = 4;
+  optional uint64 available_memory = 4;
   optional uint64 total_swap = 5;
   optional uint64 used_swap = 6;
   optional uint64 free_swap = 7;
