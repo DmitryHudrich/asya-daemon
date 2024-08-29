@@ -8,6 +8,7 @@ path = "./src/lib.rs"
 
 [dependencies]
 shared = {path = "../shared"}
+service = {path = "../service/"}
 
 log = "0.4.22"
 log4rs = "1.3.0"
@@ -41,6 +42,3 @@ tonic-reflection = "0.12.1"
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
-
-[build-dependencies]
-tonic-build = "0.12.1"

@@ -1,6 +1,6 @@
 use sysinfo::System;
 
-use crate::fetch_dto::SysFetch;
+use crate::fetches::fetch_dto::SysFetch;
 
 fn get_name() -> Option<String> {
     Some(System::name().unwrap_or_default())

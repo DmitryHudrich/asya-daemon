@@ -1448,12 +1448,12 @@ dependencies = [
  "serde",
  "serde-env",
  "serde_json",
+ "service",
  "shared",
  "sysinfo",
  "tokio",
  "toml",
  "tonic",
- "tonic-build",
  "tonic-reflection",
  "tower",
 ]
@@ -1487,6 +1487,7 @@ dependencies = [
  "tokio",
  "toml",
  "tonic",
+ "tonic-build",
  "tonic-reflection",
  "tower",
 ]

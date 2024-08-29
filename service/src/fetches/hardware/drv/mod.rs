@@ -1,6 +1,6 @@
 use sysinfo::{Disk, Disks};
 
-use crate::fetch_dto::DrvFetch;
+use crate::fetches::fetch_dto::DrvFetch;
 
 fn get_total_space(value: &String) -> Option<u64> {
     identify_disk(&value, |di| di.total_space())

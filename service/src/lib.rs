@@ -1,3 +1,3 @@
-// pub mod fetchservice;
+pub mod fetches;
 
 pub fn berba() { }

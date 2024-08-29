@@ -9,13 +9,10 @@ use std::net::SocketAddr;
 use tower::ServiceBuilder;
 use middlewares::logging;
 use shared::configuration;
-use services::fetches;
+use service::fetches;
 use log::*;
 
 pub mod middlewares;
-pub mod services;
-
-use crate::fetch_dto;
 
 pub(crate) async fn start() {
     join!(http1_start());
@@ -43,6 +40,7 @@ async fn http1_start() {
 pub(crate) async fn router(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
+    use service::fetches::*;
     match (req.method(), req.uri().path()) {
         /*
             ⣿⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣿⠏⣿⣿⣿⣿⣿⣁⠀⠀⠀⠛⠙⠛⠋      апиха снизу, команда, кайфуйте

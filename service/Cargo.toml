@@ -37,8 +37,9 @@ prost = "0.13.1"
 prost-derive = "0.13.1"
 tonic-reflection = "0.12.1"
 
-
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
 
+[build-dependencies]
+tonic-build = "0.12.1"
 

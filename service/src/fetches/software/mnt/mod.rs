@@ -1,6 +1,6 @@
 use sysinfo::{Disk, Disks};
 
-use crate::fetch_dto::MntFetch;
+use crate::fetches::fetch_dto::MntFetch;
 
 fn get_drive(value: &String) -> Option<String> {
     identify_disk(&value, |di| di.name().to_str().unwrap().to_owned())

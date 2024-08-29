@@ -1,6 +1,6 @@
 use sysinfo::{CpuRefreshKind, RefreshKind, System};
 
-use crate::fetch_dto::CpuFetch;
+use crate::fetches::fetch_dto::CpuFetch;
 
 fn get_global_usage() -> Option<u64> {
     Some(system(|sys| sys.global_cpu_usage()).unwrap() as u64)

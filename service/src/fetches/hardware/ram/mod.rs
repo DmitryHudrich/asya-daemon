@@ -1,6 +1,6 @@
 use sysinfo::{MemoryRefreshKind, RefreshKind, System};
 
-use crate::fetch_dto::RamFetch;
+use crate::fetches::fetch_dto::RamFetch;
 
 fn get_total_memory() -> Option<u64> {
     system(|sys| sys.total_memory())
