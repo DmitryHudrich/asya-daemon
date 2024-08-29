@@ -44,7 +44,7 @@ pub fn get_ram_fetch() -> Option<RamFetch> {
     total_memory: get_total_memory(),
     used_memory: get_used_memory(),
     free_memory: get_free_memory(),
-    avaible_memory: get_available_memory(),
+    available_memory: get_available_memory(),
     total_swap: get_total_swap(),
     used_swap: get_used_swap(),
     free_swap: get_free_swap()

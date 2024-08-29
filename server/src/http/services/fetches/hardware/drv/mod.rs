@@ -43,7 +43,7 @@ where
 pub fn get_drv_fetch(value: &String) -> Option<DrvFetch> {
   Some(DrvFetch {
     total_space: get_total_space(value),
-    avaible_space: get_available_space(value),
+    available_space: get_available_space(value),
     used_space: get_used_space(value),
     kind: get_kind(value),
     file_system: get_file_system(value),
