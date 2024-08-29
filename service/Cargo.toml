@@ -1,21 +1,10 @@
-[workspace]
-members = [
-  "server",
-  "service",
-  "shared",
-]
-
-resolver = "2"
-
-[workspace.package]
-name = "aska"
-version = "0.1.0"
-edition = "2021"
-
 [package]
-name = "aska"
+name = "service"
 version = "0.1.0"
 edition = "2021"
+
+[lib]
+path = "./src/lib.rs"
 
 [dependencies]
 log = "0.4.22"
@@ -48,22 +37,8 @@ prost = "0.13.1"
 prost-derive = "0.13.1"
 tonic-reflection = "0.12.1"
 
-server = {path = "./server"}
-service = {path = "./service"}
-shared = {path = "./shared"}
 
-[profile.dev]
-lto = "off"
-opt-level = 0
-incremental = true
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
 
-[profile.release]
-opt-level = 3
-lto = "fat"
 
-[profile.profiling]
-inherits = "release"
-debug = true
-
-[build-dependencies]
-tonic-build = "0.12.1"
