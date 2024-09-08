@@ -1,4 +1,4 @@
-use actix_web::{dev::ServiceFactory, middleware, rt, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{dev::ServiceFactory, middleware, web, App, Error, HttpRequest, HttpResponse};
 use service::services::fetchservice;
 
 mod ws_utils;
