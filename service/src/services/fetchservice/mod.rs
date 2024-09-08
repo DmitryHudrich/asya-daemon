@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::Deref};
 
 use multimap::MultiMap;
 use serde::Serialize;
@@ -43,49 +43,46 @@ impl ParamInfo {
     }
 }
 
-// I made it so you pass a map of String-Vec<String> and the function
-// returns a map of String-Value.
-// So you get 1:1 correspondence of keys (except of invalid keys
-// which are filtered out)
-//
-// eg. you pass a map with keys: issys_name, ismnt_kind, bebra
-// the functions returns a map with keys: issys_name, ismnt_kind
 pub fn parse(params: Vec<(String, String)>) -> HashMap<String, Value> {
     let mut res: HashMap<String, Value> = HashMap::new();
-
-    'outer: for (param_key, param_values) in params {
-        let mut matching_param = None;
-        for param in param_config::get_available_params() {
-            if param.full_name() == param_key {
-                matching_param = Some(param)
-            }
-        }
-
-        // If a param given in query is invalid, then skip
-        if matching_param.is_none() {
+    for (key, value) in &params {
+        // 0) If value is "0", skip
+        if value == "0" {
             continue;
         }
 
-        let handler = matching_param.unwrap_or_default().handler;
+        // 1) Check if key is valid and get param handler
+        let param_handler = param_config::get_available_params()
+            .into_iter()
+            .find_map(|param| if param.full_name() == *key { Some(param.handler) } else { None });
 
-        let mut sub_res = None;
-        let mut tmp = HashMap::new();
+        // If param handler is not found, insert null and continue
+        if let Some(handler) = param_handler {
+            // 2) Check if result should be single value or object
+            let data = if value.is_empty() || value == "1" {
+                // Single Value
+                handler(key.clone())
+            } else {
+                // Object: Gather all pairs that have the same key
+                let pairs = params.iter()
+                    .filter(|(k, _)| k == key)
+                    .collect::<Vec<_>>();
 
-        // for value in param_values {
-            if let Ok(val) = param_key.parse::<u32>() {
-                if val == 1 {
-                    sub_res = Some(handler(param_key.to_string()));
-                    continue;
-                }
-                // if value is 0 or any other number, then skip
-                continue;
-            }
+                let tmp: HashMap<String, Value> = pairs
+                    .into_iter()
+                    .map(|(_, v)| (v.to_string(), handler(v.to_string())))
+                    .collect();
 
-            tmp.insert(param_key.to_string(), handler(param_key.to_string()));
-            sub_res = Some(json!(tmp));
-        // }
-        res.insert(param_key, json!(sub_res.unwrap_or_default()));
+                json!(tmp)
+            };
+
+            // 3) Insert the processed data
+            res.insert(key.clone(), data);
+        } else {
+            res.insert(key.clone(), Value::Null);
+        }
     }
+
     res
 }
 
