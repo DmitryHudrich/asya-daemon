@@ -67,12 +67,11 @@ To get a local copy up and running follow these simple example steps.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/DmitryHudrich/Aska.git
+   git clone https://github.com/DmitryHudrich/aska-daemon
    ```
 2. Build projects
    ```sh
-   cargo build --bin server
-   cargo build --bin client
+   cargo build
    ```
 
 ### 🛠️ Prerequisites
@@ -80,12 +79,19 @@ To get a local copy up and running follow these simple example steps.
 This is an example of how to list things you need to use the software and how to install them.
 * Run server
   ```sh
-  cargo run --bin server
+  cargo run
   ```
 
-  Run client
+  If you use package manager nix you can run project using nix-shell.
+
+  - For build flake run
   ```sh
-  cargo run --bin client
+  nix build
+  ```
+
+  - For run environment
+  ```sh
+  nix develop
   ```
 
 
