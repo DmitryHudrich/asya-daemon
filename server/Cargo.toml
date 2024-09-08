@@ -39,6 +39,10 @@ bytes = "1.7.1"
 prost = "0.13.1"
 prost-derive = "0.13.1"
 tonic-reflection = "0.12.1"
+actix = "0.13.5"
+actix-web = { version = "4.9.0", default-features = false, features = ["http2", "macros", "unicode"] }
+actix-ws = "0.3.0"
+futures-util = "0.3.30"
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }

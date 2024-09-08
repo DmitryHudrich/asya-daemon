@@ -1,5 +1,10 @@
+use tokio::join;
+
 mod http;
+mod ws;
 
 pub async fn start() {
-    http::start().await;
+    let http = http::start();
+    let ws = ws::start();
+    join!(http, ws);
 }
