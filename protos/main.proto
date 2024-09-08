@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-package signal_service;
-
-import "fetch/info/fetch.proto";
