@@ -1,10 +1,12 @@
-use actix_web::{rt, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{middleware, rt, web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_ws::AggregatedMessage;
 use futures_util::StreamExt;
+use service::services::fetchservice;
 
 pub async fn start() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
+            .wrap(middleware::DefaultHeaders::new().add(("Content-Type", "application/json")))
             .route("/hey", web::get().to(|| async { "bebra" }))
             .route("/sex", web::get().to(|| async { "не было" }))
             .route(
@@ -13,9 +15,8 @@ pub async fn start() -> std::io::Result<()> {
                     let params =
                         web::Query::<Vec<(String, String)>>::from_query(req.query_string())
                             .unwrap();
-                    let res = service::services::fetchservice::parse(params.into_inner());
+                    let res = fetchservice::parse(params.into_inner());
                     HttpResponse::Ok()
-                        .insert_header(("Content-Type", "application/json"))
                         .body(serde_json::to_string(&res).unwrap())
                 }),
             )
