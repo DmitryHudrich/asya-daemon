@@ -1,10 +1,62 @@
-use tokio::join;
+use actix_web::{rt, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_ws::AggregatedMessage;
+use futures_util::StreamExt;
 
 mod http;
 mod ws;
 
-pub async fn start() {
-    let http = http::start();
-    let ws = ws::start();
-    join!(http, ws);
+pub async fn start() -> std::io::Result<()> {
+    HttpServer::new(|| {
+        App::new()
+            .route("/hey", web::get().to(|| async { "bebra" }))
+            .route("/sex", web::get().to(|| async { "не было" }))
+            .route("/echo", web::get().to(echo))
+    })
+    .disable_signals()
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await
 }
+
+async fn echo(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
+    let (res, mut session, stream) = actix_ws::handle(&req, stream)?;
+
+    let mut stream = stream
+        .aggregate_continuations()
+        // aggregate continuation frames up to 1MiB
+        .max_continuation_size(2_usize.pow(20));
+
+    // start task but don't wait for it
+    rt::spawn(async move {
+        // receive messages from websocket
+        while let Some(msg) = stream.next().await {
+            match msg {
+                Ok(AggregatedMessage::Text(text)) => {
+                    // echo text message
+                    session.text(text).await.unwrap();
+                }
+
+                Ok(AggregatedMessage::Binary(bin)) => {
+                    // echo binary message
+                    session.binary(bin).await.unwrap();
+                }
+
+                Ok(AggregatedMessage::Ping(msg)) => {
+                    // respond to PING frame with PONG frame
+                    session.pong(&msg).await.unwrap();
+                }
+
+                _ => {}
+            }
+        }
+    });
+
+    // respond immediately with response connected to WS session
+    Ok(res)
+}
+
+// pub async fn start() {
+//     let http = http::start();
+//     let ws = ws::start();
+//     join!(http, ws);
+// }
