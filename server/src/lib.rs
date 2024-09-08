@@ -1,5 +1,6 @@
 use actix_web::HttpServer;
 use shared::configuration;
+
 mod routing;
 
 pub async fn start() -> std::io::Result<()> {
@@ -11,9 +12,3 @@ pub async fn start() -> std::io::Result<()> {
     .run()
     .await
 }
-
-// pub async fn start() {
-//     let http = http::start();
-//     let ws = ws::start();
-//     join!(http, ws);
-// }
