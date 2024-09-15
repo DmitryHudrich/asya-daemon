@@ -4,10 +4,8 @@ use tokio::join;
 extern crate log;
 
 mod preview;
-// mod server;
 
 #[tokio::main]
-#[allow(dead_code)] // for benchmarks
 async fn main() {
     preview::show_preview();
     shared::logging_engine::init_logging();
