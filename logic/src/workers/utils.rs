@@ -5,22 +5,23 @@ use tokio::{task::JoinSet, time::sleep};
 
 use super::WorkerState;
 
+// this is used for asynchronous initialization and worker operation
 type PinnedFuture<T> = Pin<Box<dyn Future<Output = T> + Send + 'static>>;
 
 pub struct Worker {
     state: WorkerState,
-    initializer: fn() -> PinnedFuture<WorkerState>,
+    initialize: fn() -> PinnedFuture<WorkerState>,
     work: fn() -> PinnedFuture<WorkerState>,
 }
 
 impl Worker {
     pub fn new(
-        initializer: fn() -> PinnedFuture<WorkerState>,
+        initialize: fn() -> PinnedFuture<WorkerState>,
         work: fn() -> PinnedFuture<WorkerState>,
     ) -> Self {
         Self {
             state: WorkerState::Empty,
-            initializer,
+            initialize,
             work,
         }
     }
@@ -40,7 +41,7 @@ impl WorkerRunner {
 
         for mut worker in self.workers.drain(..) {
             worker_tasks.spawn(async move {
-                worker.state = (worker.initializer)().await;
+                worker.state = (worker.initialize)().await;
                 info!("worker was init");
                 loop {
                     worker.state = (worker.work)().await;
