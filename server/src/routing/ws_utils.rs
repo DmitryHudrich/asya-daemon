@@ -38,5 +38,3 @@ pub async fn echo(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse
     // respond immediately with response connected to WS session
     Ok(res)
 }
-
-

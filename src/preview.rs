@@ -1,7 +1,8 @@
 use rand::Rng;
 
 fn get_preview<'a>() -> &'a str {
-    let previews = [r"
+    let previews = [
+        r"
   ___    _____   _   __   ___
  / _ \  /  ___| | | / /  / _ \
 / /_\ \ \ `--.  | |/ /  / /_\ \
@@ -126,7 +127,8 @@ o88o     o8888o 8  88888P'  o888o  o888o o88o     o8888o
 ░░░░░░░░░░▀▀▄▄░▒▒▒▒▒▒▒▒▒▒░░░░█░
 ░░░░░░░░░░░░░░▀▄▄▄▄▄░░░░░░░░█░░
 
-"];
+",
+    ];
 
     previews[rand::thread_rng().gen_range(0..previews.len())]
 }

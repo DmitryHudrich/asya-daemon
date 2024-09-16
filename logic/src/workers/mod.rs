@@ -1,5 +1,5 @@
-use std::time::Duration;
 use log::info;
+use std::time::Duration;
 use tokio::time::sleep;
 use utils::{Worker, WorkerRunner};
 
@@ -46,5 +46,3 @@ pub async fn setup_workers() {
     let mut runner = WorkerRunner::new(workers);
     runner.run_workers().await;
 }
-
-

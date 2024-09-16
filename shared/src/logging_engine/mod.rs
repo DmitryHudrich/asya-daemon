@@ -1,10 +1,10 @@
+use log::*;
 use log4rs::{
     append::{console::ConsoleAppender, file::FileAppender},
     config::{Appender, Root},
     encode::pattern::PatternEncoder,
     Config,
 };
-use log::*;
 
 use crate::configuration;
 

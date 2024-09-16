@@ -1,11 +1,11 @@
 //! Environment variables.
 
+use crate::utils::file_utils;
 use lazy_static::lazy_static;
 use log::LevelFilter;
+use log::*;
 use serde::{Deserialize, Serialize};
 use serde_env::from_env;
-use crate::utils::file_utils;
-use log::*;
 
 lazy_static! {
     static ref ENV: Config = {
@@ -42,12 +42,13 @@ impl Config {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Net {
     http_port: Option<u16>,
-    grpc_port: Option<u16>
+    grpc_port: Option<u16>,
 }
 
 impl Net {
     pub fn http_port(&self) -> u16 {
-        self.http_port.unwrap_or_else(|| use_default("http_port", 3001))
+        self.http_port
+            .unwrap_or_else(|| use_default("http_port", 3001))
     }
 }
 
@@ -234,7 +235,10 @@ mod tests {
 
     fn default_config() -> Config {
         Config {
-            net: Some(Net { http_port: Some(3000), grpc_port: Some(50051) }),
+            net: Some(Net {
+                http_port: Some(3000),
+                grpc_port: Some(50051),
+            }),
             logging: Some(Logging {
                 place: Some(false),
                 level: Some(log::LevelFilter::Info),
