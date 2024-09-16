@@ -10,8 +10,9 @@ async fn main() {
     preview::show_preview();
     shared::logging_engine::init_logging();
     let server_launching = server::start();
+    let workers_launching = logic::workers::setup_workers();
     info!("Bootstrapping");
-    _ = join!(server_launching);
+    _ = join!(server_launching, workers_launching);
 }
 
 /*
