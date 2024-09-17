@@ -385,6 +385,7 @@ dependencies = [
  "tonic-build",
  "tonic-reflection",
  "tower",
+ "usecases",
 ]
 
 [[package]]
@@ -2519,6 +2520,40 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
+]
+
+[[package]]
+name = "usecases"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "chrono",
+ "clap",
+ "colored",
+ "criterion",
+ "form_urlencoded",
+ "http-body-util",
+ "hyper",
+ "hyper-util",
+ "lazy_static",
+ "log",
+ "log4rs",
+ "logic",
+ "merge-struct",
+ "multimap",
+ "prost",
+ "prost-derive",
+ "queues",
+ "rand",
+ "serde",
+ "serde-env",
+ "serde_json",
+ "sysinfo",
+ "tokio",
+ "toml",
+ "tonic",
+ "tonic-reflection",
+ "tower",
 ]
 
 [[package]]
