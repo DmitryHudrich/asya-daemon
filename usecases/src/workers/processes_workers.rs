@@ -1,8 +1,6 @@
 use std::time::Duration;
 
-use log::info;
 use logic::workers_infrastructure::{worker_states::WorkerState, Worker, WorkerRunner};
-use tokio::time::sleep;
 
 pub fn set(worker_runner: &mut WorkerRunner) {
     let proc_worker = Worker::new(
