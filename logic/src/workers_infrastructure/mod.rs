@@ -11,14 +11,14 @@ type PinnedFuture<T> = Pin<Box<dyn Future<Output = T> + Send + 'static>>;
 pub struct Worker {
     state: WorkerState,
     initialize: fn() -> PinnedFuture<WorkerState>,
-    work: fn() -> PinnedFuture<WorkerState>,
+    work: fn(WorkerState) -> PinnedFuture<WorkerState>,
     sleepness: Duration,
 }
 
 impl Worker {
     pub fn new(
         initialize: fn() -> PinnedFuture<WorkerState>,
-        work: fn() -> PinnedFuture<WorkerState>,
+        work: fn(WorkerState) -> PinnedFuture<WorkerState>,
         sleepness: Duration,
     ) -> Self {
         Self {
@@ -73,7 +73,7 @@ impl WorkerRunner {
                 worker.state = (worker.initialize)().await;
                 info!("Starting worker initialization: {}", descriptor);
                 loop {
-                    worker.state = (worker.work)().await;
+                    worker.state = (worker.work)(worker.state).await;
                     sleep(worker.sleepness).await;
                 }
             });
