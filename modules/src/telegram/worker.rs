@@ -1,4 +1,4 @@
-use std::{future::IntoFuture, time::Duration};
+use std::time::Duration;
 
 use log::info;
 use logic::workers_infrastructure::{worker_states::WorkerState, Worker, WorkerRunner};

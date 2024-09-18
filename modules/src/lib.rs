@@ -1,6 +1,6 @@
 use log::warn;
 use logic::workers_infrastructure::WorkerRunner;
-use std::{collections::HashMap, sync::{Arc}};
+use std::{collections::HashMap, sync::Arc};
 use tokio::{
     sync::{Mutex, MutexGuard},
     task::JoinHandle,
