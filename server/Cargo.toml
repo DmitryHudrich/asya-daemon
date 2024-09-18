@@ -9,7 +9,7 @@ path = "./src/lib.rs"
 [dependencies]
 shared = { path = "../shared" }
 service = { path = "../service/" }
-usecases = { path = "../usecases/" }
+modules = { path = "../modules/" }
 
 log = "0.4.22"
 log4rs = "1.3.0"

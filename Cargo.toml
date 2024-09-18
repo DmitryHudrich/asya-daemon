@@ -1,5 +1,5 @@
 [workspace]
-members = ["server", "service", "shared", "logic", "usecases"]
+members = ["server", "service", "shared", "logic", "modules"]
 
 resolver = "2"
 
@@ -14,6 +14,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+server = { path = "./server" }
+service = { path = "./service" }
+shared = { path = "./shared" }
+logic = { path = "./logic/" }
+modules = { path = "./modules//" }
+
 log = "0.4.22"
 log4rs = "1.3.0"
 hyper = { version = "1.4.1", features = ["full"] }
@@ -43,12 +49,6 @@ bytes = "1.7.1"
 prost = "0.13.1"
 prost-derive = "0.13.1"
 tonic-reflection = "0.12.1"
-
-server = { path = "./server" }
-service = { path = "./service" }
-shared = { path = "./shared" }
-logic = { path = "./logic/" }
-usecases = { path = "./usecases/" }
 
 [profile.dev]
 lto = "off"

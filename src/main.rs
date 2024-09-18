@@ -10,7 +10,7 @@ async fn main() {
     preview::show_preview();
     shared::logging_engine::init_logging();
     let server_launching = server::start();
-    let workers_launching = usecases::init_usecases();
+    let workers_launching = modules::init_modules();
     info!("Bootstrapping");
     _ = join!(server_launching, workers_launching);
 }
