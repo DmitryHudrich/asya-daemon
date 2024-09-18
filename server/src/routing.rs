@@ -1,5 +1,5 @@
 use actix_web::{dev::ServiceFactory, middleware, web, App, Error, HttpRequest, HttpResponse};
-use service::services::fetchservice;
+use usecases::handlers;
 
 mod ws_utils;
 
@@ -21,7 +21,7 @@ pub fn route_all() -> App<
             web::get().to(|req: HttpRequest| async move {
                 let params =
                     web::Query::<Vec<(String, String)>>::from_query(req.query_string()).unwrap();
-                let res = fetchservice::parse(params.into_inner());
+                let res = handlers::fetchservice_handler(params.into_inner());
                 HttpResponse::Ok().body(serde_json::to_string(&res).unwrap())
             }),
         )

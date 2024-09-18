@@ -1368,6 +1368,7 @@ dependencies = [
  "serde",
  "serde-env",
  "serde_json",
+ "service",
  "sysinfo",
  "tokio",
  "toml",
@@ -1974,6 +1975,7 @@ dependencies = [
  "tonic",
  "tonic-reflection",
  "tower",
+ "usecases",
 ]
 
 [[package]]
@@ -2548,6 +2550,7 @@ dependencies = [
  "serde",
  "serde-env",
  "serde_json",
+ "service",
  "sysinfo",
  "tokio",
  "toml",

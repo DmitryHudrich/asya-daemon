@@ -1,5 +1,5 @@
 [workspace]
-members = ["server", "service", "shared", "logic"]
+members = ["server", "service", "shared", "logic", "usecases"]
 
 resolver = "2"
 

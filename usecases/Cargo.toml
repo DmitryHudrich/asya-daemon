@@ -8,6 +8,7 @@ path = "./src/lib.rs"
 
 [dependencies]
 logic = { path = "../logic" }
+service = { path = "../service/" }
 
 log = "0.4.22"
 log4rs = "1.3.0"

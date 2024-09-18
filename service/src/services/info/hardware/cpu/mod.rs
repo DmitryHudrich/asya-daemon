@@ -1,7 +1,6 @@
 use serde_json::{json, Value};
 use sysinfo::{CpuRefreshKind, RefreshKind, System};
 
-
 pub fn get_global_usage(_: String) -> Value {
     json!(system(|sys| sys.global_cpu_usage()))
 }
@@ -28,7 +27,10 @@ pub fn get_frequency(_: String) -> Value {
 
 fn system<T, F>(f: T) -> F
 where
-    T: FnOnce(&sysinfo::System) -> F
+    T: FnOnce(&sysinfo::System) -> F,
 {
-    f(&System::new_with_specifics(RefreshKind::new().with_cpu(CpuRefreshKind::everything())))
+    f(&System::new_with_specifics(
+        RefreshKind::new().with_cpu(CpuRefreshKind::everything()),
+    ))
 }
+

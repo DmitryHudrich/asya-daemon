@@ -1,5 +1,5 @@
-use crate::services::fetchservice::info;
 use super::ParamInfo;
+use service::services::info;
 
 const T_INFO: &str = "i";
 // const T_COMMAND: &str = "c";

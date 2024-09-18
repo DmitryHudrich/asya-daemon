@@ -1,1 +1,1 @@
-pub mod fetchservice;
+pub mod info;

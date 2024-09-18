@@ -7,8 +7,6 @@ use serde_json::{json, Value};
 mod macro_util;
 mod param_config;
 
-mod info;
-
 #[derive(Serialize, Debug, Clone)]
 pub struct ParamInfo {
     primary_type: String,
