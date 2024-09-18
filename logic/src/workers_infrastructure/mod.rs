@@ -1,12 +1,10 @@
 use log::info;
-use std::{collections::HashMap, future::Future, pin::Pin, time::Duration};
+use std::{collections::HashMap, time::Duration};
 use tokio::{task::JoinSet, time::sleep};
 use worker_states::WorkerState;
+use shared::types::PinnedFuture;
 
 pub mod worker_states;
-
-// this is used for asynchronous initialization and worker operation
-type PinnedFuture<T> = Pin<Box<dyn Future<Output = T> + Send + 'static>>;
 
 pub struct Worker {
     state: WorkerState,

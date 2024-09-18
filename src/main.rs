@@ -9,10 +9,10 @@ mod preview;
 async fn main() {
     preview::show_preview();
     shared::logging_engine::init_logging();
+    let modules = modules::init_modules();
     let server_launching = server::start();
-    let workers_launching = modules::init_modules();
     info!("Bootstrapping");
-    _ = join!(server_launching, workers_launching);
+    _ = join!(server_launching, modules);
 }
 
 /*
