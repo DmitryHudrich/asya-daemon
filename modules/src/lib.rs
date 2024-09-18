@@ -1,6 +1,10 @@
+use log::warn;
 use logic::workers_infrastructure::WorkerRunner;
 use std::{collections::HashMap, sync::Arc};
-use tokio::{sync::{Mutex, MutexGuard}, task::JoinHandle};
+use tokio::{
+    sync::{Mutex, MutexGuard},
+    task::JoinHandle,
+};
 
 pub mod debug;
 pub mod systeminfo;
@@ -41,8 +45,13 @@ pub async fn get_modules() -> HashMap<String, AskaModule> {
         ),
     );
 
-    let handle = (modules[DEBUG_MODULE].initializer)(debug_worker_runner.lock().await);
-    _ = handle.unwrap().await;
+    for (module_name, module) in &modules {
+        let handle = (module.initializer)(debug_worker_runner.lock().await);
+        match handle {
+            Ok(h) => h.await.expect("wtf???"),
+            Err(err) => warn!("module {} wasn;t loaded: {}", module_name, err)
+        }
+    }
 
     modules
 }
