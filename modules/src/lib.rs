@@ -45,13 +45,17 @@ pub async fn get_modules() -> HashMap<String, AskaModule> {
         ),
     );
 
-    for (module_name, module) in &modules {
-        let handle = (module.initializer)(debug_worker_runner.lock().await);
-        match handle {
-            Ok(h) => h.await.expect("wtf???"),
-            Err(err) => warn!("module {} wasn;t loaded: {}", module_name, err)
-        }
-    }
+    init_all_modules(&modules).await;
 
     modules
+}
+
+async fn init_all_modules(modules: &HashMap<String, AskaModule>) {
+    for (module_name, module) in modules {
+        let handle = (module.initializer)(module.worker_runner.lock().await);
+        match handle {
+            Ok(h) => h.await.expect("wtf???"),
+            Err(err) => warn!("module {} wasn;t loaded: {}", module_name, err),
+        }
+    }
 }
