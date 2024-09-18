@@ -1,6 +1,6 @@
-pub mod workers;
-pub mod handlers;
+mod debug;
+mod telegram;
 
 pub async fn init_modules() {
-    workers::run_workers().await;
+    debug::init_module().await;
 }
