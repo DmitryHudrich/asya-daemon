@@ -1,4 +1,5 @@
 // unfortunately we can't put this file to the 'usecases' because this causing cycle dependencies
+#[derive(Clone)]
 pub enum WorkerState {
     Empty,
     Counter { count: u64 },

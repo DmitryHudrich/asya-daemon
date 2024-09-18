@@ -1,11 +1,12 @@
 use log::info;
+use shared::types::PinnedFuture;
 use std::{collections::HashMap, time::Duration};
 use tokio::{task::JoinSet, time::sleep};
 use worker_states::WorkerState;
-use shared::types::PinnedFuture;
 
 pub mod worker_states;
 
+#[derive(Clone)]
 pub struct Worker {
     state: WorkerState,
     initialize: fn() -> PinnedFuture<WorkerState>,
@@ -28,6 +29,7 @@ impl Worker {
     }
 }
 
+#[derive(Clone)]
 pub struct WorkerRunner {
     workers: HashMap<String, Worker>,
 }
