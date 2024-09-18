@@ -67,7 +67,7 @@ async fn init_all_modules(modules: &HashMap<String, AskaModule>) {
         let handle = (module.initializer)(module.worker_runner.lock().await);
         match handle {
             Ok(h) => h.await.expect("wtf???"),
-            Err(err) => warn!("module {} wasn;t loaded: {}", module_name, err),
+            Err(err) => warn!("module {} wasn't loaded: {}", module_name, err),
         }
     }
 }
