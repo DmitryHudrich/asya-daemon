@@ -2,6 +2,7 @@
 #[derive(Clone)]
 pub enum WorkerState {
     Empty,
+    Telegram,
     Counter { count: u64 },
     ProcMonitor { processes: Vec<String> }, // just names for testing. feel free for realize full functionality
     Mouse { x: u64, y: u64 },

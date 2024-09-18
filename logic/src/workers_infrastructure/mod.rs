@@ -1,27 +1,27 @@
-use log::info;
+use log::{debug, info};
 use shared::types::PinnedFuture;
-use std::{collections::HashMap, time::Duration};
-use tokio::{task::JoinSet, time::sleep};
+use std::{collections::HashMap, sync::Arc, time::Duration};
+use tokio::{spawn, sync::RwLock, task::JoinSet, time::sleep};
 use worker_states::WorkerState;
 
 pub mod worker_states;
 
 #[derive(Clone)]
 pub struct Worker {
-    state: WorkerState,
+    state: Arc<RwLock<WorkerState>>,
     initialize: fn() -> PinnedFuture<WorkerState>,
-    work: fn(WorkerState) -> PinnedFuture<WorkerState>,
+    work: fn(Arc<RwLock<WorkerState>>),
     sleepness: Duration,
 }
 
 impl Worker {
     pub fn new(
         initialize: fn() -> PinnedFuture<WorkerState>,
-        work: fn(WorkerState) -> PinnedFuture<WorkerState>,
+        work: fn(Arc<RwLock<WorkerState>>),
         sleepness: Duration,
     ) -> Self {
         Self {
-            state: WorkerState::Empty,
+            state: Arc::new(RwLock::new(WorkerState::Empty)),
             initialize,
             sleepness,
             work,
@@ -66,19 +66,19 @@ impl WorkerRunner {
     }
 
     pub async fn run_workers(&mut self) {
-        let mut worker_tasks = JoinSet::new();
-
-        for (descriptor, mut worker) in self.workers.drain() {
-            worker_tasks.spawn(async move {
-                worker.state = (worker.initialize)().await;
+        for (descriptor, worker) in self.workers.drain() {
+            let mut state_write = worker.state.write().await;
+            *state_write = (worker.initialize)().await;
+            drop(state_write);
+            spawn(async move {
                 info!("Starting worker initialization: {}", descriptor);
                 loop {
-                    worker.state = (worker.work)(worker.state).await;
+                    (worker.work)(worker.state.clone());
                     sleep(worker.sleepness).await;
+                    debug!("worker {} inited", descriptor);
                 }
             });
         }
-        while (worker_tasks.join_next().await).is_some() {}
     }
 }
 

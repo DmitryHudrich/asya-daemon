@@ -1,6 +1,6 @@
 use log::warn;
 use logic::workers_infrastructure::WorkerRunner;
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, sync::{Arc}};
 use tokio::{
     sync::{Mutex, MutexGuard},
     task::JoinHandle,
@@ -31,6 +31,7 @@ impl AskaModule {
 }
 
 const DEBUG_MODULE: &str = "debug";
+const TELEGRAM_MODULE: &str = "telegram";
 
 pub async fn get_modules() -> HashMap<String, AskaModule> {
     let mut modules = HashMap::new();
@@ -44,6 +45,17 @@ pub async fn get_modules() -> HashMap<String, AskaModule> {
             debug::init_module,
         ),
     );
+
+    let telegram_worker_runner = Arc::new(Mutex::new(telegram::worker::get_runner().await));
+    modules.insert(
+        TELEGRAM_MODULE.to_owned(),
+        AskaModule::new(
+            TELEGRAM_MODULE,
+            telegram_worker_runner.clone(),
+            telegram::init_module,
+        ),
+    );
+
 
     init_all_modules(&modules).await;
 
