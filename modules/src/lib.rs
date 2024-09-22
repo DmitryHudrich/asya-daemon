@@ -5,10 +5,13 @@ use tokio::{
     sync::{Mutex, MutexGuard},
     task::JoinHandle,
 };
+use utils::arc_mtx;
 
 pub mod debug;
 pub mod systeminfo;
 mod telegram;
+
+mod utils;
 
 pub struct AskaModule {
     name: String,
@@ -36,7 +39,7 @@ const TELEGRAM_MODULE: &str = "telegram";
 pub async fn get_modules() -> HashMap<String, AskaModule> {
     let mut modules = HashMap::new();
 
-    let debug_worker_runner = Arc::new(Mutex::new(debug::workers::get_runner().await));
+    let debug_worker_runner = arc_mtx(debug::workers::get_runner().await);
     modules.insert(
         DEBUG_MODULE.to_owned(),
         AskaModule::new(
@@ -46,7 +49,7 @@ pub async fn get_modules() -> HashMap<String, AskaModule> {
         ),
     );
 
-    let telegram_worker_runner = Arc::new(Mutex::new(telegram::worker::get_runner().await));
+    let telegram_worker_runner = arc_mtx(telegram::worker::get_runner().await);
     modules.insert(
         TELEGRAM_MODULE.to_owned(),
         AskaModule::new(
@@ -56,7 +59,6 @@ pub async fn get_modules() -> HashMap<String, AskaModule> {
         ),
     );
 
-
     init_all_modules(&modules).await;
 
     modules
@@ -64,9 +66,9 @@ pub async fn get_modules() -> HashMap<String, AskaModule> {
 
 async fn init_all_modules(modules: &HashMap<String, AskaModule>) {
     for (module_name, module) in modules {
-        let handle = (module.initializer)(module.worker_runner.lock().await);
-        match handle {
-            Ok(h) => h.await.expect("wtf???"),
+        let init_res = (module.initializer)(module.worker_runner.lock().await);
+        match init_res {
+            Ok(join_handle) => join_handle.await.expect("wtf???"),
             Err(err) => warn!("module {} wasn't loaded: {}", module_name, err),
         }
     }
