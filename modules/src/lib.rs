@@ -8,9 +8,8 @@ use tokio::{
 
 // use utils::arc_mtx;
 
-pub mod debug;
 pub mod systeminfo;
-mod telegram;
+pub mod debug;
 
 // mod utils;
 //
