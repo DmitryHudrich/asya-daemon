@@ -1,3 +1,4 @@
+use shared::configuration;
 use tokio::join;
 
 #[macro_use]
@@ -9,10 +10,11 @@ mod preview;
 async fn main() {
     preview::show_preview();
     shared::logging_engine::init_logging();
-    let modules = modules::get_modules();
+    // let modules = modules::get_modules();
     let server_launching = server::start();
     info!("Bootstrapping");
-    _ = join!(server_launching, modules);
+    configuration::get().net().http_port();
+    _ = join!(server_launching);
 }
 
 /*

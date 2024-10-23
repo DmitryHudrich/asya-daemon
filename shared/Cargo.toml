@@ -14,11 +14,13 @@ tokio = { version = "1.39.2", features = ["full"] }
 http-body-util = "0.1.2"
 hyper-util = { version = "0.1.6", features = ["full"] }
 
+mlua = { version = "*", features = ["luajit"] }
+mlua_serde = { version = "0.6.0", features = ["luajit"] }
+
 tower = "0.4.13"
 serde-env = "0.2.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-
 colored = "2.1.0"
 chrono = "0.4.38"
 sysinfo = "0.31.0"
@@ -40,3 +42,4 @@ tonic-reflection = "0.12.1"
 
 [dev-dependencies]
 criterion = { version = "0.5.1", features = ["html_reports"] }
+serde_derive = "=1.0.213"

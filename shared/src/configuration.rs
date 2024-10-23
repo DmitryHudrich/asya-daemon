@@ -1,21 +1,35 @@
 //! Environment variables.
 
+use std::fmt::Debug;
+
 use crate::utils::file_utils;
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use log::*;
+use mlua::{Lua, Table, ToLua};
+use mlua_serde;
 use serde::{Deserialize, Serialize};
 use serde_env::from_env;
 
+const CONFIGS_PATH: [&str; 2] = ["aska_config.lua", "aska-config-internal.lua"];
+
 lazy_static! {
     static ref ENV: Config = {
-        let toml_config = toml::de::from_str::<Config>(
-            file_utils::load_file(file_utils::shell_args().config.as_str())
-                .unwrap()
-                .as_str(),
-        )
-        .unwrap();
-        merge_struct::merge(&toml_config, &from_env::<Config>().unwrap()).unwrap()
+        let lua_config = {
+            let lua = Lua::new();
+            let (_, lua_file_content) =
+                file_utils::load_files(CONFIGS_PATH.to_vec()).expect("на всякий");
+
+            let config_lua: Table = lua
+                .load(&lua_file_content)
+                .eval()
+                .expect("Failed to evaluate Lua configuration.");
+
+            let config: Config = mlua_serde::from_value(config_lua.to_lua(&lua).unwrap())
+                .expect("Failed to deserialize Lua config to Rust structure.");
+            config
+        };
+        merge_struct::merge(&lua_config, &from_env::<Config>().unwrap()).unwrap()
     };
 }
 
@@ -23,7 +37,7 @@ pub fn get() -> &'static Config {
     &ENV
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     net: Option<Net>,
     logging: Option<Logging>,

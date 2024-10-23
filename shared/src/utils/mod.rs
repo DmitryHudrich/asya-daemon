@@ -1,4 +1,5 @@
 pub mod file_utils {
+    use core::panic;
     use std::{fs::File, io::Read};
 
     use clap::Parser;
@@ -15,6 +16,14 @@ pub mod file_utils {
             }
             Err(e) => Err(e.to_string()),
         }
+    }
+    pub fn load_files(pathes: Vec<&'static str>) -> Result<(String, String), String> {
+        for path in pathes {
+            if let Ok(data) = load_file(path) {
+                return Ok((path.to_owned(), data))
+            };
+        };
+        panic!("еблан чтоли");
     }
 
     pub fn shell_args() -> Args {
