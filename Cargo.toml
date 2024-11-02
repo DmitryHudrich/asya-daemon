@@ -1,5 +1,5 @@
 [workspace]
-members = ["server", "service", "shared", "logic", "modules"]
+members = ["./src/crates/server", "./src/crates/service", "./src/crates/shared", "./src/crates/logic", "./src/crates/modules"]
 
 resolver = "2"
 
@@ -14,11 +14,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-server = { path = "./server" }
-service = { path = "./service" }
-shared = { path = "./shared" }
-logic = { path = "./logic/" }
-modules = { path = "./modules//" }
+server = { path = "./src/crates/server/" }
+service = { path = "./src/crates/service/" }
+shared = { path = "./src/crates/shared/" }
+logic = { path = "./src/crates/logic/" }
+modules = { path = "./src/crates/modules/" }
 
 log = "0.4.22"
 log4rs = "1.3.0"
