@@ -41,6 +41,7 @@ pub fn get() -> &'static Config {
 pub struct Config {
     net: Option<Net>,
     logging: Option<Logging>,
+    telegram: Option<Telegram>
 }
 
 impl Config {
@@ -50,6 +51,20 @@ impl Config {
 
     pub fn logging(&self) -> Logging {
         self.logging.clone().unwrap()
+    }
+    pub fn telegram(&self) -> Telegram {
+        self.telegram.clone().unwrap()
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Telegram {
+    token: Option<String>,
+}
+
+impl Telegram {
+    pub fn token(&self) -> String {
+        self.token.clone().expect("Specify token pls.")
     }
 }
 
@@ -260,6 +275,7 @@ mod tests {
                 filescount: Some(10),
                 stdout: Some(true),
             }),
+            telegram: None,
         }
     }
 }

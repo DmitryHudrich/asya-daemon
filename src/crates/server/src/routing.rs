@@ -1,5 +1,5 @@
 use actix_web::{dev::ServiceFactory, middleware, web, App, Error, HttpRequest, HttpResponse};
-use modules::systeminfo::handlers;
+use features::systeminfo::handlers;
 
 mod ws_utils;
 

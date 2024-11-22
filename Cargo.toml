@@ -1,5 +1,5 @@
 [workspace]
-members = ["./src/crates/server", "./src/crates/service", "./src/crates/shared", "./src/crates/logic", "./src/crates/modules"]
+members = ["./src/crates/server", "./src/crates/service", "./src/crates/shared", "./src/crates/logic", "src/crates/features"]
 
 resolver = "2"
 
@@ -18,7 +18,9 @@ server = { path = "./src/crates/server/" }
 service = { path = "./src/crates/service/" }
 shared = { path = "./src/crates/shared/" }
 logic = { path = "./src/crates/logic/" }
-modules = { path = "./src/crates/modules/" }
+features = { path = "src/crates/features/" }
+
+ctrlc = "3.4.5"
 
 log = "0.4.22"
 log4rs = "1.3.0"

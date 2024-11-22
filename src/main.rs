@@ -8,12 +8,20 @@ mod preview;
 
 #[tokio::main]
 async fn main() {
+    ctrlc::set_handler(move || {
+        println!("\nReceived Ctrl+C, shutting down...");
+        std::process::exit(0);
+    })
+    .expect("Error setting Ctrl-C handler");
+
     preview::show_preview();
     shared::logging_engine::init_logging();
-    // let modules = modules::get_modules();
+    features::telegram_service::run_telegram();
+    // let features = features::get_modules();
     let server_launching = server::start();
     info!("Bootstrapping");
     configuration::get().net().http_port();
+
     _ = join!(server_launching);
 }
 
