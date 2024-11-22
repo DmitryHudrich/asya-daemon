@@ -30,6 +30,7 @@
   **[<kbd> <br> Report Bug <br> </kbd>][Bug]**
   **[<kbd> <br> Request Feature <br> </kbd>][Feature]**
 
+  ![](https://count.getloli.com/get/@DmitryHudrich.github.readme)
 
   ---
   
