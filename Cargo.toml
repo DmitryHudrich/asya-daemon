@@ -20,6 +20,8 @@ shared = { path = "./src/crates/shared/" }
 logic = { path = "./src/crates/logic/" }
 features = { path = "src/crates/features/" }
 
+playerctl = "0.1.0"
+
 ctrlc = "3.4.5"
 
 log = "0.4.22"

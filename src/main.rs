@@ -16,13 +16,12 @@ async fn main() {
 
     preview::show_preview();
     shared::logging_engine::init_logging();
-    features::telegram_service::run_telegram();
-    // let features = features::get_modules();
+    let tg_bot_launching = features::telegram_service::run_telegram();
     let server_launching = server::start();
     info!("Bootstrapping");
     configuration::get().net().http_port();
 
-    _ = join!(server_launching);
+    _ = join!(server_launching, tg_bot_launching);
 }
 
 /*

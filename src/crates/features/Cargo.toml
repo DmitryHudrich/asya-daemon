@@ -11,7 +11,7 @@ logic = { path = "../logic" }
 service = { path = "../service/" }
 shared = { path = "../shared/" }
 
-libloading = "0.8"
+teloxide = { version = "0.13", features = ["macros"] }
 
 log = "0.4.22"
 log4rs = "1.3.0"
