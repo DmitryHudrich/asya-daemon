@@ -16,7 +16,7 @@ async fn main() {
 
     preview::show_preview();
     shared::logging_engine::init_logging();
-    let tg_bot_launching = features::telegram_service::run_telegram();
+    let tg_bot_launching = tgbot::run_telegram();
     let server_launching = server::start();
     info!("Bootstrapping");
     configuration::get().net().http_port();

@@ -11,7 +11,7 @@ use mlua_serde;
 use serde::{Deserialize, Serialize};
 use serde_env::from_env;
 
-const CONFIGS_PATH: [&str; 1] = ["aska-config-internal.lua"];
+const CONFIGS_PATH: [&str; 1] = ["../../aska-config-internal.lua"];
 
 lazy_static! {
     static ref ENV: Config = {

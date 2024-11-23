@@ -395,6 +395,7 @@ dependencies = [
  "service",
  "shared",
  "sysinfo",
+ "tgbot",
  "tokio",
  "toml",
  "tonic",
@@ -2986,6 +2987,18 @@ dependencies = [
  "once_cell",
  "rustix",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "tgbot"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "log4rs",
+ "service",
+ "shared",
+ "teloxide",
+ "tokio",
 ]
 
 [[package]]
