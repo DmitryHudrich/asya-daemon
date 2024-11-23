@@ -1,5 +1,5 @@
 [workspace]
-members = ["./src/crates/server", "./src/crates/service", "./src/crates/shared", "./src/crates/tgbot"]
+members = ["./src/crates/server", "./src/crates/features/", "./src/crates/shared", "./src/crates/tgbot"]
 
 resolver = "2"
 
@@ -15,7 +15,7 @@ edition = "2021"
 
 [dependencies]
 server = { path = "./src/crates/server/" }
-service = { path = "./src/crates/service/" }
+features = { path = "./src/crates/features/" }
 shared = { path = "./src/crates/shared/" }
 tgbot = { path = "./src/crates/tgbot/"}
 

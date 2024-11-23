@@ -31,10 +31,10 @@ pub async fn route_ws(session: &mut Session, input: String) {
     if let Requests::Music { action } = request {
         match action {
             MusicAction::PlayPause => {
-                service::services::commands::music::play_pause();
+                features::services::commands::music::play_pause();
             }
             MusicAction::GetStatus => {
-                let status = service::services::commands::music::get_status();
+                let status = features::services::commands::music::get_status();
                 session.text(format!("{:?}", status)).await.unwrap();
             }
         }
