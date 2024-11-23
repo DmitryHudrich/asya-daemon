@@ -373,7 +373,6 @@ dependencies = [
  "clap",
  "colored",
  "ctrlc",
- "features",
  "form_urlencoded",
  "http-body-util",
  "hyper 1.5.1",
@@ -981,43 +980,6 @@ name = "fastrand"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "486f806e73c5707928240ddc295403b1b93c96a02038563881c4a2fd84b81ac4"
-
-[[package]]
-name = "features"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "chrono",
- "clap",
- "colored",
- "criterion",
- "form_urlencoded",
- "http-body-util",
- "hyper 1.5.1",
- "hyper-util",
- "lazy_static",
- "log",
- "log4rs",
- "logic",
- "merge-struct",
- "multimap",
- "prost",
- "prost-derive",
- "queues",
- "rand",
- "serde",
- "serde-env",
- "serde_json",
- "service",
- "shared",
- "sysinfo",
- "teloxide",
- "tokio",
- "toml",
- "tonic",
- "tonic-reflection",
- "tower 0.4.13",
-]
 
 [[package]]
 name = "fixedbitset"
@@ -2648,7 +2610,6 @@ dependencies = [
  "clap",
  "colored",
  "criterion",
- "features",
  "form_urlencoded",
  "futures-util",
  "http-body-util",
