@@ -2,6 +2,8 @@ use actix_web::{rt, web, Error, HttpRequest, HttpResponse};
 use actix_ws::AggregatedMessage;
 use futures_util::StreamExt;
 
+use crate::routing::route_ws;
+
 pub async fn echo(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
     let (res, mut session, stream) = actix_ws::handle(&req, stream)?;
 
@@ -16,8 +18,7 @@ pub async fn echo(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse
         while let Some(msg) = stream.next().await {
             match msg {
                 Ok(AggregatedMessage::Text(text)) => {
-                    // echo text message
-                    session.text(text).await.unwrap();
+                    route_ws(&mut session, text.to_string()).await;
                 }
 
                 Ok(AggregatedMessage::Binary(bin)) => {

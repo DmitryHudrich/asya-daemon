@@ -1,5 +1,6 @@
 use shared::utils::shell_utils;
 
+#[derive(Debug)]
 pub enum MediaPlayingStatus {
     /// Media is currently playing.
     Playing,
