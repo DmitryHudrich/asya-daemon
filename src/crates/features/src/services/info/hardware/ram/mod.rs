@@ -1,6 +1,5 @@
 use sysinfo::{MemoryRefreshKind, RefreshKind, System};
 
-
 pub fn get_total_memory(_: String) -> Option<u64> {
     system(|sys| Some(sys.total_memory()))
 }

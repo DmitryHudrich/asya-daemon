@@ -1,6 +1,5 @@
 use sysinfo::{CpuRefreshKind, RefreshKind, System};
 
-
 pub fn get_global_usage(_: String) -> Option<f32> {
     system(|sys| Some(sys.global_cpu_usage()))
 }

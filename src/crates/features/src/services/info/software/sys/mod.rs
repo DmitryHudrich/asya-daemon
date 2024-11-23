@@ -1,6 +1,5 @@
 use sysinfo::System;
 
-
 pub fn get_name(_: String) -> Option<String> {
     Some(System::name().unwrap_or_default())
 }
