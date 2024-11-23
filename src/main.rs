@@ -13,13 +13,12 @@ async fn main() {
         std::process::exit(0);
     })
     .expect("Error setting Ctrl-C handler");
-
+    shared::state::init_state().await;
     preview::show_preview();
-    shared::logging_engine::init_logging();
+    shared::logging_engine::init_logging().await;
     let tg_bot_launching = tgbot::run_telegram();
     let server_launching = server::start();
     info!("Bootstrapping");
-    configuration::get().net().http_port();
 
     _ = join!(server_launching, tg_bot_launching);
 }

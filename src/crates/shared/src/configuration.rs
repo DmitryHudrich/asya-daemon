@@ -33,7 +33,7 @@ lazy_static! {
     };
 }
 
-pub fn get() -> &'static Config {
+pub(crate) fn get() -> &'static Config {
     &ENV
 }
 
@@ -79,9 +79,11 @@ pub struct Net {
 }
 
 impl Net {
-    pub fn http_port(&self) -> u16 {
-        self.http_port
-            .unwrap_or_else(|| use_default("http_port", 3001))
+    pub fn http_port(&self) -> Option<u16> {
+        Some(
+            self.http_port
+                .unwrap_or_else(|| use_default("http_port", 3001)),
+        )
     }
 }
 
@@ -95,20 +97,23 @@ pub struct Logging {
 }
 
 impl Logging {
-    pub fn place(&self) -> bool {
-        debug!("getting config property: logging.place");
-        self.place.unwrap_or_else(|| use_default("place", false))
+    pub fn place(&self) -> Option<bool> {
+        Some(self.place.unwrap_or_else(|| use_default("place", false)))
     }
 
-    pub fn level(&self) -> LevelFilter {
-        self.level
-            .unwrap_or_else(|| use_default("level", LevelFilter::Info))
+    pub fn level(&self) -> Option<LevelFilter> {
+        Some(
+            self.level
+                .unwrap_or_else(|| use_default("level", LevelFilter::Info)),
+        )
     }
 
-    pub fn folder(&self) -> String {
-        self.folder
-            .clone()
-            .unwrap_or_else(|| use_default("folder", String::from("logs")))
+    pub fn folder(&self) -> Option<String> {
+        Some(
+            self.folder
+                .clone()
+                .unwrap_or_else(|| use_default("folder", String::from("logs"))),
+        )
     }
 
     // pub fn filescount(&self) -> usize {
@@ -116,8 +121,8 @@ impl Logging {
     //         .unwrap_or_else(|| use_default("filescount", 10))
     // }
 
-    pub fn stdout(&self) -> bool {
-        self.stdout.unwrap_or_else(|| use_default("stdout", true))
+    pub fn stdout(&self) -> Option<bool> {
+        Some(self.stdout.unwrap_or_else(|| use_default("stdout", true)))
     }
 }
 
@@ -164,9 +169,9 @@ mod tests {
             c
         };
 
-        assert_eq!(config_with_default_port.net().http_port(), 3000);
-        assert_eq!(config_without_port.net().http_port(), 3000);
-        assert_eq!(config_wit_custom_port.net().http_port(), 2000);
+        assert_eq!(config_with_default_port.net().http_port(), Some(3000));
+        assert_eq!(config_without_port.net().http_port(), Some(3000));
+        assert_eq!(config_wit_custom_port.net().http_port(), Some(2000));
     }
 
     #[test]
@@ -183,9 +188,9 @@ mod tests {
             c
         };
 
-        assert!(!config_with_default_place.logging().place());
-        assert!(!config_without_place.logging().place());
-        assert!(config_wit_custom_place.logging().place());
+        assert!(!config_with_default_place.logging().place().unwrap());
+        assert!(!config_without_place.logging().place().unwrap());
+        assert!(config_wit_custom_place.logging().place().unwrap());
     }
 
     #[test]
@@ -203,11 +208,11 @@ mod tests {
         };
 
         assert_eq!(
-            config_with_default_level.logging().level(),
+            config_with_default_level.logging().level().unwrap(),
             LevelFilter::Info
         );
-        assert_eq!(config_without_level.logging().level(), LevelFilter::Info);
-        assert_eq!(config_with_warn.logging().level(), LevelFilter::Warn);
+        assert_eq!(config_without_level.logging().level().unwrap(), LevelFilter::Info);
+        assert_eq!(config_with_warn.logging().level().unwrap(), LevelFilter::Warn);
     }
 
     #[test]
@@ -223,9 +228,9 @@ mod tests {
             c.logging.as_mut().unwrap().folder = Some("aska_logs".to_owned());
             c
         };
-        assert_eq!(config_with_default_folder.logging().folder(), "logs");
-        assert_eq!(config_without_folder.logging().folder(), "logs");
-        assert_eq!(config_wit_custom_folder.logging().folder(), "aska_logs");
+        assert_eq!(config_with_default_folder.logging().folder().unwrap(), "logs");
+        assert_eq!(config_without_folder.logging().folder().unwrap(), "logs");
+        assert_eq!(config_wit_custom_folder.logging().folder().unwrap(), "aska_logs");
     }
 
     // #[test]
@@ -261,9 +266,9 @@ mod tests {
             c
         };
 
-        assert!(config_with_default_stdout.logging().stdout());
-        assert!(config_without_stdout.logging().stdout());
-        assert!(!config_wit_custom_stdout.logging().stdout());
+        assert!(config_with_default_stdout.logging().stdout().unwrap());
+        assert!(config_without_stdout.logging().stdout().unwrap());
+        assert!(!config_wit_custom_stdout.logging().stdout().unwrap());
     }
 
     fn default_config() -> Config {

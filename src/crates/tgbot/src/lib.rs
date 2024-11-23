@@ -1,5 +1,5 @@
-use log::{info, warn};
 use features::services::commands::music::{self, MediaPlayingStatus};
+use log::{info, warn};
 use shared::{configuration, utils::shell_utils};
 use teloxide::{
     payloads::SendMessageSetters,
@@ -10,8 +10,8 @@ use teloxide::{
 };
 
 pub async fn run_telegram() {
-    let bot_token_opt = configuration::get().telegram().token();
-    let accepted_users = match get_users_safely() {
+    let bot_token_opt = shared::state::get_tgtoken().await;
+    let accepted_users = match get_users_safely().await {
         Some(value) => value,
         None => return,
     };
@@ -22,7 +22,6 @@ pub async fn run_telegram() {
 async fn check_token_and_launch(bot_token_opt: Option<String>) {
     match bot_token_opt {
         Some(token) => {
-            shared::ASYA_STATUS.write().await.tgtoken_obtained = true;
             info!("Telegram token obtained successfully.");
             let bot = Bot::new(token);
             Command::repl(bot, answer).await;
@@ -33,8 +32,8 @@ async fn check_token_and_launch(bot_token_opt: Option<String>) {
     }
 }
 
-fn get_users_safely() -> Option<Vec<String>> {
-    let accepted_users = configuration::get().telegram().accepted_users();
+async fn get_users_safely() -> Option<Vec<String>> {
+    let accepted_users = shared::state::get_tg_accepted_users().await;
     match accepted_users {
         Some(users) => match users.is_empty() {
             true => no_auth_users(),
@@ -65,9 +64,8 @@ enum Command {
 
 async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
     let username = msg.chat.username().unwrap();
-    let accepted_users = configuration::get()
-        .telegram()
-        .accepted_users()
+    let accepted_users = shared::state::get_tg_accepted_users()
+        .await
         .expect("Accepted users was checked, but empty.");
     if !accepted_users.contains(&username.to_owned()) {
         bot.send_message(msg.chat.id, "This is not your pc, go away.")

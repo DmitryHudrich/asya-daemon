@@ -6,24 +6,24 @@ use log4rs::{
     Config,
 };
 
-use crate::configuration;
+use crate::state;
 
-pub fn init_logging() {
-    let console_pattern = match configuration::get().logging().place() {
+pub async fn init_logging() {
+    let console_pattern = match state::get_logging_place().await.expect("missing config position. todo: remove default values") {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
     };
-    let config = match configuration::get().logging().stdout() {
+    let config = match state::get_logging_stdout().await.unwrap() {
         true => Config::builder().appender(
             Appender::builder().build("console", Box::new(enable_console(console_pattern))),
         ),
         false => Config::builder(),
     };
 
-    log4rs::init_config(build_config(config, enable_file())).unwrap();
+    log4rs::init_config(build_config(config, enable_file().await).await).unwrap();
 
-    info!("Logging level: {}", configuration::get().logging().level());
-    info!("Logging to: {}", configuration::get().logging().folder());
+    info!("Logging level: {}", state::get_logging_level().await.unwrap());
+    info!("Logging to: {}", state::get_logging_folder().await.unwrap());
 
     log_check();
 }
@@ -38,26 +38,26 @@ fn log_check() {
     }
 }
 
-fn build_config(config: log4rs::config::runtime::ConfigBuilder, logfile: FileAppender) -> Config {
+async fn build_config(config: log4rs::config::runtime::ConfigBuilder, logfile: FileAppender) -> Config {
     config
         .appender(Appender::builder().build("file", Box::new(logfile)))
         .build(
             Root::builder()
                 .appender("console")
                 .appender("file")
-                .build(configuration::get().logging().level().to_owned()),
+                .build(state::get_logging_level().await.unwrap()),
         )
         .unwrap()
 }
 
-fn enable_file() -> FileAppender {
+async fn enable_file() -> FileAppender {
     FileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
             "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} {h(SERVER)} - {l} > {m}\n",
         )))
         .build(format!(
             "{}/{}aska_logs.log",
-            configuration::get().logging().folder(),
+            state::get_logging_folder().await.unwrap(),
             chrono::Local::now().format("%Y-%m-%d_%H-%M-%S_")
         ))
         .unwrap()
