@@ -10,7 +10,7 @@
 
   # Who is Aska?
 
-  <p align="center"> 
+  <p align="center">
     Your personal digital assistant for PC use. Aska helps you to manage your system,
     </br>
     get information about the status of your PC, update and troubleshoot problems.
@@ -20,20 +20,19 @@
     <br />
     <!-- <a href="https://github.com/DmitryHudrich/Aska">View Demo</a>  //TODO -->
   </p>
-  
-  ![Badge Pull Requests] 
+
+  ![Badge Pull Requests]
   ![Badge Issues]
   ![Badge Hi Mom]
   ![Badge Language]
   ![Badge License]
-  
+
   **[<kbd> <br> Report Bug <br> </kbd>][Bug]**
   **[<kbd> <br> Request Feature <br> </kbd>][Feature]**
 
   ![](https://count.getloli.com/get/@DmitryHudrich.github.readme)
 
   ---
-  
 </div>
 
 
