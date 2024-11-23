@@ -4,7 +4,7 @@
 <!-- PROJECT LOGO //TODO Add lodo -->
 <br />
 <div align="center">
-  <a href="https://github.com/DmitryHudrich/Aska">
+  <a href="https://github.com/DmitryHudrich/asya-daemon">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -15,10 +15,10 @@
     </br>
     get information about the status of your PC, update and troubleshoot problems.
     <br />
-    <a href="https://github.com/DmitryHudrich/Aska/wiki"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/DmitryHudrich/asya-daemon/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <!-- <a href="https://github.com/DmitryHudrich/Aska">View Demo</a>  //TODO -->
+    <!-- <a href="https://github.com/DmitryHudrich/asya-daemon">View Demo</a>  //TODO -->
   </p>
 
   ![Badge Pull Requests]
@@ -67,7 +67,7 @@ To get a local copy up and running follow these simple example steps.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/DmitryHudrich/aska-daemon
+   git clone https://github.com/DmitryHudrich/asya-daemon
    ```
 2. Build projects
    ```sh
@@ -119,8 +119,8 @@ Don't forget to give the project a star! Thanks again!
 
 ### Top contributors:
 
-<a href="https://github.com/DmitryHudrich/Aska/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=DmitryHudrich/Aska" alt="contrib.rocks image" />
+<a href="https://github.com/DmitryHudrich/asya-daemon/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=DmitryHudrich/asya-daemon" alt="contrib.rocks image" />
 </a>
 
 
@@ -150,13 +150,13 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[Badge Issues]: https://img.shields.io/github/issues/DmitryHudrich/Aska
-[Badge Pull Requests]: https://img.shields.io/github/issues-pr/DmitryHudrich/Aska
-[Badge Language]: https://img.shields.io/github/languages/top/DmitryHudrich/Aska
-[Badge Lines]: https://img.shields.io/tokei/lines/github/hyprwm/DmitryHudrich/Aska
+[Badge Issues]: https://img.shields.io/github/issues/DmitryHudrich/asya-daemon
+[Badge Pull Requests]: https://img.shields.io/github/issues-pr/DmitryHudrich/asya-daemon
+[Badge Language]: https://img.shields.io/github/languages/top/DmitryHudrich/asya-daemon
+[Badge Lines]: https://img.shields.io/tokei/lines/github/hyprwm/DmitryHudrich/asya-daemon
 [Badge Hi Mom]: https://img.shields.io/badge/Hi-mom!-ff69b4
-[Badge Language]: https://img.shields.io/github/languages/top/DmitryHudrich/Aska
-[Badge License]: https://img.shields.io/github/license/DmitryHudrich/Aska
+[Badge Language]: https://img.shields.io/github/languages/top/DmitryHudrich/asya-daemon
+[Badge License]: https://img.shields.io/github/license/DmitryHudrich/asya-daemon
 
-[Feature]: https://github.com/DmitryHudrich/Aska/issues/new?labels=bug&template=bug-report---.md
-[Bug]: https://github.com/DmitryHudrich/Aska/issues/new?labels=bug&template=bug-report---.md
+[Feature]: https://github.com/DmitryHudrich/asya-daemon/issues/new?labels=bug&template=bug-report---.md
+[Bug]: https://github.com/DmitryHudrich/asya-daemon/issues/new?labels=bug&template=bug-report---.md
