@@ -1,5 +1,5 @@
 [workspace]
-members = ["./src/crates/server", "./src/crates/service", "./src/crates/shared", "./src/crates/logic", "src/crates/features", "src/crates/tgbot"]
+members = ["./src/crates/server", "./src/crates/service", "./src/crates/shared", "./src/crates/logic", "./src/crates/features", "./src/crates/tgbot"]
 
 resolver = "2"
 

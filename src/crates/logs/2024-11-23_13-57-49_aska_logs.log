@@ -1,7 +1,0 @@
-src/crates/shared/./src/logging_engine/mod.rs:25: 2024-11-23 13:57:49 SERVER - INFO > Logging level: INFO
-src/crates/shared/./src/logging_engine/mod.rs:26: 2024-11-23 13:57:49 SERVER - INFO > Logging to: logs
-src/main.rs:21: 2024-11-23 13:57:49 SERVER - INFO > Bootstrapping
-/home/eblan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-server-2.5.0/src/builder.rs:272: 2024-11-23 13:57:49 SERVER - INFO > starting 4 workers
-/home/eblan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-server-2.5.0/src/server.rs:192: 2024-11-23 13:57:49 SERVER - INFO > Tokio runtime found; starting in existing Tokio runtime
-/home/eblan/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-server-2.5.0/src/server.rs:197: 2024-11-23 13:57:49 SERVER - INFO > starting service: "actix-web-service-127.0.0.1:3001", workers: 4, listening on: 127.0.0.1:3001
-/home/eblan/Projects/aska-daemon/src/crates/tgbot/src/lib.rs:13: 2024-11-23 13:57:49 SERVER - INFO > Telegram token obtained successfully.

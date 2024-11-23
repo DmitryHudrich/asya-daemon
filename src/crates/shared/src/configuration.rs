@@ -11,7 +11,7 @@ use mlua_serde;
 use serde::{Deserialize, Serialize};
 use serde_env::from_env;
 
-const CONFIGS_PATH: [&str; 1] = ["../../aska-config-internal.lua"];
+const CONFIGS_PATH: [&str; 1] = ["aska-config-internal.lua"];
 
 lazy_static! {
     static ref ENV: Config = {
@@ -64,11 +64,11 @@ pub struct Telegram {
 }
 
 impl Telegram {
-    pub fn token(&self) -> String {
-        self.token.clone().expect("Specify token pls.")
+    pub fn token(&self) -> Option<String> {
+        self.token.clone()
     }
-    pub fn accepted_users(&self) -> Vec<String> {
-        self.accepted_users.clone().expect("hmm")
+    pub fn accepted_users(&self) -> Option<Vec<String>> {
+        self.accepted_users.clone()
     }
 }
 
