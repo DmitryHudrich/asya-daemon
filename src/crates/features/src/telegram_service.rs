@@ -21,7 +21,6 @@ pub async fn run_telegram() {
     rename_rule = "lowercase",
     description = "These commands are supported:"
 )]
-
 enum Command {
     #[command(description = "display this text.")]
     Help,
@@ -30,19 +29,25 @@ enum Command {
 }
 
 async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
-    match cmd {
-        Command::Help => {
-            bot.send_message(msg.chat.id, Command::descriptions().to_string())
-                .await?;
-        }
-        Command::Music(command) => {
-            let response = dispatch_music_command(command);
-            bot.send_message(msg.chat.id, response)
-                .await?;
-        }
-    };
+    let accepted_users = configuration::get().telegram().accepted_users();
+    let username = msg.chat.username().unwrap();
+    if !accepted_users.contains(&username.to_owned()) {
+        bot.send_message(msg.chat.id, "This is not your pc, go away.").await?;
+        Ok(())
+    } else {
+        match cmd {
+            Command::Help => {
+                bot.send_message(msg.chat.id, Command::descriptions().to_string())
+                    .await?;
+            }
+            Command::Music(command) => {
+                let response = dispatch_music_command(command);
+                bot.send_message(msg.chat.id, response).await?;
+            }
+        };
 
-    Ok(())
+        Ok(())
+    }
 }
 
 fn dispatch_music_command(command: String) -> String {

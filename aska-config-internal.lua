@@ -10,6 +10,11 @@ local config = {
         filescount = 5,
         stdout = true
     },
+    telegram = {
+        accepted_users = {
+            "ohhh_i_l1ke_u"
+        },
+    },
 }
 
 return config

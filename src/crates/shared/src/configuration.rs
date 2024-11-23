@@ -41,7 +41,7 @@ pub fn get() -> &'static Config {
 pub struct Config {
     net: Option<Net>,
     logging: Option<Logging>,
-    telegram: Option<Telegram>
+    telegram: Option<Telegram>,
 }
 
 impl Config {
@@ -60,11 +60,15 @@ impl Config {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Telegram {
     token: Option<String>,
+    accepted_users: Option<Vec<String>>,
 }
 
 impl Telegram {
     pub fn token(&self) -> String {
         self.token.clone().expect("Specify token pls.")
+    }
+    pub fn accepted_users(&self) -> Vec<String> {
+        self.accepted_users.clone().expect("hmm")
     }
 }
 
