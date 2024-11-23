@@ -3,6 +3,7 @@ use actix_web::HttpServer;
 mod routing;
 mod ws_utils;
 mod requests;
+mod responses;
 
 pub async fn start() -> std::io::Result<()> {
     HttpServer::new(routing::route_all)

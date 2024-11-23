@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 pub enum MusicAction {
     PlayPause,
     GetStatus,
+    Next,
+    Previous,
 }
 
 #[derive(Serialize, Deserialize)]

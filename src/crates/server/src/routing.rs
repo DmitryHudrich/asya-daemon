@@ -1,9 +1,11 @@
 use actix_web::{dev::ServiceFactory, middleware, web, App, Error};
 use actix_ws::Session;
+use features::services::commands::music;
 use log::warn;
 
 use crate::{
     requests::{MusicAction, Requests},
+    responses::Responses,
     ws_utils,
 };
 
@@ -28,12 +30,29 @@ pub async fn route_ws(session: &mut Session, input: String) {
     if let Requests::Music { action } = request {
         match action {
             MusicAction::PlayPause => {
-                features::services::commands::music::play_pause();
+                music::play_pause();
+                let response = Responses::Base {
+                    is_err: false,
+                    message: "i don't know what i should write here.".to_string(),
+                };
+                session
+                    .text(serde_json::to_string(&response).unwrap().to_string())
+                    .await
+                    .unwrap();
             }
             MusicAction::GetStatus => {
-                let status = features::services::commands::music::get_status();
-                session.text(format!("{:?}", status)).await.unwrap();
+                let status = music::get_status();
+                let response = Responses::Base {
+                    is_err: false,
+                    message: format!("{:?}", status),
+                };
+                session
+                    .text(serde_json::to_string(&response).unwrap().to_string())
+                    .await
+                    .unwrap();
             }
+            MusicAction::Next => todo!(),
+            MusicAction::Previous => todo!(),
         }
     }
 }
