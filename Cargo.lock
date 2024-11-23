@@ -384,7 +384,6 @@ dependencies = [
  "logic",
  "merge-struct",
  "multimap",
- "playerctl",
  "prost",
  "prost-derive",
  "queues",
@@ -2127,12 +2126,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "953ec861398dccce10c670dfeaf3ec4911ca479e9c02154b3a215178c5f566f2"
 
 [[package]]
-name = "playerctl"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46e64d4850dfbd759aa3f4e303674ee3f697b9548ab60dc0e2571dc43568a7c7"
-
-[[package]]
 name = "plotters"
 version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2700,7 +2693,6 @@ dependencies = [
  "log4rs",
  "merge-struct",
  "multimap",
- "playerctl",
  "prost",
  "prost-derive",
  "queues",
@@ -2708,6 +2700,7 @@ dependencies = [
  "serde",
  "serde-env",
  "serde_json",
+ "shared",
  "sysinfo",
  "tokio",
  "toml",

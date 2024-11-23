@@ -1,5 +1,5 @@
 use log::info;
-use service::services::commands::music;
+use service::services::commands::music::{self, play_pause, MediaPlayingStatus};
 use shared::configuration;
 use teloxide::{
     prelude::{Requester, *},
@@ -21,11 +21,12 @@ pub async fn run_telegram() {
     rename_rule = "lowercase",
     description = "These commands are supported:"
 )]
+
 enum Command {
     #[command(description = "display this text.")]
     Help,
-    #[command(description = "pause music")]
-    MusicPause,
+    #[command(description = "control music. u can:\npause / resume: __p__")]
+    Music(String),
 }
 
 async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
@@ -34,11 +35,29 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
             bot.send_message(msg.chat.id, Command::descriptions().to_string())
                 .await?;
         }
-        Command::MusicPause => {
-            music::pause_track();
-            bot.send_message(msg.chat.id, "track paused").await?;
+        Command::Music(command) => {
+            let response = dispatch_music_command(command);
+            bot.send_message(msg.chat.id, response)
+                .await?;
         }
     };
 
     Ok(())
+}
+
+fn dispatch_music_command(command: String) -> String {
+    match command.as_str() {
+        "p" => {
+            let music_status = music::get_status();
+            music::play_pause();
+            let res = match music_status {
+                MediaPlayingStatus::Stopped => "music is not playing",
+                MediaPlayingStatus::Paused => "resumed",
+                MediaPlayingStatus::Playing => "stopped",
+                MediaPlayingStatus::Unknown => "music is not playing",
+            };
+            res.to_owned()
+        }
+        _ => todo!(),
+    }
 }

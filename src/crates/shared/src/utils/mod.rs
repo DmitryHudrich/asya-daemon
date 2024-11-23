@@ -20,9 +20,9 @@ pub mod file_utils {
     pub fn load_files(pathes: Vec<&'static str>) -> Result<(String, String), String> {
         for path in pathes {
             if let Ok(data) = load_file(path) {
-                return Ok((path.to_owned(), data))
+                return Ok((path.to_owned(), data));
             };
-        };
+        }
         panic!("еблан чтоли");
     }
 
@@ -35,5 +35,24 @@ pub mod file_utils {
     pub struct Args {
         #[arg(short, long, default_value = "AskaConfig.toml")]
         pub config: String,
+    }
+}
+
+pub mod shell_utils {
+    use core::panic;
+    use std::process::Command;
+
+    /// create a proccess and returns stdout.
+    /// args: command and args
+    pub fn execute_command(args: Vec<&str>) -> Option<String> {
+        if args.is_empty() {
+            panic!("Empty command for execute in shell.")
+        }
+        let output_res = Command::new(args[0]).args(&args[1..]).output();
+        let output  = match output_res {
+            Ok(v) => v.stdout,
+            Err(_) => return None,
+        };
+        Some(String::from_utf8(output).expect("да я заебался это анврапать уже"))
     }
 }
