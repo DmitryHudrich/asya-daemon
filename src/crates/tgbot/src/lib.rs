@@ -22,9 +22,9 @@ pub async fn run_telegram() {
 async fn check_token_and_launch(bot_token_opt: Option<String>) {
     match bot_token_opt {
         Some(token) => {
+            shared::ASYA_STATUS.write().await.tgtoken_obtained = true;
             info!("Telegram token obtained successfully.");
             let bot = Bot::new(token);
-
             Command::repl(bot, answer).await;
         }
         None => {
