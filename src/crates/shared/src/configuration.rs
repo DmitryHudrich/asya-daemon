@@ -7,7 +7,6 @@ use lazy_static::lazy_static;
 use log::LevelFilter;
 use log::*;
 use mlua::{Lua, Table, ToLua};
-use mlua_serde;
 use serde::{Deserialize, Serialize};
 use serde_env::from_env;
 
