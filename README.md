@@ -8,10 +8,10 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-  # Who is Aska?
+  # Who is Asya?
 
   <p align="center">
-    Your personal digital assistant for PC use. Aska helps you to manage your system,
+    Your personal digital assistant for PC use. Asya helps you to manage your system,
     </br>
     get information about the status of your PC, update and troubleshoot problems.
     <br />
