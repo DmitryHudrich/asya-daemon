@@ -24,10 +24,7 @@ pub fn route_all() -> App<
 }
 
 pub async fn route_ws(session: &mut Session, input: String) {
-    let request = serde_json::from_str::<Requests>(&input).unwrap_or_else(|err| {
-        warn!("{:?}", err);
-        Requests::Empty
-    });
+    let request = extract_request(input);
     if let Requests::Music { action } = request {
         match action {
             MusicAction::PlayPause => {
@@ -39,4 +36,11 @@ pub async fn route_ws(session: &mut Session, input: String) {
             }
         }
     }
+}
+
+fn extract_request(input: String) -> Requests {
+    serde_json::from_str::<Requests>(&input).unwrap_or_else(|err| {
+        warn!("{:?}", err);
+        Requests::Empty
+    })
 }
