@@ -1,8 +1,5 @@
 use log::info;
-use service::services::commands::{
-    self,
-    music::{self, MediaPlayingStatus},
-};
+use service::services::commands::music::{self, MediaPlayingStatus};
 use shared::{configuration, utils::shell_utils};
 use teloxide::{
     payloads::SendMessageSetters, prelude::{Requester, *}, types::{Message, ParseMode}, utils::command::BotCommands, Bot
