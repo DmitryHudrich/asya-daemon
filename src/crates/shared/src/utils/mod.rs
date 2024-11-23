@@ -53,6 +53,7 @@ pub mod shell_utils {
             Ok(v) => v.stdout,
             Err(_) => return None,
         };
-        Some(String::from_utf8(output).expect("да я заебался это анврапать уже"))
+        let from_utf8 = String::from_utf8(output).expect("да я заебался это анврапать уже");
+        Some(from_utf8)
     }
 }

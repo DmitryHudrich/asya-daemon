@@ -1,11 +1,11 @@
 use log::info;
-use service::services::commands::music::{self, MediaPlayingStatus};
-use shared::configuration;
+use service::services::commands::{
+    self,
+    music::{self, MediaPlayingStatus},
+};
+use shared::{configuration, utils::shell_utils};
 use teloxide::{
-    prelude::{Requester, *},
-    types::Message,
-    utils::command::BotCommands,
-    Bot,
+    payloads::SendMessageSetters, prelude::{Requester, *}, types::{Message, ParseMode}, utils::command::BotCommands, Bot
 };
 
 pub async fn run_telegram() {
@@ -26,13 +26,16 @@ enum Command {
     Help,
     #[command(description = "control music. u can:\npause / resume: __p__")]
     Music(String),
+    #[command(description = "execute shell command")]
+    Execute(String),
 }
 
 async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
     let accepted_users = configuration::get().telegram().accepted_users();
     let username = msg.chat.username().unwrap();
     if !accepted_users.contains(&username.to_owned()) {
-        bot.send_message(msg.chat.id, "This is not your pc, go away.").await?;
+        bot.send_message(msg.chat.id, "This is not your pc, go away.")
+            .await?;
         Ok(())
     } else {
         match cmd {
@@ -43,6 +46,11 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
             Command::Music(command) => {
                 let response = dispatch_music_command(command);
                 bot.send_message(msg.chat.id, response).await?;
+            }
+            Command::Execute(command) => {
+                let args = command.split_whitespace().collect();
+                let response = format!("```\n{}\n```", shell_utils::execute_command(args).unwrap());
+                bot.send_message(msg.chat.id, response).parse_mode(ParseMode::MarkdownV2).await?;
             }
         };
 
