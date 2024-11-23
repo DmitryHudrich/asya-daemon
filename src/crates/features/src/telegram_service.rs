@@ -1,5 +1,5 @@
 use log::info;
-use service::services::commands::music::{self, play_pause, MediaPlayingStatus};
+use service::services::commands::music::{self, MediaPlayingStatus};
 use shared::configuration;
 use teloxide::{
     prelude::{Requester, *},
