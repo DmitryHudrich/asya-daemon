@@ -20,7 +20,7 @@ pub fn route_all() -> App<
         .wrap(middleware::DefaultHeaders::new().add(("Content-Type", "application/json")))
         .route("/hey", web::get().to(|| async { "bebra" }))
         .route("/sex", web::get().to(|| async { "не было" }))
-        .route("/ws", web::get().to(ws_utils::echo))
+        .route("/ws", web::get().to(ws_utils::ws_handler))
 }
 
 pub async fn route_ws(session: &mut Session, input: String) {
