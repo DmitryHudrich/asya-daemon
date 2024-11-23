@@ -1,6 +1,6 @@
 use features::services::commands::music::{self, MediaPlayingStatus};
 use log::{info, warn};
-use shared::{configuration, utils::shell_utils};
+use shared::utils::shell_utils;
 use teloxide::{
     payloads::SendMessageSetters,
     prelude::{Requester, *},

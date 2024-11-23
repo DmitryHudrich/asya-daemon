@@ -1,4 +1,3 @@
-use shared::configuration;
 use tokio::join;
 
 #[macro_use]

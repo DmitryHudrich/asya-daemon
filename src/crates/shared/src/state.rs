@@ -3,8 +3,8 @@ use tokio::sync::RwLock;
 use crate::configuration;
 
 static ASYA_STATUS: RwLock<AsyaStatus> = RwLock::const_new(AsyaStatus {
-    tgtoken: None,
     tg_accepted_users: None,
+    tgtoken: None,
     http_port: None,
     grpc_port: None,
     logging_place: None,
