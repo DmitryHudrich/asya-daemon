@@ -380,7 +380,6 @@ dependencies = [
  "lazy_static",
  "log",
  "log4rs",
- "logic",
  "merge-struct",
  "multimap",
  "prost",
@@ -1748,42 +1747,6 @@ dependencies = [
  "thread-id",
  "typemap-ors",
  "winapi",
-]
-
-[[package]]
-name = "logic"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "chrono",
- "clap",
- "colored",
- "criterion",
- "form_urlencoded",
- "futures",
- "http-body-util",
- "hyper 1.5.1",
- "hyper-util",
- "lazy_static",
- "log",
- "log4rs",
- "merge-struct",
- "multimap",
- "prost",
- "prost-derive",
- "queues",
- "rand",
- "serde",
- "serde-env",
- "serde_json",
- "service",
- "shared",
- "sysinfo",
- "tokio",
- "toml",
- "tonic",
- "tonic-reflection",
- "tower 0.4.13",
 ]
 
 [[package]]
