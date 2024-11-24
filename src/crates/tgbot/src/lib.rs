@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use features::{
-    mistral,
+    llm_api,
     services::commands::music::{self, MediaPlayingStatus},
     workers::{self, Observer},
 };
@@ -63,10 +63,14 @@ async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
 
 async fn mistral_response(msg: &Message) -> String {
     let req = format!("Determine which Telegram command from the list the user query is most similar to.
-        Return only the name of the command without any explanations or extra text. Here is the list of commands: {}
+        Return only the name of the command without any explanations or extra text. Here is the list of commands: 
+        {}
+
         Command for recognizing: {}.", 
-        "/music resume, /music pause", msg.text().unwrap());
-    let res = mistral::send_request(req.clone()).await;
+        "/music resume, 
+        /music pause", 
+        msg.text().unwrap());
+    let res = llm_api::send_request(req.clone()).await;
     println!("{:?}", res);
     let val: serde_json::Value = serde_json::from_str(res.as_str()).unwrap();
     let res_text = val

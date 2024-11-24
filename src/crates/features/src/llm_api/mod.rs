@@ -7,8 +7,6 @@ use shared::state;
 
 pub async fn send_request(req: String) -> String {
     let client = Client::new();
-
-    // URL и заголовки
     let url = "https://api.groq.com/openai/v1/chat/completions";
     let api_key = state::get_mistral_token().await.unwrap_or_else(|| {
         error!("Mistral api key not found. Skip.");
@@ -17,8 +15,8 @@ pub async fn send_request(req: String) -> String {
 
     let body = json!({
         "messages": [
-            { 
-                "role": "user", 
+            {
+                "role": "user",
                 "content": req
             }
         ],
