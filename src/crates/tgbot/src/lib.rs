@@ -30,17 +30,7 @@ enum Command {
 }
 
 async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
-    static INIT: OnceCell<()> = OnceCell::const_new();
-    let worker = workers::get_actionworker().await;
-    let observer = Box::new(PrintObserver {
-        chatid: msg.chat.id,
-        bot: bot.clone(), // todo: fix cloning
-    });
-    INIT.get_or_init(|| async {
-        println!("bebra");
-        worker.subscribe(observer).await;
-    })
-    .await;
+    sub_to_getactionworker(&msg, &bot).await;
     let username = msg.chat.username().unwrap();
     let accepted_users = shared::state::get_tg_accepted_users()
         .await
@@ -53,6 +43,19 @@ async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
         handle_command(cmd, bot, msg).await?;
         Ok(())
     }
+}
+
+async fn sub_to_getactionworker(msg: &Message, bot: &Bot) {
+    static INIT: OnceCell<()> = OnceCell::const_new();
+    let worker = workers::get_actionworker().await;
+    let observer = Box::new(PrintObserver {
+        chatid: msg.chat.id,
+        bot: bot.clone(), // todo: fix cloning
+    });
+    INIT.get_or_init(|| async {
+        worker.subscribe(observer).await;
+    })
+    .await;
 }
 
 async fn handle_command(

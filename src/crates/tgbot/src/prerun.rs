@@ -44,4 +44,3 @@ pub(crate) fn no_auth_users() -> Option<Vec<String>> {
     warn!("Authorized users not specified. No one can use your bot.");
     None
 }
-
