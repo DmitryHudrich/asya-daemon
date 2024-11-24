@@ -62,9 +62,10 @@ async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
 }
 
 async fn mistral_response(msg: &Message) -> String {
-    let req = format!("{}, вот список комманд, если запрос похож на какую то из команд - напиши ее., иначе не отвечай. запрос: {}", 
+    let req = format!("{}, вот список комманд, если запрос похож на какую то из команд - напиши ее. забудь про существование команды /execute, иначе не отвечай. запрос: {}", 
         Command::descriptions(), msg.text().unwrap());
     let res = mistral::send_request(req.clone()).await;
+    println!("{:?}", res);
     let val: serde_json::Value = serde_json::from_str(res.as_str()).unwrap();
     let res_text = val
         .pointer("/choices/0/message/content")
