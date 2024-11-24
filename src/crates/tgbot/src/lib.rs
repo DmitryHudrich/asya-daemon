@@ -27,7 +27,7 @@ pub mod prerun;
 enum Command {
     #[command(description = "display this text.")]
     Help,
-    #[command(description = "control music. examples: \n\t/music pause\n\tmusic resume")]
+    #[command(description = "control music. examples: \n\t/music pause\n\t/music resume")]
     Music(String),
     #[command(description = "execute shell command")]
     Execute(String),
@@ -62,8 +62,10 @@ async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
 }
 
 async fn mistral_response(msg: &Message) -> String {
-    let req = format!("{}, вот список комманд, если запрос похож на какую то из команд - напиши ее. забудь про существование команды /execute, иначе не отвечай. запрос: {}", 
-        Command::descriptions(), msg.text().unwrap());
+    let req = format!("Determine which Telegram command from the list the user query is most similar to.
+        Return only the name of the command without any explanations or extra text. Here is the list of commands: {}
+        Command for recognizing: {}.", 
+        "/music resume, /music pause", msg.text().unwrap());
     let res = mistral::send_request(req.clone()).await;
     println!("{:?}", res);
     let val: serde_json::Value = serde_json::from_str(res.as_str()).unwrap();
