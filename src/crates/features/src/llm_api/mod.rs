@@ -1,5 +1,7 @@
 // G5d7L3yHNcBkiqGjhF563V1o2IUmshyI
 
+use std::str::FromStr;
+
 use log::error;
 use reqwest::Client;
 use serde_json::json;
@@ -12,15 +14,16 @@ pub async fn send_request(req: String) -> String {
         error!("Mistral api key not found. Skip.");
         String::default()
     });
+    let r = req + &String::from_str("").unwrap();
 
     let body = json!({
         "messages": [
             {
                 "role": "user",
-                "content": req
+                "content": r
             }
         ],
-        "model": "llama3-8b-8192",
+        "model": "llama-3.1-70b-versatile",
         "temperature": 0.7
     });
 
@@ -34,5 +37,10 @@ pub async fn send_request(req: String) -> String {
         .await
         .unwrap();
 
-    response.text().await.unwrap()
+    let val: serde_json::Value = serde_json::from_str(response.text().await.unwrap().as_str()).unwrap();
+    val
+        .pointer("/choices/0/message/content")
+        .unwrap()
+        .to_string()
+        .replace("\"", "")
 }

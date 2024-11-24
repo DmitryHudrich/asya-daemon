@@ -44,24 +44,24 @@ async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
             bot.send_message(msg.chat.id, "This is not your pc, go away.")
                 .await?;
         } else if let Some(text) = msg.text() {
-            let res_text = if state::get_mistral_token().await.is_some() {
-                llm_api_response(&msg).await
+            let command = if state::get_mistral_token().await.is_some() {
+                llm_api_response(text.to_string()).await
             } else {
                 text.to_string()
             };
 
-            if text.starts_with('/') || res_text.starts_with('/') {
-                let cmd = Command::parse(&res_text, username).unwrap();
+            if text.starts_with('/') || command.starts_with('/') {
+                let cmd = Command::parse(&command, username).unwrap();
                 handle_command(cmd, bot.clone(), msg.clone()).await?;
             } else {
-                bot.send_message(msg.chat.id, res_text).await?;
+                bot.send_message(msg.chat.id, command).await?;
             }
         }
     }
     Ok(())
 }
 
-async fn llm_api_response(msg: &Message) -> String {
+async fn llm_api_response(msg: String) -> String {
     let req = format!("Determine which Telegram command from the list the user query is most similar to.
         Return only the name of the command without any explanations or extra text. Here is the list of commands: 
         {}
@@ -69,15 +69,8 @@ async fn llm_api_response(msg: &Message) -> String {
         Command for recognizing: {}.", 
         "/music resume, 
         /music pause", 
-        msg.text().unwrap());
-    let res = llm_api::send_request(req.clone()).await;
-    let val: serde_json::Value = serde_json::from_str(res.as_str()).unwrap();
-    let res_text = val
-        .pointer("/choices/0/message/content")
-        .unwrap()
-        .to_string()
-        .replace("\"", "");
-    res_text
+        msg);
+    llm_api::send_request(req.clone()).await
 }
 
 async fn sub_to_getactionworker(msg: &Message, bot: &Bot) {
@@ -104,7 +97,13 @@ async fn handle_command(
                 .await?;
         }
         Command::Music(command) => {
-            let response = dispatch_music_command(command);
+            let _ = dispatch_music_command(command);
+            let response = llm_api::send_request(format!(
+                "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl. 
+                Answer moderately briefly. Be sure to respond in the language of the sent request please. Cutely answer as if you have executed this command: {}",
+                msg.text().unwrap()
+            ))
+            .await;
             bot.send_message(msg.chat.id, response).await?;
         }
         Command::Execute(command) => {
