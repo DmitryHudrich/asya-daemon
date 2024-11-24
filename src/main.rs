@@ -17,7 +17,7 @@ async fn main() {
     preview::show_preview();
     shared::logging_engine::init_logging().await;
     let run_workers = workers::run_workers();
-    let tg_bot_launching = tgbot::run_telegram();
+    let tg_bot_launching = tgbot::prerun::run_telegram();
     let server_launching = server::start();
     info!("Bootstrapping");
 

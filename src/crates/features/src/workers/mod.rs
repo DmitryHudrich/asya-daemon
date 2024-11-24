@@ -2,7 +2,8 @@ use action_worker::ActionsWorker;
 use async_trait::async_trait;
 use std::sync::Arc;
 use tokio::{
-    join, sync::{OnceCell, RwLock, RwLockReadGuard}
+    join,
+    sync::{OnceCell, RwLock, RwLockReadGuard},
 };
 
 mod action_worker;
