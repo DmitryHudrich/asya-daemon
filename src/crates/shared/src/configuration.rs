@@ -41,6 +41,7 @@ pub struct Config {
     net: Option<Net>,
     logging: Option<Logging>,
     telegram: Option<Telegram>,
+    mistral_token: Option<String>,
 }
 
 impl Config {
@@ -53,6 +54,9 @@ impl Config {
     }
     pub fn telegram(&self) -> Telegram {
         self.telegram.clone().unwrap()
+    }
+    pub fn mistral_token(&self) -> Option<String> {
+        self.mistral_token.clone()
     }
 }
 

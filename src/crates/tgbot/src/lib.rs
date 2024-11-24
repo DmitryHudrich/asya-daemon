@@ -1,9 +1,13 @@
 use async_trait::async_trait;
 use features::{
+    mistral,
     services::commands::music::{self, MediaPlayingStatus},
     workers::{self, Observer},
 };
-use shared::utils::shell_utils;
+use shared::{
+    state::{self, get_tg_accepted_users},
+    utils::shell_utils,
+};
 use teloxide::{
     payloads::SendMessageSetters,
     prelude::{Requester, *},
@@ -15,7 +19,7 @@ use tokio::sync::OnceCell;
 
 pub mod prerun;
 
-#[derive(BotCommands, Clone)]
+#[derive(BotCommands, Clone, Debug)]
 #[command(
     rename_rule = "lowercase",
     description = "These commands are supported:"
@@ -23,26 +27,51 @@ pub mod prerun;
 enum Command {
     #[command(description = "display this text.")]
     Help,
-    #[command(description = "control music. u can:\npause / resume: __p__")]
+    #[command(description = "control music. examples: \n\t/music pause\n\tmusic resume")]
     Music(String),
     #[command(description = "execute shell command")]
     Execute(String),
 }
 
-async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
-    sub_to_getactionworker(&msg, &bot).await;
-    let username = msg.chat.username().unwrap();
-    let accepted_users = shared::state::get_tg_accepted_users()
-        .await
-        .expect("Accepted users was checked, but empty.");
-    if !accepted_users.contains(&username.to_owned()) {
-        bot.send_message(msg.chat.id, "This is not your pc, go away.")
-            .await?;
-        Ok(())
-    } else {
-        handle_command(cmd, bot, msg).await?;
-        Ok(())
+async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
+    if let Some(username) = msg.chat.username() {
+        // sub_to_getactionworker(&msg, &bot).await; // регулярные сообщения от аси
+        let accepted_users = get_tg_accepted_users()
+            .await
+            .expect("Accepted users was checked, but empty.");
+
+        if !accepted_users.contains(&username.to_owned()) {
+            bot.send_message(msg.chat.id, "This is not your pc, go away.")
+                .await?;
+        } else if let Some(text) = msg.text() {
+            let res_text = if state::get_mistral_token().await.is_some() {
+                mistral_response(&msg).await
+            } else {
+                text.to_string()
+            };
+
+            if text.starts_with('/') || res_text.starts_with('/') {
+                let cmd = Command::parse(&res_text, username).unwrap();
+                handle_command(cmd, bot.clone(), msg.clone()).await?;
+            } else {
+                bot.send_message(msg.chat.id, res_text).await?;
+            }
+        }
     }
+    Ok(())
+}
+
+async fn mistral_response(msg: &Message) -> String {
+    let req = format!("{}, вот список комманд, если запрос похож на какую то из команд - напиши ее., иначе не отвечай. запрос: {}", 
+        Command::descriptions(), msg.text().unwrap());
+    let res = mistral::send_request(req.clone()).await;
+    let val: serde_json::Value = serde_json::from_str(res.as_str()).unwrap();
+    let res_text = val
+        .pointer("/choices/0/message/content")
+        .unwrap()
+        .to_string()
+        .replace("\"", "");
+    res_text
 }
 
 async fn sub_to_getactionworker(msg: &Message, bot: &Bot) {
@@ -85,7 +114,7 @@ async fn handle_command(
 
 fn dispatch_music_command(command: String) -> String {
     match command.as_str() {
-        "p" => {
+        "pause" | "resume" => {
             let music_status = music::get_status();
             music::play_pause();
             let res = match music_status {

@@ -1,9 +1,9 @@
-use super::answer;
-use super::Command;
-
 use log::info;
 use log::warn;
-use teloxide::repls::CommandReplExt;
+use teloxide::dispatching::UpdateFilterExt;
+use teloxide::dptree;
+use teloxide::prelude::Dispatcher;
+use teloxide::types::Update;
 use teloxide::Bot;
 
 pub async fn run_telegram() {
@@ -21,7 +21,13 @@ pub(crate) async fn check_token_and_launch(bot_token_opt: Option<String>) {
         Some(token) => {
             info!("Telegram token obtained successfully.");
             let bot = Bot::new(token);
-            Command::repl(bot, answer).await;
+            let handler = Update::filter_message().branch(dptree::entry().endpoint(super::handle_message));
+            Dispatcher::builder(bot, handler)
+                .enable_ctrlc_handler()
+                .build()
+                .dispatch()
+                .await;
+            // Command::repl(bot, answer).await;
         }
         None => {
             warn!("Token not found. Skip telegram bot launch.");

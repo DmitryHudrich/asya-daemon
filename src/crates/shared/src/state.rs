@@ -12,6 +12,7 @@ static ASYA_STATUS: RwLock<AsyaStatus> = RwLock::const_new(AsyaStatus {
     logging_folder: None,
     logging_filescount: None,
     logging_stdout: None,
+    mistral_token: None,
 });
 
 struct AsyaStatus {
@@ -24,6 +25,7 @@ struct AsyaStatus {
     logging_folder: Option<String>,
     logging_filescount: Option<usize>,
     logging_stdout: Option<bool>,
+    mistral_token: Option<String>,
 }
 
 pub async fn init_state() {
@@ -38,8 +40,13 @@ pub async fn init_state() {
         logging_folder: configuration::get().logging().folder(),
         logging_filescount: None,
         logging_stdout: configuration::get().logging().stdout(),
+        mistral_token: configuration::get().mistral_token(),
     };
     *asya_status = status;
+}
+
+pub async fn get_mistral_token() -> Option<String> {
+    ASYA_STATUS.read().await.mistral_token.clone()
 }
 
 pub async fn get_tgtoken() -> Option<String> {
