@@ -15,4 +15,3 @@ pub fn execute_command(args: Vec<&str>) -> Option<String> {
     let from_utf8 = String::from_utf8(output).expect("да я заебался это анврапать уже");
     Some(from_utf8)
 }
-

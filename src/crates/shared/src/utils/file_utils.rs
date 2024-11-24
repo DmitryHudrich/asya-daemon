@@ -22,7 +22,7 @@ pub fn load_files(pathes: Vec<&'static str>) -> Result<(String, String), String>
             return Ok((path.to_owned(), data));
         };
     }
-    panic!("еблан чтоли");
+    panic!("Config file not found.");
 }
 
 pub fn shell_args() -> Args {
@@ -35,4 +35,3 @@ pub struct Args {
     #[arg(short, long, default_value = "AskaConfig.toml")]
     pub config: String,
 }
-
