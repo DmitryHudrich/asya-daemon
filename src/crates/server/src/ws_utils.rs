@@ -55,7 +55,7 @@ impl Observer<String> for PrintObserver {
             .text(serde_json::to_string(phrase).unwrap().to_string())
             .await;
         match res {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(_) => return,
         };
     }

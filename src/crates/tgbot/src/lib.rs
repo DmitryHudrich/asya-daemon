@@ -1,4 +1,8 @@
-use features::services::commands::music::{self, MediaPlayingStatus};
+use async_trait::async_trait;
+use features::{
+    services::commands::music::{self, MediaPlayingStatus},
+    workers::Observer,
+};
 use log::{info, warn};
 use shared::utils::shell_utils;
 use teloxide::{
@@ -8,6 +12,7 @@ use teloxide::{
     utils::command::BotCommands,
     Bot,
 };
+use tokio::sync::OnceCell;
 
 pub async fn run_telegram() {
     let bot_token_opt = shared::state::get_tgtoken().await;
@@ -63,6 +68,17 @@ enum Command {
 }
 
 async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
+    static INIT: OnceCell<()> = OnceCell::const_new();
+    let worker = features::workers::ACTION_WORKER.read().await;
+    let observer = Box::new(PrintObserver {
+        chatid: msg.chat.id,
+        bot: bot.clone(),
+    });
+    INIT.get_or_init(|| async {
+        println!("bebra");
+        worker.subscribe(observer).await;
+    })
+    .await;
     let username = msg.chat.username().unwrap();
     let accepted_users = shared::state::get_tg_accepted_users()
         .await
@@ -116,5 +132,17 @@ fn dispatch_music_command(command: String) -> String {
             res.to_owned()
         }
         _ => todo!(),
+    }
+}
+
+pub struct PrintObserver {
+    chatid: ChatId,
+    bot: Bot,
+}
+
+#[async_trait]
+impl Observer<String> for PrintObserver {
+    async fn update(&self, phrase: &String) {
+        self.bot.send_message(self.chatid, phrase).await.unwrap();
     }
 }

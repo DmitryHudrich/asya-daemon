@@ -1,8 +1,6 @@
 use actix_web::{dev::ServiceFactory, middleware, web, App, Error};
 use actix_ws::Session;
-use features::
-    services::commands::music
-;
+use features::services::commands::music;
 use log::warn;
 
 use crate::{

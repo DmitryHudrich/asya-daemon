@@ -2919,6 +2919,7 @@ dependencies = [
 name = "tgbot"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "features",
  "log",
  "log4rs",

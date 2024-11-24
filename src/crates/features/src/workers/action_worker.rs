@@ -5,7 +5,7 @@ use tokio::sync::RwLock;
 
 use super::Observer;
 
-static PHRASES: &[&str] = &["Hi!", "How r u?", "ну шо ти лиси)))"];
+static PHRASES: &[&str] = &["Hi!", "How r u?", "ну шо ти епта"];
 
 #[derive(Default)]
 pub struct ActionsWorker {
@@ -44,4 +44,3 @@ impl ActionsWorker {
         }
     }
 }
-
