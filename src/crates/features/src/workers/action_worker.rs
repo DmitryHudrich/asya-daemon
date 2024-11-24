@@ -28,11 +28,7 @@ impl ActionsWorker {
         let mut interval = tokio::time::interval(std::time::Duration::from_secs(1));
         loop {
             interval.tick().await;
-
-            // Выбор фразы
             let phrase = PHRASES.choose(&mut rand::thread_rng()).unwrap();
-
-            // Уведомление подписчиков
             self.notify_observers(phrase).await;
         }
     }

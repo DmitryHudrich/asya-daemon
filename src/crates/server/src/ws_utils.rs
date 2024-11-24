@@ -33,7 +33,7 @@ pub async fn wsevents_handler(
 ) -> Result<HttpResponse, Error> {
     let (res, session, _) = actix_ws::handle(&req, stream)?;
 
-    let worker = features::workers::ACTION_WORKER.read().await;
+    let worker = features::workers::get_actionworker().await;
     let s = session.to_owned();
     worker
         .subscribe(Box::new(PrintObserver {

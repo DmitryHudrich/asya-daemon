@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use features::{
     services::commands::music::{self, MediaPlayingStatus},
-    workers::Observer,
+    workers::{self, Observer},
 };
 use log::{info, warn};
 use shared::utils::shell_utils;
@@ -69,10 +69,10 @@ enum Command {
 
 async fn answer(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
     static INIT: OnceCell<()> = OnceCell::const_new();
-    let worker = features::workers::ACTION_WORKER.read().await;
+    let worker = workers::get_actionworker().await;
     let observer = Box::new(PrintObserver {
         chatid: msg.chat.id,
-        bot: bot.clone(),
+        bot: bot.clone(), // todo: fix cloning
     });
     INIT.get_or_init(|| async {
         println!("bebra");
