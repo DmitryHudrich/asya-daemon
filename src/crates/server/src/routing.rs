@@ -28,32 +28,36 @@ pub fn route_all() -> App<
 pub async fn route_ws(session: &mut Session, input: String) {
     let request = extract_request(input);
     if let Requests::Music { action } = request {
-        match action {
-            MusicAction::PlayPause => {
-                music::play_pause();
-                let response = Responses::Base {
-                    is_err: false,
-                    message: "i don't know what i should write here.".to_string(),
-                };
-                session
-                    .text(serde_json::to_string(&response).unwrap().to_string())
-                    .await
-                    .unwrap();
-            }
-            MusicAction::GetStatus => {
-                let status = music::get_status();
-                let response = Responses::Base {
-                    is_err: false,
-                    message: format!("{:?}", status),
-                };
-                session
-                    .text(serde_json::to_string(&response).unwrap().to_string())
-                    .await
-                    .unwrap();
-            }
-            MusicAction::Next => todo!(),
-            MusicAction::Previous => todo!(),
+        handle_music(action, session).await;
+    }
+}
+
+async fn handle_music(action: MusicAction, session: &mut Session) {
+    match action {
+        MusicAction::PlayPause => {
+            music::play_pause();
+            let response = Responses::Base {
+                is_err: false,
+                message: "i don't know what i should write here.".to_string(),
+            };
+            session
+                .text(serde_json::to_string(&response).unwrap().to_string())
+                .await
+                .unwrap();
         }
+        MusicAction::GetStatus => {
+            let status = music::get_status();
+            let response = Responses::Base {
+                is_err: false,
+                message: format!("{:?}", status),
+            };
+            session
+                .text(serde_json::to_string(&response).unwrap().to_string())
+                .await
+                .unwrap();
+        }
+        MusicAction::Next => todo!(),
+        MusicAction::Previous => todo!(),
     }
 }
 

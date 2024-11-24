@@ -77,4 +77,3 @@ pub async fn get_logging_filescount() -> Option<usize> {
 pub async fn get_logging_stdout() -> Option<bool> {
     ASYA_STATUS.read().await.logging_stdout
 }
-

@@ -27,7 +27,7 @@ pub fn get_status() -> MediaPlayingStatus {
             "Stopped" => MediaPlayingStatus::Stopped,
             _ => MediaPlayingStatus::Unknown,
         },
-        None => todo!()
+        None => todo!(),
     }
 }
 

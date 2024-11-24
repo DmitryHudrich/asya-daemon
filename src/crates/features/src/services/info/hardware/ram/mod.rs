@@ -29,9 +29,10 @@ pub fn get_free_swap(_: String) -> Option<u64> {
 }
 
 fn system<T, F>(f: T) -> Option<F>
-where T: FnOnce(&sysinfo::System) -> Option<F>
+where
+    T: FnOnce(&sysinfo::System) -> Option<F>,
 {
-    f(&System::new_with_specifics(
-        RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram().with_swap()),
-    ))
+    f(&System::new_with_specifics(RefreshKind::new().with_memory(
+        MemoryRefreshKind::new().with_ram().with_swap(),
+    )))
 }

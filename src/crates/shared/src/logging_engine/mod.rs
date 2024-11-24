@@ -9,7 +9,10 @@ use log4rs::{
 use crate::state;
 
 pub async fn init_logging() {
-    let console_pattern = match state::get_logging_place().await.expect("missing config position. todo: remove default values") {
+    let console_pattern = match state::get_logging_place()
+        .await
+        .expect("missing config position. todo: remove default values")
+    {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
     };
@@ -22,7 +25,10 @@ pub async fn init_logging() {
 
     log4rs::init_config(build_config(config, enable_file().await).await).unwrap();
 
-    info!("Logging level: {}", state::get_logging_level().await.unwrap());
+    info!(
+        "Logging level: {}",
+        state::get_logging_level().await.unwrap()
+    );
     info!("Logging to: {}", state::get_logging_folder().await.unwrap());
 
     log_check();
@@ -38,7 +44,10 @@ fn log_check() {
     }
 }
 
-async fn build_config(config: log4rs::config::runtime::ConfigBuilder, logfile: FileAppender) -> Config {
+async fn build_config(
+    config: log4rs::config::runtime::ConfigBuilder,
+    logfile: FileAppender,
+) -> Config {
     config
         .appender(Appender::builder().build("file", Box::new(logfile)))
         .build(

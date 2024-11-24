@@ -49,7 +49,7 @@ pub mod shell_utils {
             panic!("Empty command for execute in shell.")
         }
         let output_res = Command::new(args[0]).args(&args[1..]).output();
-        let output  = match output_res {
+        let output = match output_res {
             Ok(v) => v.stdout,
             Err(_) => return None,
         };

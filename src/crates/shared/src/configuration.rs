@@ -125,7 +125,6 @@ impl Logging {
     }
 }
 
-
 // todo: нужно сделать так, чтобы значения по умолчанию объявлялись на месте, а не тут
 fn use_default<T>(field: &str, value: T) -> T
 where
