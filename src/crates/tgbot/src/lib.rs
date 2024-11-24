@@ -45,7 +45,7 @@ async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
                 .await?;
         } else if let Some(text) = msg.text() {
             let res_text = if state::get_mistral_token().await.is_some() {
-                mistral_response(&msg).await
+                llm_api_response(&msg).await
             } else {
                 text.to_string()
             };
@@ -61,7 +61,7 @@ async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
     Ok(())
 }
 
-async fn mistral_response(msg: &Message) -> String {
+async fn llm_api_response(msg: &Message) -> String {
     let req = format!("Determine which Telegram command from the list the user query is most similar to.
         Return only the name of the command without any explanations or extra text. Here is the list of commands: 
         {}
@@ -71,7 +71,6 @@ async fn mistral_response(msg: &Message) -> String {
         /music pause", 
         msg.text().unwrap());
     let res = llm_api::send_request(req.clone()).await;
-    println!("{:?}", res);
     let val: serde_json::Value = serde_json::from_str(res.as_str()).unwrap();
     let res_text = val
         .pointer("/choices/0/message/content")
