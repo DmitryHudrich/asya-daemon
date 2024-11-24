@@ -984,6 +984,7 @@ checksum = "486f806e73c5707928240ddc295403b1b93c96a02038563881c4a2fd84b81ac4"
 name = "features"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "bytes",
  "chrono",
  "clap",
@@ -2603,6 +2604,7 @@ dependencies = [
  "actix",
  "actix-web",
  "actix-ws",
+ "async-trait",
  "bytes",
  "chrono",
  "clap",

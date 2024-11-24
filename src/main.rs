@@ -1,3 +1,4 @@
+use features::workers;
 use tokio::join;
 
 #[macro_use]
@@ -15,11 +16,12 @@ async fn main() {
     shared::state::init_state().await;
     preview::show_preview();
     shared::logging_engine::init_logging().await;
+    let run_workers = workers::run_workers();
     let tg_bot_launching = tgbot::run_telegram();
     let server_launching = server::start();
     info!("Bootstrapping");
 
-    _ = join!(server_launching, tg_bot_launching);
+    _ = join!(server_launching, tg_bot_launching, run_workers);
 }
 
 /*

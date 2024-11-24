@@ -1,6 +1,8 @@
 use actix_web::{dev::ServiceFactory, middleware, web, App, Error};
 use actix_ws::Session;
-use features::services::commands::music;
+use features::
+    services::commands::music
+;
 use log::warn;
 
 use crate::{
@@ -23,6 +25,7 @@ pub fn route_all() -> App<
         .route("/hey", web::get().to(|| async { "bebra" }))
         .route("/sex", web::get().to(|| async { "не было" }))
         .route("/ws", web::get().to(ws_utils::ws_handler))
+        .route("/ws/events", web::get().to(ws_utils::wsevents_handler))
 }
 
 pub async fn route_ws(session: &mut Session, input: String) {
