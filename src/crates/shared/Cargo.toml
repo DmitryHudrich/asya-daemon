@@ -16,6 +16,7 @@ http-body-util = "0.1.2"
 mlua = { version = "*", features = ["luajit"] }
 mlua_serde = { version = "0.6.0", features = ["luajit"] }
 
+serde_yaml = "0.9.34"
 homedir = "0.3.4"
 tower = "0.4.13"
 serde-env = "0.2.0"

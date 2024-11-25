@@ -22,7 +22,7 @@ pub(crate) async fn check_token_and_launch(bot_token_opt: Option<String>) {
             info!("Telegram token obtained successfully.");
             let bot = Bot::new(token);
             let handler =
-                Update::filter_message().branch(dptree::entry().endpoint(super::handle_message));
+                Update::filter_message().branch(dptree::entry().endpoint(super::security_check));
             Dispatcher::builder(bot, handler)
                 .enable_ctrlc_handler()
                 .build()

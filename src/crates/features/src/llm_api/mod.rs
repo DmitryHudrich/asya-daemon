@@ -29,10 +29,16 @@ pub async fn send_request(req: String) -> String {
     let response_res = response.text().await;
     let temp = &response_res.unwrap();
     let response_text = temp.as_str();
-    file_utils::get_json_value(response_text, "/choices/0/message/content").expect("Error while handling response from llm api.")
+    file_utils::get_json_value(response_text, "/choices/0/message/content")
+        .expect("Error while handling response from llm api.")
 }
 
-async fn request(client: Client, url: &str, api_key: String, body: serde_json::Value) -> reqwest::Response {
+async fn request(
+    client: Client,
+    url: &str,
+    api_key: String,
+    body: serde_json::Value,
+) -> reqwest::Response {
     client
         .post(url)
         .header("Content-Type", "application/json")

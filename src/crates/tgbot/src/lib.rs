@@ -2,11 +2,11 @@ use async_trait::async_trait;
 use features::{
     llm_api,
     services::commands::music::{self, MediaPlayingStatus},
-    workers::{self, Observer},
+    workers::Observer,
 };
 use shared::{
     state::{self, get_tg_accepted_users},
-    utils::shell_utils,
+    utils::{llm_utils, shell_utils},
 };
 use teloxide::{
     payloads::SendMessageSetters,
@@ -15,7 +15,6 @@ use teloxide::{
     utils::command::BotCommands,
     Bot,
 };
-use tokio::sync::OnceCell;
 
 pub mod prerun;
 
@@ -33,8 +32,9 @@ enum Command {
     Execute(String),
 }
 
-async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
+async fn security_check(bot: Bot, msg: Message) -> ResponseResult<()> {
     if let Some(username) = msg.chat.username() {
+        let username = username.to_string();
         // sub_to_getactionworker(&msg, &bot).await; // регулярные сообщения от аси
         let accepted_users = get_tg_accepted_users()
             .await
@@ -44,61 +44,42 @@ async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {
             bot.send_message(msg.chat.id, "This is not your pc, go away.")
                 .await?;
         } else if let Some(text) = msg.text() {
-            let command = if state::get_mistral_token().await.is_some() {
-                llm_api_response(text.to_string()).await
-            } else {
-                text.to_string()
-            };
-
-            if text.starts_with('/') || command.starts_with('/') {
-                let cmd = Command::parse(&command, username).unwrap();
-                handle_command(cmd, bot.clone(), msg.clone()).await?;
-            } else {
-                bot.send_message(msg.chat.id, command).await?;
-            }
+            handle_command(text, username, bot, &msg).await?;
         }
     }
     Ok(())
 }
 
-async fn llm_api_response(msg: String) -> String {
-    let req = format!("Determine which Telegram command from the list the user query is most similar to.
-        Return only the name of the command without any explanations or extra text. Here is the list of commands: 
-        {}
-
-        Command for recognizing: {}.", 
-        "/music resume, 
-        /music pause
-        /music status", 
-        msg);
-    llm_api::send_request(req.clone()).await
-}
-
-async fn sub_to_getactionworker(msg: &Message, bot: &Bot) {
-    static INIT: OnceCell<()> = OnceCell::const_new();
-    let worker = workers::get_actionworker().await;
-    let observer = Box::new(PrintObserver {
-        chatid: msg.chat.id,
-        bot: bot.clone(), // todo: fix cloning
-    });
-    INIT.get_or_init(|| async {
-        worker.subscribe(observer).await;
-    })
-    .await;
-}
-
 async fn handle_command(
-    cmd: Command,
+    text: &str,
+    username: String,
     bot: Bot,
-    msg: Message,
+    msg: &Message,
 ) -> Result<(), teloxide::RequestError> {
+    let slash_command = if state::get_mistral_token().await.is_some() {
+        recognize_command_with_llm(text.to_string()).await
+    } else {
+        text.to_string()
+    };
+
+    if text.starts_with('/') || slash_command.starts_with('/') {
+        let cmd = Command::parse(&slash_command, username.as_str()).unwrap();
+        dispatch(cmd, &bot, msg).await?;
+    } else {
+        bot.send_message(msg.chat.id, slash_command).await?;
+    };
+
+    Ok(())
+}
+
+async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide::RequestError> {
     match cmd {
         Command::Help => {
             bot.send_message(msg.chat.id, Command::descriptions().to_string())
                 .await?;
         }
         Command::Music(command) => {
-            let response = dispatch_music_command(command, &msg).await;
+            let response = dispatch_music_command(command, msg).await;
             bot.send_message(msg.chat.id, response).await?;
         }
         Command::Execute(command) => {
@@ -112,6 +93,33 @@ async fn handle_command(
     Ok(())
 }
 
+async fn recognize_command_with_llm(msg: String) -> String {
+    let commands = r#"
+        /music resume, 
+        /music pause
+        /music status",
+    "#;
+    let prompt = llm_utils::get_prompt("/telegram/recognize_command");
+    let formatted_prompt = prompt
+        .replace("{commands}", commands)
+        .replace("{message}", msg.as_str());
+    let response = llm_api::send_request(formatted_prompt);
+    response.await
+}
+
+// async fn sub_to_getactionworker(msg: &Message, bot: &Bot) {
+//     static INIT: OnceCell<()> = OnceCell::const_new();
+//     let worker = workers::get_actionworker().await;
+//     let observer = Box::new(PrintObserver {
+//         chatid: msg.chat.id,
+//         bot: bot.clone(), // todo: fix cloning
+//     });
+//     INIT.get_or_init(|| async {
+//         worker.subscribe(observer).await;
+//     })
+//     .await;
+// }
+
 async fn dispatch_music_command(command: String, msg: &Message) -> String {
     match command.as_str() {
         "pause" | "resume" => {
@@ -120,20 +128,16 @@ async fn dispatch_music_command(command: String, msg: &Message) -> String {
             match music_status {
                 MediaPlayingStatus::Stopped => "music is not playing".to_string(),
                 MediaPlayingStatus::Paused(_) => {
-                    let response = llm_api::send_request(format!(
-                        "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl.
-                        Answer moderately briefly. Be sure to respond in the language of the sent request please. Cutely answer as if you have executed this command: {}",
-                        msg.text().unwrap()
-                    ));
+                    let prompt = llm_utils::get_prompt("/telegram/music/resume");
+                    let formatted_prompt = prompt.replace("{command}", msg.text().unwrap());
+                    let response = llm_api::send_request(formatted_prompt);
                     response.await
                 }
 
                 MediaPlayingStatus::Playing(_) => {
-                    let response = llm_api::send_request(format!(
-                        "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl.
-                        Answer moderately briefly. Be sure to respond in the language of the sent request please. Cutely answer as if you have executed this command: {}",
-                        msg.text().unwrap()
-                    ));
+                    let prompt = llm_utils::get_prompt("/telegram/music/pause");
+                    let formatted_prompt = prompt.replace("{command}", msg.text().unwrap());
+                    let response = llm_api::send_request(formatted_prompt);
                     response.await
                 }
                 MediaPlayingStatus::Unknown => "music is not playing".to_string(),
@@ -144,30 +148,20 @@ async fn dispatch_music_command(command: String, msg: &Message) -> String {
             match music_status {
                 MediaPlayingStatus::Stopped => "music is not playing".to_string(),
                 MediaPlayingStatus::Paused(status) => {
-                    let response = llm_api::send_request(format!(
-                        "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl.
-                        Answer moderately briefly. Be sure to respond in the language of the sent request please.
-                        This question is about what kind of music is playing now, 
-                        so answer as if this music is playing at the sender of the request, list all the information about the song.
-                        Current music status: {:?}
-                        Cutely answer about status: {}",
-                        status,
-                        msg.text().unwrap()
-                    ));
+                    let prompt = llm_utils::get_prompt("/telegram/music/status");
+                    let formatted_prompt = prompt
+                        .replace("{status}", format!("{:?}", status).as_str())
+                        .replace("{message}", msg.text().unwrap());
+                    let response = llm_api::send_request(formatted_prompt);
                     response.await
                 }
 
                 MediaPlayingStatus::Playing(status) => {
-                    let response = llm_api::send_request(format!(
-                        "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl.
-                        Answer moderately briefly. Be sure to respond in the language of the sent request please. 
-                        This question is about what kind of music is playing now, 
-                        so answer as if this music is playing at the sender of the request, list all the information about the song.
-                        Current music status: {:?} 
-                        Cutely answer about status: {}",
-                        status,
-                        msg.text().unwrap()
-                    ));
+                    let prompt = llm_utils::get_prompt("/telegram/music/status");
+                    let formatted_prompt = prompt
+                        .replace("{status}", format!("{:?}", status).as_str())
+                        .replace("{message}", msg.text().unwrap());
+                    let response = llm_api::send_request(formatted_prompt);
                     response.await
                 }
                 MediaPlayingStatus::Unknown => "music is not playing".to_string(),
