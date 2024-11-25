@@ -3,6 +3,7 @@
 use std::fmt::Debug;
 
 use crate::utils::file_utils;
+use homedir::my_home;
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use log::*;
@@ -10,15 +11,16 @@ use mlua::{Lua, Table, ToLua};
 use serde::{Deserialize, Serialize};
 use serde_env::from_env;
 
-const CONFIGS_PATH: [&str; 1] = ["aska-config-internal.lua"];
-
 lazy_static! {
     static ref ENV: Config = {
+        let config_path = vec![format!(
+            "{}/.config/asya/asya-config.lua",
+            my_home().unwrap().unwrap().to_str().unwrap().to_string()
+        )];
         let lua_config = {
             let lua = Lua::new();
-            let (_, lua_file_content) =
-                file_utils::load_files(CONFIGS_PATH.to_vec()).expect("на всякий");
-
+            let (_, lua_file_content) = file_utils::load_files(config_path).expect("на всякий");
+            
             let config_lua: Table = lua
                 .load(&lua_file_content)
                 .eval()
@@ -79,6 +81,7 @@ impl Telegram {
 pub struct Net {
     http_port: Option<u16>,
     grpc_port: Option<u16>,
+    proxy_addr: Option<String>,
 }
 
 impl Net {
@@ -87,6 +90,9 @@ impl Net {
             self.http_port
                 .unwrap_or_else(|| use_default("http_port", 3001)),
         )
+    }
+    pub fn proxy_addr(&self) -> Option<String> {
+        self.proxy_addr.clone()
     }
 }
 

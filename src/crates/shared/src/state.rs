@@ -13,8 +13,10 @@ static ASYA_STATUS: RwLock<AsyaStatus> = RwLock::const_new(AsyaStatus {
     logging_filescount: None,
     logging_stdout: None,
     mistral_token: None,
+    proxy_addr: None,
 });
 
+#[derive(Debug)]
 struct AsyaStatus {
     tg_accepted_users: Option<Vec<String>>,
     tgtoken: Option<String>,
@@ -26,6 +28,7 @@ struct AsyaStatus {
     logging_filescount: Option<usize>,
     logging_stdout: Option<bool>,
     mistral_token: Option<String>,
+    proxy_addr: Option<String>,
 }
 
 pub async fn init_state() {
@@ -41,8 +44,13 @@ pub async fn init_state() {
         logging_filescount: None,
         logging_stdout: configuration::get().logging().stdout(),
         mistral_token: configuration::get().mistral_token(),
+        proxy_addr: configuration::get().net().proxy_addr(),
     };
     *asya_status = status;
+}
+
+pub async fn get_proxy_addr() -> Option<String> {
+    ASYA_STATUS.read().await.proxy_addr.clone()
 }
 
 pub async fn get_mistral_token() -> Option<String> {

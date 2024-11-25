@@ -1,21 +1,18 @@
-// G5d7L3yHNcBkiqGjhF563V1o2IUmshyI
-
 use std::str::FromStr;
 
 use log::error;
-use reqwest::Client;
+use reqwest::{Client, Proxy};
 use serde_json::json;
 use shared::state;
 
 pub async fn send_request(req: String) -> String {
-    let client = Client::new();
+    let client = construct_reqwest_client().await;
     let url = "https://api.groq.com/openai/v1/chat/completions";
     let api_key = state::get_mistral_token().await.unwrap_or_else(|| {
         error!("Mistral api key not found. Skip.");
         String::default()
     });
     let r = req + &String::from_str("").unwrap();
-
     let body = json!({
         "messages": [
             {
@@ -43,4 +40,16 @@ pub async fn send_request(req: String) -> String {
         .unwrap()
         .to_string()
         .replace("\"", "")
+}
+
+async fn construct_reqwest_client() -> Client {
+    if let Some(proxy_addr) = state::get_proxy_addr().await {
+        let proxy = Proxy::http(proxy_addr).expect("Error while proxy setup.");
+        Client::builder()
+            .proxy(proxy)
+            .build()
+            .expect("Error while building client with proxy.")
+    } else {
+        Client::new()
+    }
 }

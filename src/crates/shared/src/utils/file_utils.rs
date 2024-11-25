@@ -16,9 +16,9 @@ pub fn load_file(path: &str) -> Result<String, String> {
         Err(e) => Err(e.to_string()),
     }
 }
-pub fn load_files(pathes: Vec<&'static str>) -> Result<(String, String), String> {
+pub fn load_files(pathes: Vec<String>) -> Result<(String, String), String> {
     for path in pathes {
-        if let Ok(data) = load_file(path) {
+        if let Ok(data) = load_file(path.as_str()) {
             return Ok((path.to_owned(), data));
         };
     }
