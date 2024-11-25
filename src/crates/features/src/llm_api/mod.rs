@@ -3,7 +3,7 @@ use std::str::FromStr;
 use log::error;
 use reqwest::{Client, Proxy};
 use serde_json::json;
-use shared::state;
+use shared::{state, utils::file_utils};
 
 pub async fn send_request(req: String) -> String {
     let client = construct_reqwest_client().await;
@@ -24,7 +24,16 @@ pub async fn send_request(req: String) -> String {
         "temperature": 0.7
     });
 
-    let response = client
+    let response = request(client, url, api_key, body).await;
+
+    let response_res = response.text().await;
+    let temp = &response_res.unwrap();
+    let response_text = temp.as_str();
+    file_utils::get_json_value(response_text, "/choices/0/message/content").expect("Error while handling response from llm api.")
+}
+
+async fn request(client: Client, url: &str, api_key: String, body: serde_json::Value) -> reqwest::Response {
+    client
         .post(url)
         .header("Content-Type", "application/json")
         .header("Accept", "application/json")
@@ -32,14 +41,7 @@ pub async fn send_request(req: String) -> String {
         .json(&body)
         .send()
         .await
-        .unwrap();
-
-    let val: serde_json::Value =
-        serde_json::from_str(response.text().await.unwrap().as_str()).unwrap();
-    val.pointer("/choices/0/message/content")
         .unwrap()
-        .to_string()
-        .replace("\"", "")
 }
 
 async fn construct_reqwest_client() -> Client {

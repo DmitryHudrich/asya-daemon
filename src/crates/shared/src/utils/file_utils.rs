@@ -3,6 +3,14 @@ use std::{fs::File, io::Read};
 
 use clap::Parser;
 
+pub fn get_json_value(content: &str, path: &str) -> Option<String> {
+    if let Ok(val) = serde_json::from_str::<serde_json::Value>(content) {
+        let pointer = val.pointer(path)?;
+        pointer.to_string();
+    };
+    None
+}
+
 pub fn load_file(path: &str) -> Result<String, String> {
     let file = File::open(path);
     match file {
