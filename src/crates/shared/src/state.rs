@@ -13,6 +13,7 @@ static ASYA_STATUS: RwLock<AsyaStatus> = RwLock::const_new(AsyaStatus {
     logging_filescount: None,
     logging_stdout: None,
     mistral_token: None,
+    is_mistral_token_obtained: false,
     proxy_addr: None,
 });
 
@@ -29,6 +30,7 @@ struct AsyaStatus {
     logging_stdout: Option<bool>,
     mistral_token: Option<String>,
     proxy_addr: Option<String>,
+    is_mistral_token_obtained: bool,
 }
 
 pub async fn init_state() {
@@ -45,8 +47,13 @@ pub async fn init_state() {
         logging_stdout: configuration::get().logging().stdout(),
         mistral_token: configuration::get().mistral_token(),
         proxy_addr: configuration::get().net().proxy_addr(),
+        is_mistral_token_obtained: configuration::get().mistral_token().is_some(),
     };
     *asya_status = status;
+}
+
+pub async fn is_llm_obtained() -> bool {
+    ASYA_STATUS.read().await.is_mistral_token_obtained
 }
 
 pub async fn get_proxy_addr() -> Option<String> {

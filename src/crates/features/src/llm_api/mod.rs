@@ -1,23 +1,26 @@
-use std::str::FromStr;
-
-use log::error;
 use reqwest::{Client, Proxy};
 use serde_json::json;
 use shared::{state, utils::file_utils};
 
-pub async fn send_request(req: String) -> String {
+// todo: rewrite to result
+/// Returns `None` if token unspecified or ошибка случилась
+pub async fn send_request(req: String) -> Option<String> {
     let client = construct_reqwest_client().await;
     let url = "https://api.groq.com/openai/v1/chat/completions";
-    let api_key = state::get_mistral_token().await.unwrap_or_else(|| {
-        error!("Mistral api key not found. Skip.");
-        String::default()
-    });
-    let r = req + &String::from_str("").unwrap();
+    let api_key = state::get_mistral_token().await;
+    if let Some(api_key) = api_key {
+        construct_and_send_reqwest(req, client, url, api_key).await
+    } else {
+        None
+    }
+}
+
+async fn construct_and_send_reqwest(req: String, client: Client, url: &str, api_key: String) -> Option<String> {
     let body = json!({
         "messages": [
             {
                 "role": "user",
-                "content": r
+                "content": req
             }
         ],
         "model": "llama-3.1-70b-versatile",
@@ -30,7 +33,6 @@ pub async fn send_request(req: String) -> String {
     let temp = &response_res.unwrap();
     let response_text = temp.as_str();
     file_utils::get_json_value(response_text, "/choices/0/message/content")
-        .expect("Error while handling response from llm api.")
 }
 
 async fn request(

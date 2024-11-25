@@ -1,8 +1,5 @@
 use async_trait::async_trait;
-use features::{
-    llm_api,
-    workers::Observer,
-};
+use features::{llm_api, workers::Observer};
 use shared::{
     state::{self, get_tg_accepted_users},
     utils::{llm_utils, shell_utils},
@@ -57,7 +54,7 @@ async fn handle_command(
     bot: Bot,
     msg: &Message,
 ) -> Result<(), teloxide::RequestError> {
-    let slash_command = if state::get_mistral_token().await.is_some() {
+    let slash_command = if state::is_llm_obtained().await {
         recognize_command_with_llm(text.to_string()).await
     } else {
         text.to_string()
@@ -105,7 +102,7 @@ async fn recognize_command_with_llm(msg: String) -> String {
         .replace("{commands}", commands)
         .replace("{message}", msg.as_str());
     let response = llm_api::send_request(formatted_prompt);
-    response.await
+    response.await.expect("Fail due recognizing command with llm.")
 }
 
 // async fn sub_to_getactionworker(msg: &Message, bot: &Bot) {
