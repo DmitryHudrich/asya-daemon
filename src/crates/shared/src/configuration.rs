@@ -20,7 +20,7 @@ lazy_static! {
         let lua_config = {
             let lua = Lua::new();
             let (_, lua_file_content) = file_utils::load_files(config_path).expect("на всякий");
-            
+
             let config_lua: Table = lua
                 .load(&lua_file_content)
                 .eval()

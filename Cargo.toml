@@ -4,12 +4,12 @@ members = ["./src/crates/server", "./src/crates/features/", "./src/crates/shared
 resolver = "2"
 
 [workspace.package]
-name = "aska"
+name = "asya"
 version = "0.1.0"
 edition = "2021"
 
 [package]
-name = "aska"
+name = "asya"
 version = "0.1.0"
 edition = "2021"
 
