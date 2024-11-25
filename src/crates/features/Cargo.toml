@@ -33,7 +33,7 @@ merge-struct = "0.1.0"
 clap = { version = "4.5.16", features = ["derive"] }
 rand = "0.8.5"
 queues = "1.1.0"
-
+regex = "1.11.1"
 bytes = "1.7.1"
 
 [dev-dependencies]

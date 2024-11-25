@@ -37,9 +37,9 @@ pub async fn send_request(req: String) -> String {
         .await
         .unwrap();
 
-    let val: serde_json::Value = serde_json::from_str(response.text().await.unwrap().as_str()).unwrap();
-    val
-        .pointer("/choices/0/message/content")
+    let val: serde_json::Value =
+        serde_json::from_str(response.text().await.unwrap().as_str()).unwrap();
+    val.pointer("/choices/0/message/content")
         .unwrap()
         .to_string()
         .replace("\"", "")

@@ -68,7 +68,8 @@ async fn llm_api_response(msg: String) -> String {
 
         Command for recognizing: {}.", 
         "/music resume, 
-        /music pause", 
+        /music pause
+        /music status", 
         msg);
     llm_api::send_request(req.clone()).await
 }
@@ -97,13 +98,7 @@ async fn handle_command(
                 .await?;
         }
         Command::Music(command) => {
-            let _ = dispatch_music_command(command);
-            let response = llm_api::send_request(format!(
-                "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl. 
-                Answer moderately briefly. Be sure to respond in the language of the sent request please. Cutely answer as if you have executed this command: {}",
-                msg.text().unwrap()
-            ))
-            .await;
+            let response = dispatch_music_command(command, &msg).await;
             bot.send_message(msg.chat.id, response).await?;
         }
         Command::Execute(command) => {
@@ -117,18 +112,66 @@ async fn handle_command(
     Ok(())
 }
 
-fn dispatch_music_command(command: String) -> String {
+async fn dispatch_music_command(command: String, msg: &Message) -> String {
     match command.as_str() {
         "pause" | "resume" => {
             let music_status = music::get_status();
             music::play_pause();
-            let res = match music_status {
-                MediaPlayingStatus::Stopped => "music is not playing",
-                MediaPlayingStatus::Paused => "resumed",
-                MediaPlayingStatus::Playing => "stopped",
-                MediaPlayingStatus::Unknown => "music is not playing",
-            };
-            res.to_owned()
+            match music_status {
+                MediaPlayingStatus::Stopped => "music is not playing".to_string(),
+                MediaPlayingStatus::Paused(_) => {
+                    let response = llm_api::send_request(format!(
+                        "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl.
+                        Answer moderately briefly. Be sure to respond in the language of the sent request please. Cutely answer as if you have executed this command: {}",
+                        msg.text().unwrap()
+                    ));
+                    response.await
+                }
+
+                MediaPlayingStatus::Playing(_) => {
+                    let response = llm_api::send_request(format!(
+                        "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl.
+                        Answer moderately briefly. Be sure to respond in the language of the sent request please. Cutely answer as if you have executed this command: {}",
+                        msg.text().unwrap()
+                    ));
+                    response.await
+                }
+                MediaPlayingStatus::Unknown => "music is not playing".to_string(),
+            }
+        }
+        "status" => {
+            let music_status = music::get_status();
+            match music_status {
+                MediaPlayingStatus::Stopped => "music is not playing".to_string(),
+                MediaPlayingStatus::Paused(status) => {
+                    let response = llm_api::send_request(format!(
+                        "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl.
+                        Answer moderately briefly. Be sure to respond in the language of the sent request please.
+                        This question is about what kind of music is playing now, 
+                        so answer as if this music is playing at the sender of the request, list all the information about the song.
+                        Current music status: {:?}
+                        Cutely answer about status: {}",
+                        status,
+                        msg.text().unwrap()
+                    ));
+                    response.await
+                }
+
+                MediaPlayingStatus::Playing(status) => {
+                    let response = llm_api::send_request(format!(
+                        "Keep in mind that your name is Asya, you are a sweet, flirtatious, kind, always ready to help girl.
+                        Answer moderately briefly. Be sure to respond in the language of the sent request please. 
+                        This question is about what kind of music is playing now, 
+                        so answer as if this music is playing at the sender of the request, list all the information about the song.
+                        Current music status: {:?} 
+                        Cutely answer about status: {}",
+                        status,
+                        msg.text().unwrap()
+                    ));
+                    response.await
+                }
+                MediaPlayingStatus::Unknown => "music is not playing".to_string(),
+            }
         }
         _ => todo!(),
     }
