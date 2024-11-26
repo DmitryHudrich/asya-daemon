@@ -15,6 +15,9 @@ local config = {
             "ohhh_i_l1ke_u"
         },
     },
+    ai = {
+        recognize_method = "Groq",
+    }
 }
 
 return config

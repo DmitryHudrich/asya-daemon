@@ -1,6 +1,6 @@
-use tokio::sync::RwLock;
-use lazy_static::lazy_static;
 use crate::configuration;
+use lazy_static::lazy_static;
+use tokio::sync::RwLock;
 
 lazy_static! {
     static ref ASYA_STATUS: RwLock<AsyaStatus> = RwLock::const_new(AsyaStatus::default());
@@ -20,6 +20,7 @@ struct AsyaStatus {
     mistral_token: Option<String>,
     proxy_addr: Option<String>,
     is_mistral_token_obtained: bool,
+    recognize_method: Option<configuration::AiRecognizeMethod>
 }
 
 pub async fn init_state() {
@@ -34,11 +35,16 @@ pub async fn init_state() {
         logging_folder: configuration::get().logging().folder(),
         logging_filescount: None,
         logging_stdout: configuration::get().logging().stdout(),
-        mistral_token: configuration::get().mistral_token(),
+        mistral_token: configuration::get().ai().groq_token(),
         proxy_addr: configuration::get().net().proxy_addr(),
-        is_mistral_token_obtained: configuration::get().mistral_token().is_some(),
+        is_mistral_token_obtained: configuration::get().ai().groq_token().is_some(),
+        recognize_method: configuration::get().ai().recognize_method()
     };
     *asya_status = status;
+}
+
+pub async fn get_ai_req_method() -> Option<configuration::AiRecognizeMethod> {
+    ASYA_STATUS.read().await.recognize_method.clone()
 }
 
 pub async fn is_llm_obtained() -> bool {

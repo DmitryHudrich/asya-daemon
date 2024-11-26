@@ -43,7 +43,7 @@ pub struct Config {
     net: Option<Net>,
     logging: Option<Logging>,
     telegram: Option<Telegram>,
-    llm_token: Option<String>,
+    ai: Option<Ai>,
 }
 
 impl Config {
@@ -57,9 +57,34 @@ impl Config {
     pub fn telegram(&self) -> Telegram {
         self.telegram.clone().unwrap()
     }
-    pub fn mistral_token(&self) -> Option<String> {
-        self.llm_token.clone()
+
+    pub fn ai(&self) -> Ai {
+        self.ai.clone().unwrap()
     }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Ai {
+    groq_token: Option<String>,
+    recognize_method: Option<AiRecognizeMethod>
+}
+
+impl Ai {
+    pub fn recognize_method(&self) -> Option<AiRecognizeMethod> {
+        self.recognize_method.clone()
+    }
+
+    pub fn groq_token(&self) -> Option<String> {
+        self.groq_token.clone()
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub enum AiRecognizeMethod {
+    Groq,
+    AltaS,
+    #[default]
+    None,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

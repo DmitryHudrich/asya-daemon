@@ -11,6 +11,7 @@ pub async fn send_request(req: String) -> Option<String> {
     if let Some(api_key) = api_key {
         construct_and_send_reqwest(req, client, url, api_key).await
     } else {
+        println!("nenra");
         None
     }
 }
