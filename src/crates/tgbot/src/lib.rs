@@ -102,7 +102,9 @@ async fn recognize_command_with_llm(msg: String) -> String {
         .replace("{commands}", commands)
         .replace("{message}", msg.as_str());
     let response = llm_api::send_request(formatted_prompt);
-    response.await.expect("Fail due recognizing command with llm.")
+    response
+        .await
+        .expect("Fail due recognizing command with llm.")
 }
 
 // async fn sub_to_getactionworker(msg: &Message, bot: &Bot) {

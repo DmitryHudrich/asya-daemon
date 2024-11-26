@@ -30,8 +30,7 @@ pub fn get_status() -> MediaPlayingStatus {
 
     let status_opt = shell_utils::execute_command(vec!["playerctl", "status"]);
     let metadata = shell_utils::execute_command(vec!["playerctl", "metadata"]);
-    let re = Regex::new(r"(?m)YoutubeMusic xesam:(title|album|artist)\s+(.*)").unwrap();
-
+    let re = Regex::new(r"xesam:(title|album|artist)\s+(.*)").unwrap();
     let mut results = std::collections::HashMap::new();
 
     for cap in re.captures_iter(metadata.unwrap().as_str()) {

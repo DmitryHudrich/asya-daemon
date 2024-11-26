@@ -15,7 +15,12 @@ pub async fn send_request(req: String) -> Option<String> {
     }
 }
 
-async fn construct_and_send_reqwest(req: String, client: Client, url: &str, api_key: String) -> Option<String> {
+async fn construct_and_send_reqwest(
+    req: String,
+    client: Client,
+    url: &str,
+    api_key: String,
+) -> Option<String> {
     let body = json!({
         "messages": [
             {
