@@ -7,11 +7,10 @@ use shared::{state, utils::file_utils};
 pub async fn send_request(req: String) -> Option<String> {
     let client = construct_reqwest_client().await;
     let url = "https://api.groq.com/openai/v1/chat/completions";
-    let api_key = state::get_mistral_token().await;
+    let api_key = state::get_mistral_token();
     if let Some(api_key) = api_key {
         construct_and_send_reqwest(req, client, url, api_key).await
     } else {
-        println!("nenra");
         None
     }
 }
@@ -59,7 +58,7 @@ async fn request(
 }
 
 async fn construct_reqwest_client() -> Client {
-    if let Some(proxy_addr) = state::get_proxy_addr().await {
+    if let Some(proxy_addr) = state::get_proxy_addr() {
         let proxy = Proxy::http(proxy_addr).expect("Error while proxy setup.");
         Client::builder()
             .proxy(proxy)

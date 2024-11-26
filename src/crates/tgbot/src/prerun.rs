@@ -7,7 +7,7 @@ use teloxide::types::Update;
 use teloxide::Bot;
 
 pub async fn run_telegram() {
-    let bot_token_opt = shared::state::get_tgtoken().await;
+    let bot_token_opt = shared::state::get_tgtoken();
     let accepted_users = match get_users_safely().await {
         Some(value) => value,
         None => return,
@@ -37,7 +37,7 @@ pub(crate) async fn check_token_and_launch(bot_token_opt: Option<String>) {
 }
 
 pub(crate) async fn get_users_safely() -> Option<Vec<String>> {
-    let accepted_users = shared::state::get_tg_accepted_users().await;
+    let accepted_users = shared::state::get_tg_accepted_users();
     match accepted_users {
         Some(users) => match users.is_empty() {
             true => no_auth_users(),

@@ -10,13 +10,13 @@ use crate::state;
 
 pub async fn init_logging() {
     let console_pattern = match state::get_logging_place()
-        .await
+        
         .expect("missing config position. todo: remove default values")
     {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
     };
-    let config = match state::get_logging_stdout().await.unwrap() {
+    let config = match state::get_logging_stdout().unwrap() {
         true => Config::builder().appender(
             Appender::builder().build("console", Box::new(enable_console(console_pattern))),
         ),
@@ -27,9 +27,9 @@ pub async fn init_logging() {
 
     info!(
         "Logging level: {}",
-        state::get_logging_level().await.unwrap()
+        state::get_logging_level().unwrap()
     );
-    info!("Logging to: {}", state::get_logging_folder().await.unwrap());
+    info!("Logging to: {}", state::get_logging_folder().unwrap());
 
     log_check();
 }
@@ -54,7 +54,7 @@ async fn build_config(
             Root::builder()
                 .appender("console")
                 .appender("file")
-                .build(state::get_logging_level().await.unwrap()),
+                .build(state::get_logging_level().unwrap()),
         )
         .unwrap()
 }
@@ -66,7 +66,7 @@ async fn enable_file() -> FileAppender {
         )))
         .build(format!(
             "{}/{}aska_logs.log",
-            state::get_logging_folder().await.unwrap(),
+            state::get_logging_folder().unwrap(),
             chrono::Local::now().format("%Y-%m-%d_%H-%M-%S_")
         ))
         .unwrap()

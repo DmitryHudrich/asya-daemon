@@ -13,7 +13,6 @@ async fn main() {
         std::process::exit(0);
     })
     .expect("Error setting Ctrl-C handler");
-    shared::state::init_state().await;
     preview::show_preview();
     shared::logging_engine::init_logging().await;
     let run_workers = workers::run_workers();

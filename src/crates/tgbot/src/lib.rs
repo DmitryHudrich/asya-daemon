@@ -35,7 +35,6 @@ async fn security_check(bot: Bot, msg: Message) -> ResponseResult<()> {
         let username = username.to_string();
         // sub_to_getactionworker(&msg, &bot).await; // регулярные сообщения от аси
         let accepted_users = get_tg_accepted_users()
-            .await
             .expect("Accepted users was checked, but empty.");
 
         if !accepted_users.contains(&username.to_owned()) {
@@ -54,7 +53,7 @@ async fn handle_command(
     bot: Bot,
     msg: &Message,
 ) -> Result<(), teloxide::RequestError> {
-    let slash_command = if state::is_llm_obtained().await {
+    let slash_command = if state::is_llm_obtained() {
         recognize_command_with_llm(text.to_string()).await
     } else {
         text.to_string()

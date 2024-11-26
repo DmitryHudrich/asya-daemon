@@ -68,7 +68,6 @@ pub fn get_status() -> MediaPlayingStatus {
         artist: splited_metadata[1].clone(),
         album: splited_metadata[2].clone(),
     };
-    println!("{:?}", track_info);
     match status_opt {
         Some(status) => match status.as_str().trim() {
             "Playing" => MediaPlayingStatus::Playing(track_info),

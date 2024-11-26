@@ -11,7 +11,6 @@ pub async fn start() -> std::io::Result<()> {
         .bind((
             "127.0.0.1",
             shared::state::get_http_port()
-                .await
                 .expect("http port is not defined."),
         ))?
         .run()
