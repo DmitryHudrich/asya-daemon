@@ -1,23 +1,12 @@
 use tokio::sync::RwLock;
-
+use lazy_static::lazy_static;
 use crate::configuration;
 
-static ASYA_STATUS: RwLock<AsyaStatus> = RwLock::const_new(AsyaStatus {
-    tg_accepted_users: None,
-    tgtoken: None,
-    http_port: None,
-    grpc_port: None,
-    logging_place: None,
-    logging_level: None,
-    logging_folder: None,
-    logging_filescount: None,
-    logging_stdout: None,
-    mistral_token: None,
-    is_mistral_token_obtained: false,
-    proxy_addr: None,
-});
+lazy_static! {
+    static ref ASYA_STATUS: RwLock<AsyaStatus> = RwLock::const_new(AsyaStatus::default());
+}
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct AsyaStatus {
     tg_accepted_users: Option<Vec<String>>,
     tgtoken: Option<String>,
