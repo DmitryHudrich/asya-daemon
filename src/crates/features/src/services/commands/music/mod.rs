@@ -1,4 +1,7 @@
+use std::fmt::Display;
+
 use shared::utils::shell_utils;
+use tokio::fs::write;
 
 #[derive(Debug)]
 pub struct TrackInfo {
@@ -6,6 +9,16 @@ pub struct TrackInfo {
     artist: String,
     album: String,
     // platform: String,
+}
+
+impl Display for TrackInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "artist: {}\ntitle:{}\nalbum:{}\n",
+            self.artist, self.title, self.album
+        )
+    }
 }
 
 #[derive(Debug)]
@@ -18,6 +31,17 @@ pub enum MediaPlayingStatus {
     Stopped,
     /// Maybe media is currently destroyed.
     Unknown,
+}
+
+impl Display for MediaPlayingStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            MediaPlayingStatus::Playing(track_info) | MediaPlayingStatus::Paused(track_info) => {
+                write!(f, "{}", track_info)
+            }
+            _ => write!(f, ""),
+        }
+    }
 }
 
 #[cfg(target_family = "unix")]

@@ -50,7 +50,7 @@ async fn handle_music(action: MusicAction, session: &mut Session) {
             let status = music::get_status();
             let response = Responses::Base {
                 is_err: false,
-                message: format!("{:?}", status),
+                message: format!("{}", status),
             };
             session
                 .text(serde_json::to_string(&response).unwrap().to_string())
