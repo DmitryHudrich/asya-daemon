@@ -3,7 +3,7 @@
 use serde::Deserialize;
 use std::fmt::Debug;
 
-use crate::utils::file_utils;
+use crate::{types::AiRecognizeMethod, utils::file_utils};
 use homedir::my_home;
 use lazy_static::lazy_static;
 use log::LevelFilter;
@@ -63,14 +63,6 @@ pub struct Ai {
     pub(crate) alta_s_addr: Option<String>,
     pub(crate) autolaunch_alta_s: Option<bool>,
     pub(crate) alta_s_path: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub enum AiRecognizeMethod {
-    Groq,
-    AltaS,
-    #[default]
-    None,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -1,4 +1,4 @@
-use crate::configuration::{self, get};
+use crate::{configuration::get, types::AiRecognizeMethod};
 
 pub fn get_autolaunch_alta_s() -> Option<bool> {
     get("/telegram/accepted_users")
@@ -12,7 +12,7 @@ pub fn get_alta_s_addr() -> Option<String> {
     get("/ai/alta_s_addr")
 }
 
-pub fn get_ai_req_method() -> Option<configuration::AiRecognizeMethod> {
+pub fn get_ai_req_method() -> Option<AiRecognizeMethod> {
     get("/ai/recognize_method")
 }
 
