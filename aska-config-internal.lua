@@ -16,7 +16,9 @@ local config = {
         },
     },
     ai = {
-        recognize_method = "Groq",
+        recognize_method = "AltaS",
+        alta_s_path = "~/asya-model-server/",
+        alta_s_addr = "http://127.0.0.1:5000/recognition",
     }
 }
 

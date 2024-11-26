@@ -1,7 +1,13 @@
+use core::panic;
+
 use async_trait::async_trait;
-use features::{llm_api, workers::Observer};
+use features::{
+    llm_api::{self, AiRequestError},
+    workers::Observer,
+};
 use shared::{
     state::{self, get_tg_accepted_users},
+    types::AiRecognizeMethod,
     utils::{llm_utils, shell_utils},
 };
 use teloxide::{
@@ -18,7 +24,7 @@ mod music_dispatching;
 
 #[derive(BotCommands, Clone, Debug)]
 #[command(
-    rename_rule = "lowercase",
+    rename_rule = "snake_case",
     description = "These commands are supported:"
 )]
 enum Command {
@@ -53,7 +59,7 @@ async fn handle_command(
     bot: Bot,
     msg: &Message,
 ) -> Result<(), teloxide::RequestError> {
-    let slash_command = if state::is_llm_obtained() {
+    let slash_command = if state::is_llm_obtained() && !text.starts_with('/') {
         recognize_command_with_llm(text.to_string()).await
     } else {
         text.to_string()
@@ -91,6 +97,18 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
 }
 
 async fn recognize_command_with_llm(msg: String) -> String {
+    let prompt = match state::get_ai_req_method().unwrap() {
+        AiRecognizeMethod::Groq => format_for_groq(msg),
+        AiRecognizeMethod::AltaS => msg,
+        AiRecognizeMethod::None => panic!("Ai recognizing with unspecified model"),
+    };
+    let response = llm_api::send_request(prompt);
+    response
+        .await
+        .expect("Fail due recognizing command with llm.")
+}
+
+fn format_for_groq(msg: String) -> String {
     let commands = r#"
         /music resume, 
         /music pause
@@ -100,10 +118,7 @@ async fn recognize_command_with_llm(msg: String) -> String {
     let formatted_prompt = prompt
         .replace("{commands}", commands)
         .replace("{message}", msg.as_str());
-    let response = llm_api::send_request(formatted_prompt);
-    response
-        .await
-        .expect("Fail due recognizing command with llm.")
+    formatted_prompt
 }
 
 // async fn sub_to_getactionworker(msg: &Message, bot: &Bot) {
