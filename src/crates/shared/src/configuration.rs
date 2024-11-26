@@ -66,7 +66,10 @@ impl Config {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Ai {
     groq_token: Option<String>,
-    recognize_method: Option<AiRecognizeMethod>
+    recognize_method: Option<AiRecognizeMethod>,
+    alta_s_addr: Option<String>,
+    autolaunch_alta_s: Option<bool>,
+    alta_s_path: Option<String>,
 }
 
 impl Ai {
@@ -76,6 +79,18 @@ impl Ai {
 
     pub fn groq_token(&self) -> Option<String> {
         self.groq_token.clone()
+    }
+
+    pub fn autolaunch_alta_s(&self) -> Option<bool> {
+        self.autolaunch_alta_s
+    }
+
+    pub fn alta_s_path(&self) -> Option<String> {
+        self.alta_s_path.clone()
+    }
+
+    pub fn alta_s_addr(&self) -> Option<String> {
+        self.alta_s_addr.clone()
     }
 }
 

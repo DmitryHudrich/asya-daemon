@@ -20,7 +20,10 @@ struct AsyaStatus {
     mistral_token: Option<String>,
     proxy_addr: Option<String>,
     is_mistral_token_obtained: bool,
-    recognize_method: Option<configuration::AiRecognizeMethod>
+    recognize_method: Option<configuration::AiRecognizeMethod>,
+    alta_s_addr: Option<String>,
+    autolaunch_alta_s: Option<bool>,
+    alta_s_path: Option<String>,
 }
 
 pub async fn init_state() {
@@ -38,9 +41,24 @@ pub async fn init_state() {
         mistral_token: configuration::get().ai().groq_token(),
         proxy_addr: configuration::get().net().proxy_addr(),
         is_mistral_token_obtained: configuration::get().ai().groq_token().is_some(),
-        recognize_method: configuration::get().ai().recognize_method()
+        recognize_method: configuration::get().ai().recognize_method(),
+        alta_s_addr: configuration::get().ai().alta_s_addr(),
+        alta_s_path: configuration::get().ai().alta_s_path(),
+        autolaunch_alta_s: configuration::get().ai().autolaunch_alta_s(),
     };
     *asya_status = status;
+}
+
+pub async fn get_autolaunch_alta_s() -> Option<bool> {
+    ASYA_STATUS.read().await.autolaunch_alta_s
+}
+
+pub async fn get_alta_s_path() -> Option<String> {
+    ASYA_STATUS.read().await.alta_s_path.clone()
+}
+
+pub async fn get_alta_s_addr() -> Option<String> {
+    ASYA_STATUS.read().await.alta_s_addr.clone()
 }
 
 pub async fn get_ai_req_method() -> Option<configuration::AiRecognizeMethod> {
