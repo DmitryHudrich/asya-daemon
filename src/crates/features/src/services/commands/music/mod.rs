@@ -1,7 +1,6 @@
 use std::fmt::Display;
 
 use shared::utils::shell_utils;
-use tokio::fs::write;
 
 #[derive(Debug)]
 pub struct TrackInfo {
