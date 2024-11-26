@@ -5,6 +5,7 @@ pub struct TrackInfo {
     title: String,
     artist: String,
     album: String,
+    // platform: String,
 }
 
 #[derive(Debug)]
@@ -26,23 +27,25 @@ pub fn play_pause() {
 
 #[cfg(target_family = "unix")]
 pub fn get_status() -> MediaPlayingStatus {
-    use regex::Regex;
-
+    //playerctl metadata --format "{{ artist }}{{ album }}{{ title }}"
     let status_opt = shell_utils::execute_command(vec!["playerctl", "status"]);
-    let metadata = shell_utils::execute_command(vec!["playerctl", "metadata"]);
-    let re = Regex::new(r"xesam:(title|album|artist)\s+(.*)").unwrap();
-    let mut results = std::collections::HashMap::new();
-
-    for cap in re.captures_iter(metadata.unwrap().as_str()) {
-        let key = cap[1].to_string();
-        let value = cap[2].trim().to_string();
-        results.insert(key, value);
-    }
+    let metadata = shell_utils::execute_command(vec![
+        "playerctl",
+        "metadata",
+        "--format",
+        "{{ artist }};{{ album }};{{ title }}",
+    ])
+    .expect("Error while unwrapping metadata from current track.");
+    let splited_metadata = Vec::from_iter(metadata.split_terminator(';'))
+        .iter_mut()
+        .map(|el| el.to_string())
+        .collect::<Vec<String>>();
     let track_info = TrackInfo {
-        title: results["title"].clone(),
-        artist: results["artist"].clone(),
-        album: results["album"].clone(),
+        title: splited_metadata[0].clone(),
+        artist: splited_metadata[1].clone(),
+        album: splited_metadata[2].clone(),
     };
+    println!("{:?}", track_info);
     match status_opt {
         Some(status) => match status.as_str().trim() {
             "Playing" => MediaPlayingStatus::Playing(track_info),
