@@ -10,7 +10,6 @@ use crate::state;
 
 pub async fn init_logging() {
     let console_pattern = match state::get_logging_place()
-        
         .expect("missing config position. todo: remove default values")
     {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
@@ -25,10 +24,7 @@ pub async fn init_logging() {
 
     log4rs::init_config(build_config(config, enable_file().await).await).unwrap();
 
-    info!(
-        "Logging level: {}",
-        state::get_logging_level().unwrap()
-    );
+    info!("Logging level: {}", state::get_logging_level().unwrap());
     info!("Logging to: {}", state::get_logging_folder().unwrap());
 
     log_check();

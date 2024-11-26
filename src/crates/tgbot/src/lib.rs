@@ -34,8 +34,8 @@ async fn security_check(bot: Bot, msg: Message) -> ResponseResult<()> {
     if let Some(username) = msg.chat.username() {
         let username = username.to_string();
         // sub_to_getactionworker(&msg, &bot).await; // регулярные сообщения от аси
-        let accepted_users = get_tg_accepted_users()
-            .expect("Accepted users was checked, but empty.");
+        let accepted_users =
+            get_tg_accepted_users().expect("Accepted users was checked, but empty.");
 
         if !accepted_users.contains(&username.to_owned()) {
             bot.send_message(msg.chat.id, "This is not your pc, go away.")

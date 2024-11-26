@@ -10,8 +10,7 @@ pub async fn start() -> std::io::Result<()> {
         .disable_signals()
         .bind((
             "127.0.0.1",
-            shared::state::get_http_port()
-                .expect("http port is not defined."),
+            shared::state::get_http_port().expect("http port is not defined."),
         ))?
         .run()
         .await
