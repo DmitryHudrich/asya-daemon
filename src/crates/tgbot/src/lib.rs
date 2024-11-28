@@ -2,7 +2,7 @@ use core::panic;
 
 use async_trait::async_trait;
 use features::{
-    llm_api::{self, AiRequestError},
+    llm_api::{self},
     workers::Observer,
 };
 use shared::{

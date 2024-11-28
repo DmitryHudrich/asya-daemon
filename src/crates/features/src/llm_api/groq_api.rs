@@ -1,4 +1,4 @@
-use reqwest::{Client, Proxy};
+use reqwest::Client;
 use serde_json::json;
 use shared::{state, utils::file_utils};
 
