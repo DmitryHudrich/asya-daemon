@@ -2,42 +2,47 @@ use features::{
     llm_api,
     services::commands::music::{self, MediaPlayingStatus},
 };
-use shared::utils::llm_utils;
+use shared::{traits::Beautify, utils::llm_utils};
 use teloxide::types::Message;
+use crate::lexicon::get_lexicon;
 
 pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
+    // FIXME: this is probably bad
+    // maybe static variable will be better
+    // but i huy znaet how to do it
+    let lexicon = get_lexicon();
     match command.as_str() {
         "pause" | "resume" => {
             let music_status = music::get_status();
             music::play_pause();
             match music_status {
-                MediaPlayingStatus::Stopped => "music is not playing".to_string(),
+                MediaPlayingStatus::Stopped => lexicon["music_stopped"].clone(),
                 MediaPlayingStatus::Paused(_) => {
                     let prompt = llm_utils::get_prompt("/telegram/music/resume");
                     let formatted_prompt = prompt.replace("{command}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
-                    response.unwrap_or("play".to_owned())
+                    response.unwrap_or(lexicon["music_resume"].clone())
                 }
                 MediaPlayingStatus::Playing(_) => {
                     let prompt = llm_utils::get_prompt("/telegram/music/pause");
                     let formatted_prompt = prompt.replace("{command}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
-                    response.unwrap_or("paused".to_owned())
+                    response.unwrap_or(lexicon["music_pause"].clone())
                 }
-                MediaPlayingStatus::Unknown => "music is not playing".to_string(),
+                MediaPlayingStatus::Unknown => lexicon["music_stopped"].clone(),
             }
         }
         "status" => {
             let music_status = music::get_status();
             match music_status {
-                MediaPlayingStatus::Stopped => "music is not playing".to_string(),
+                MediaPlayingStatus::Stopped => lexicon["music_stopped"].clone(),
                 MediaPlayingStatus::Paused(status) => {
                     let prompt = llm_utils::get_prompt("/telegram/music/status");
                     let formatted_prompt = prompt
                         .replace("{status}", format!("{:?}", status).as_str())
                         .replace("{message}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
-                    response.unwrap_or(format!("{:?}", status))
+                    response.unwrap_or(status.beautiful_out())
                     // todo: beautify
                     // music output
                 }
@@ -47,13 +52,13 @@ pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
                         .replace("{status}", format!("{:?}", status).as_str())
                         .replace("{message}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
-                    response.unwrap_or(format!("{:?}", status))
+                    response.unwrap_or(status.beautiful_out())
                     // todo: beautify
                     // music output
                 }
-                MediaPlayingStatus::Unknown => "music is not playing".to_string(),
+                MediaPlayingStatus::Unknown => lexicon["music_stopped"].clone(),
             }
         }
-        _ => "не понял".to_string(),
+        _ => lexicon["error"].clone(),
     }
 }

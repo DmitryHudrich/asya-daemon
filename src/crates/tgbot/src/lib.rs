@@ -18,7 +18,10 @@ use teloxide::{
     Bot,
 };
 
+use crate::lexicon::get_lexicon;
+
 pub mod prerun;
+pub mod lexicon;
 
 mod music_dispatching;
 
@@ -37,6 +40,11 @@ enum Command {
 }
 
 async fn security_check(bot: Bot, msg: Message) -> ResponseResult<()> {
+    let lexicon = get_lexicon();
+    // FIXME:
+    // в телеграме у очень многих людей юзернейм может быть пустым
+    // я не знаю почему так, но я это еще в черепахе заметил
+    // поэтому делать проверку по юзернейму не очень
     if let Some(username) = msg.chat.username() {
         let username = username.to_string();
         // sub_to_getactionworker(&msg, &bot).await; // регулярные сообщения от аси
@@ -44,7 +52,7 @@ async fn security_check(bot: Bot, msg: Message) -> ResponseResult<()> {
             get_tg_accepted_users().expect("Accepted users was checked, but empty.");
 
         if !accepted_users.contains(&username.to_owned()) {
-            bot.send_message(msg.chat.id, "This is not your pc, go away.")
+            bot.send_message(msg.chat.id, lexicon["unauthorized"].clone())
                 .await?;
         } else if let Some(text) = msg.text() {
             handle_command(text, username, bot, &msg).await?;
@@ -76,20 +84,25 @@ async fn handle_command(
 }
 
 async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide::RequestError> {
+    let lexicon = get_lexicon();
     match cmd {
         Command::Help => {
-            bot.send_message(msg.chat.id, Command::descriptions().to_string())
+            // bot.send_message(msg.chat.id, Command::descriptions().to_string())
+            bot.send_message(msg.chat.id, lexicon["help"].clone())
+                .parse_mode(ParseMode::Html)
                 .await?;
         }
         Command::Music(command) => {
             let response = music_dispatching::dispatch_music_command(command, msg).await;
-            bot.send_message(msg.chat.id, response).await?;
+            bot.send_message(msg.chat.id, response)
+                .parse_mode(ParseMode::Html)
+                .await?;
         }
         Command::Execute(command) => {
             let args = command.split_whitespace().collect();
-            let response = format!("```\n{}\n```", shell_utils::execute_command(args).unwrap());
+            let response = format!("<pre>{}\n</pre>", shell_utils::execute_command(args).unwrap());
             bot.send_message(msg.chat.id, response)
-                .parse_mode(ParseMode::MarkdownV2)
+                .parse_mode(ParseMode::Html)
                 .await?;
         }
     };
