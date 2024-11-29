@@ -11,6 +11,7 @@ use shared::{
     utils::{llm_utils, shell_utils},
 };
 use teloxide::{
+    dispatching::dialogue::GetChatId,
     payloads::SendMessageSetters,
     prelude::{Requester, *},
     types::{Message, ParseMode},
@@ -39,23 +40,23 @@ enum Command {
 }
 
 async fn security_check(bot: Bot, msg: Message) -> ResponseResult<()> {
-    // FIXME:
-    // в телеграме у очень многих людей юзернейм может быть пустым
-    // я не знаю почему так, но я это еще в черепахе заметил
-    // поэтому делать проверку по юзернейму не очень
-    if let Some(username) = msg.chat.username() {
-        let username = username.to_string();
-        // sub_to_getactionworker(&msg, &bot).await; // регулярные сообщения от аси
-        let accepted_users =
-            get_tg_accepted_users().expect("Accepted users was checked, but empty.");
+    let authorized_name = if let Some(username) = msg.chat.username() {
+        username.to_string()
+    } else if let Some(telegram_id) = msg.chat_id() {
+        telegram_id.to_string()
+    } else {
+        return Ok(());
+    };
+    // sub_to_getactionworker(&msg, &bot).await; // регулярные сообщения от аси
+    let accepted_users = get_tg_accepted_users().expect("Accepted users was checked, but empty.");
 
-        if !accepted_users.contains(&username.to_owned()) {
-            bot.send_message(msg.chat.id, get_lexicon("unauthorized"))
-                .await?;
-        } else if let Some(text) = msg.text() {
-            handle_command(text, username, bot, &msg).await?;
-        }
+    if !accepted_users.contains(&authorized_name.to_owned()) {
+        bot.send_message(msg.chat.id, get_lexicon("unauthorized"))
+            .await?;
+    } else if let Some(text) = msg.text() {
+        handle_command(text, authorized_name, bot, &msg).await?;
     }
+
     Ok(())
 }
 
