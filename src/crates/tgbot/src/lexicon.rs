@@ -13,5 +13,5 @@ pub fn get_lexicon(key: &str) -> &str {
         ("kostin_error", "Что-то пошло не так...\n=> Пропишите /help"),
     ]);
 
-    lexicon[key].clone()
+    lexicon[key]
 }
