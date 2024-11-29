@@ -18,9 +18,8 @@ use teloxide::{
     Bot,
 };
 
-use crate::lexicon::get_lexicon;
+use features::lexicon::get_lexicon;
 
-pub mod lexicon;
 pub mod prerun;
 
 mod music_dispatching;

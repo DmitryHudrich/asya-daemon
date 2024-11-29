@@ -1,4 +1,4 @@
-use crate::lexicon::get_lexicon;
+use features::lexicon::get_lexicon;
 use features::{
     llm_api,
     services::commands::music::{self, MediaPlayingStatus},
