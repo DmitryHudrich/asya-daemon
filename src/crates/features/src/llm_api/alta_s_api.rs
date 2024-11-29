@@ -25,4 +25,3 @@ async fn construct_and_send_reqwest(req: String, client: Client, url: &str) -> O
     let response_text = temp.as_str();
     file_utils::get_json_value(response_text, "/result/answer")
 }
-

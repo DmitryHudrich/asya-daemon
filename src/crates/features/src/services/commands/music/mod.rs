@@ -86,9 +86,21 @@ pub fn get_status() -> MediaPlayingStatus {
         .map(|el| el.to_string())
         .collect::<Vec<String>>();
 
-    let title = if !splited_metadata[0].trim().is_empty() { Some(splited_metadata[0].clone()) } else { None };
-    let artist = if !splited_metadata[1].trim().is_empty() { Some(splited_metadata[1].clone()) } else { None };
-    let album = if !splited_metadata[2].trim().is_empty() { Some(splited_metadata[2].clone()) } else { None };
+    let title = if !splited_metadata[0].trim().is_empty() {
+        Some(splited_metadata[0].clone())
+    } else {
+        None
+    };
+    let artist = if !splited_metadata[1].trim().is_empty() {
+        Some(splited_metadata[1].clone())
+    } else {
+        None
+    };
+    let album = if !splited_metadata[2].trim().is_empty() {
+        Some(splited_metadata[2].clone())
+    } else {
+        None
+    };
 
     let track_info = TrackInfo {
         title,

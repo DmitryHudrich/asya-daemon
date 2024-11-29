@@ -3,8 +3,8 @@ use groq_api::send_to_groq;
 use reqwest::Client;
 use shared::{state, types::AiRecognizeMethod};
 
-mod groq_api;
 mod alta_s_api;
+mod groq_api;
 
 // todo: покрыть все ошибки, а не те которые мне по кайфу щас
 #[derive(Debug)]
@@ -39,4 +39,3 @@ async fn request(
         .await
         .unwrap()
 }
-
