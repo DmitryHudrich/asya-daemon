@@ -7,9 +7,6 @@ use shared::{traits::Beautify, utils::llm_utils};
 use teloxide::types::Message;
 
 pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
-    // FIXME: this is probably bad
-    // maybe static variable will be better
-    // but i huy znaet how to do it
     match command.as_str() {
         "pause" | "resume" => {
             let music_status = music::get_status();
