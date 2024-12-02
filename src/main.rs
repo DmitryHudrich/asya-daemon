@@ -4,6 +4,7 @@ use tokio::join;
 #[macro_use]
 extern crate log;
 
+mod logging;
 mod preview;
 
 #[tokio::main]
@@ -14,7 +15,7 @@ async fn main() {
     })
     .expect("Error setting Ctrl-C handler");
     preview::show_preview();
-    shared::logging_engine::init_logging().await;
+    logging::init_logging();
     let run_workers = workers::run_workers();
     let tg_bot_launching = tgbot::prerun::run_telegram();
     let server_launching = server::start();

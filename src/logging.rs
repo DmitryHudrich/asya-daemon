@@ -5,10 +5,9 @@ use log4rs::{
     encode::pattern::PatternEncoder,
     Config,
 };
+use shared::state;
 
-use crate::state;
-
-pub async fn init_logging() {
+pub fn init_logging() {
     let console_pattern = match state::get_logging_place()
         .expect("missing config position. todo: remove default values")
     {
@@ -22,28 +21,25 @@ pub async fn init_logging() {
         false => Config::builder(),
     };
 
-    log4rs::init_config(build_config(config, enable_file().await).await).unwrap();
+    log4rs::init_config(build_config(config, enable_file())).unwrap();
 
     info!("Logging level: {}", state::get_logging_level().unwrap());
     info!("Logging to: {}", state::get_logging_folder().unwrap());
 
-    log_check();
-}
-
-fn log_check() {
     if log_enabled!(log::Level::Trace) {
-        trace!("trace logging example (THIS ISN'T ERROR) - - - - - - OK");
-        debug!("debug logging example (THIS ISN'T ERROR) - - - - - - OK");
-        info!("info  logging example (THIS ISN'T ERROR) - - - - - - OK");
-        warn!("warn  logging example (THIS ISN'T ERROR) - - - - - - OK");
-        error!("error logging example (THIS ISN'T ERROR) - - - - - - OK\n------------------------------------------------------------");
+        log_check();
     }
 }
 
-async fn build_config(
-    config: log4rs::config::runtime::ConfigBuilder,
-    logfile: FileAppender,
-) -> Config {
+fn log_check() {
+    trace!("trace logging example (THIS ISN'T ERROR) - - - - - - OK");
+    debug!("debug logging example (THIS ISN'T ERROR) - - - - - - OK");
+    info!("info  logging example (THIS ISN'T ERROR) - - - - - - OK");
+    warn!("warn  logging example (THIS ISN'T ERROR) - - - - - - OK");
+    error!("error logging example (THIS ISN'T ERROR) - - - - - - OK\n------------------------------------------------------------");
+}
+
+fn build_config(config: log4rs::config::runtime::ConfigBuilder, logfile: FileAppender) -> Config {
     config
         .appender(Appender::builder().build("file", Box::new(logfile)))
         .build(
@@ -55,7 +51,7 @@ async fn build_config(
         .unwrap()
 }
 
-async fn enable_file() -> FileAppender {
+fn enable_file() -> FileAppender {
     FileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
             "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} {h(SERVER)} - {l} > {m}\n",
