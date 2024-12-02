@@ -18,19 +18,22 @@ lazy_static! {
             "{}/.config/asya/asya-config.lua",
             my_home().unwrap().unwrap().to_str().unwrap().to_string()
         )];
+
         let lua_config = {
             let lua = Lua::new();
-            let (_, lua_file_content) = file_utils::load_files(config_path).expect("на всякий");
+            let (_config_path, lua_file_content) = file_utils::load_any_file(config_path).expect("Config file must be reachable");
 
             let config_lua: Table = lua
                 .load(&lua_file_content)
                 .eval()
-                .expect("Failed to evaluate Lua configuration.");
+                .expect("Lua configuration file must be correct to evaluate");
 
             let config: Config = mlua_serde::from_value(config_lua.to_lua(&lua).unwrap())
-                .expect("Failed to deserialize Lua config to Rust structure.");
+                .expect("Lua config table must be correct to desiralize into Rust struct");
+
             config
         };
+
         let merged = merge_struct::merge(&lua_config, &from_env::<Config>().unwrap()).unwrap();
         serde_json::to_value(merged).unwrap()
     };

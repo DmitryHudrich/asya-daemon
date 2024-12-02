@@ -1,6 +1,3 @@
-use core::panic;
-use std::{fs::File, io::Read};
-
 use clap::Parser;
 
 pub fn get_json_value(content: &str, path: &str) -> Option<String> {
@@ -21,26 +18,15 @@ pub fn get_yaml_value(content: &str, path: &str) -> Option<String> {
     }
 }
 
-pub fn load_file(path: &str) -> Result<String, String> {
-    let file = File::open(path);
-    match file {
-        Ok(mut opened_file) => {
-            let mut contents = String::new();
-            if let Err(e) = opened_file.read_to_string(&mut contents) {
-                return Err(e.to_string());
-            };
-            Ok(contents)
-        }
-        Err(e) => Err(e.to_string()),
-    }
-}
-pub fn load_files(pathes: Vec<String>) -> Result<(String, String), String> {
-    for path in pathes {
-        if let Ok(data) = load_file(path.as_str()) {
-            return Ok((path.to_owned(), data));
-        };
-    }
-    panic!("Config file not found.");
+pub fn load_any_file(pathes: Vec<String>) -> Result<(String, String), String> {
+    pathes
+        .into_iter()
+        .find_map(|path| {
+            std::fs::read_to_string(&path)
+                .map(|content| (path, content))
+                .ok()
+        })
+        .ok_or("Config file not found".to_owned())
 }
 
 pub fn shell_args() -> Args {

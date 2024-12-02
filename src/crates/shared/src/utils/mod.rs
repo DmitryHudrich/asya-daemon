@@ -7,8 +7,7 @@ pub mod llm_utils {
     const PROMPT_CONFIG: &str = "ai-prompts.yaml";
     pub fn get_prompt(path: &str) -> String {
         let err_msg = "Error while load prompt config.";
-        let load_file = &file_utils::load_file(PROMPT_CONFIG).expect(err_msg);
-        let content = load_file.as_str();
+        let content = &std::fs::read_to_string(PROMPT_CONFIG).expect(err_msg);
         file_utils::get_yaml_value(content, path).expect(err_msg)
     }
 }
