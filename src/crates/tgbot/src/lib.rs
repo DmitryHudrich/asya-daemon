@@ -6,9 +6,10 @@ use features::{
     workers::Observer,
 };
 use shared::{
+    llm,
     state::{self, get_tg_accepted_users},
     types::AiRecognizeMethod,
-    utils::{llm_utils, shell_utils},
+    shell,
 };
 use teloxide::{
     dispatching::dialogue::GetChatId,
@@ -100,7 +101,7 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
             let args = command.split_whitespace().collect();
             let response = format!(
                 "<pre>{}\n</pre>",
-                shell_utils::execute_command(args).unwrap()
+                shell::execute_command(args).unwrap()
             );
             bot.send_message(msg.chat.id, response)
                 .parse_mode(ParseMode::Html)
@@ -128,7 +129,7 @@ fn format_for_groq(msg: String) -> String {
         /music pause
         /music status",
     "#;
-    let prompt = llm_utils::get_prompt("/telegram/recognize_command");
+    let prompt = llm::get_prompt("/telegram/recognize_command");
     let formatted_prompt = prompt
         .replace("{commands}", commands)
         .replace("{message}", msg.as_str());

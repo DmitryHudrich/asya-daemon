@@ -1,6 +1,6 @@
 use reqwest::Client;
 use serde_json::json;
-use shared::{state, utils::file_utils};
+use shared::{serde_extensions::get_json_value, state};
 
 use super::{request, AiRequestError};
 
@@ -38,8 +38,8 @@ async fn construct_and_send_reqwest(
 
     let response = request(client, url, api_key, body).await;
 
-    let response_res = response.text().await;
-    let temp = &response_res.unwrap();
-    let response_text = temp.as_str();
-    file_utils::get_json_value(response_text, "/choices/0/message/content")
+    get_json_value(
+        &response.text().await.unwrap(),
+        "/choices/0/message/content",
+    )
 }

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use shared::{traits::Beautify, utils::shell_utils};
+use shared::{shell, traits::Beautify};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct TrackInfo {
@@ -64,14 +64,14 @@ impl Display for MediaPlayingStatus {
 
 #[cfg(target_family = "unix")]
 pub fn play_pause() {
-    shell_utils::execute_command(vec!["playerctl", "play-pause"]);
+    shell::execute_command(vec!["playerctl", "play-pause"]);
 }
 
 #[cfg(target_family = "unix")]
 pub fn get_status() -> MediaPlayingStatus {
     //playerctl metadata --format "{{ artist }}{{ album }}{{ title }}"
-    let status_opt = shell_utils::execute_command(vec!["playerctl", "status"]);
-    let metadata = shell_utils::execute_command(vec![
+    let status_opt = shell::execute_command(vec!["playerctl", "status"]);
+    let metadata = shell::execute_command(vec![
         "playerctl",
         "metadata",
         "--format",

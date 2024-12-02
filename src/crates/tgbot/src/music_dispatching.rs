@@ -3,7 +3,7 @@ use features::{
     llm_api,
     services::commands::music::{self, MediaPlayingStatus},
 };
-use shared::{traits::Beautify, utils::llm_utils};
+use shared::{llm, traits::Beautify};
 use teloxide::types::Message;
 
 pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
@@ -14,13 +14,13 @@ pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
             match music_status {
                 MediaPlayingStatus::Stopped => get_lexicon("music_stopped").to_string(),
                 MediaPlayingStatus::Paused(_) => {
-                    let prompt = llm_utils::get_prompt("/telegram/music/resume");
+                    let prompt = llm::get_prompt("/telegram/music/resume");
                     let formatted_prompt = prompt.replace("{command}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
                     response.unwrap_or(get_lexicon("music_resume").to_string())
                 }
                 MediaPlayingStatus::Playing(_) => {
-                    let prompt = llm_utils::get_prompt("/telegram/music/pause");
+                    let prompt = llm::get_prompt("/telegram/music/pause");
                     let formatted_prompt = prompt.replace("{command}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
                     response.unwrap_or(get_lexicon("music_pause").to_string())
@@ -33,7 +33,7 @@ pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
             match music_status {
                 MediaPlayingStatus::Stopped => get_lexicon("music_stopped").to_string(),
                 MediaPlayingStatus::Paused(status) => {
-                    let prompt = llm_utils::get_prompt("/telegram/music/status");
+                    let prompt = llm::get_prompt("/telegram/music/status");
                     let formatted_prompt = prompt
                         .replace("{status}", format!("{:?}", status).as_str())
                         .replace("{message}", msg.text().unwrap());
@@ -43,7 +43,7 @@ pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
                     // music output
                 }
                 MediaPlayingStatus::Playing(status) => {
-                    let prompt = llm_utils::get_prompt("/telegram/music/status");
+                    let prompt = llm::get_prompt("/telegram/music/status");
                     let formatted_prompt = prompt
                         .replace("{status}", format!("{:?}", status).as_str())
                         .replace("{message}", msg.text().unwrap());

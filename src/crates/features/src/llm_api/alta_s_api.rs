@@ -1,5 +1,5 @@
 use reqwest::Client;
-use shared::{state, utils::file_utils};
+use shared::{serde_extensions::get_json_value, state};
 
 use super::AiRequestError;
 
@@ -20,8 +20,5 @@ async fn construct_and_send_reqwest(req: String, client: Client, url: &str) -> O
         .await
         .expect("altas response");
 
-    let response_res = response.text().await;
-    let temp = &response_res.unwrap();
-    let response_text = temp.as_str();
-    file_utils::get_json_value(response_text, "/result/answer")
+    get_json_value(&response.text().await.unwrap(), "/result/answer")
 }

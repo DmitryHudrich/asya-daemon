@@ -3,7 +3,7 @@
 use serde::Deserialize;
 use std::fmt::Debug;
 
-use crate::{types::AiRecognizeMethod, utils::file_utils};
+use crate::types::AiRecognizeMethod;
 use homedir::my_home;
 use lazy_static::lazy_static;
 use log::LevelFilter;
@@ -21,7 +21,7 @@ lazy_static! {
 
         let lua_config = {
             let lua = Lua::new();
-            let (_config_path, lua_file_content) = file_utils::load_any_file(config_path).expect("Config file must be reachable");
+            let (_config_path, lua_file_content) = load_any_file(config_path).expect("Config file must be reachable");
 
             let config_lua: Table = lua
                 .load(&lua_file_content)
@@ -39,16 +39,24 @@ lazy_static! {
     };
 }
 
+pub fn load_any_file(pathes: Vec<String>) -> Result<(String, String), String> {
+    pathes
+        .into_iter()
+        .find_map(|path| {
+            std::fs::read_to_string(&path)
+                .map(|content| (path, content))
+                .ok()
+        })
+        .ok_or("Config file not found".to_owned())
+}
+
 pub(crate) fn get<T>(pointer: &str) -> T
 where
     T: DeserializeOwned,
 {
-    serde_json::from_value::<T>(
-        ENV.pointer(pointer)
-            .unwrap_or_else(|| panic!("Failed to get config: {}", pointer))
-            .clone(),
-    )
-    .unwrap_or_else(|_| panic!("Failed to get config: {}", pointer))
+    ENV.pointer(pointer)
+        .and_then(|ref_val| serde_json::from_value::<T>(ref_val.to_owned()).ok())
+        .expect(&format!("The config '{pointer}' must be reachable"))
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
