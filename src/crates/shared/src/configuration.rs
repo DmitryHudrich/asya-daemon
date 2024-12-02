@@ -56,7 +56,7 @@ where
 {
     ENV.pointer(pointer)
         .and_then(|ref_val| serde_json::from_value::<T>(ref_val.to_owned()).ok())
-        .expect(&format!("The config '{pointer}' must be reachable"))
+        .unwrap_or_else(|| panic!("The config '{pointer}' must be reachable"))
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
