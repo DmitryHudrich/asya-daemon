@@ -1,7 +1,5 @@
-use features::lexicon::get_lexicon;
 use features::{
-    llm_api,
-    services::commands::music::{self, MediaPlayingStatus},
+    lexicon::Lexicon, llm_api, services::commands::music::{self, MediaPlayingStatus}
 };
 use shared::{llm, traits::Beautify};
 use teloxide::types::Message;
@@ -12,26 +10,26 @@ pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
             let music_status = music::get_status();
             music::play_pause();
             match music_status {
-                MediaPlayingStatus::Stopped => get_lexicon("music_stopped").to_string(),
+                MediaPlayingStatus::Stopped => Lexicon::MusicStopped.describe().to_string(),
                 MediaPlayingStatus::Paused(_) => {
                     let prompt = llm::get_prompt("/telegram/music/resume");
                     let formatted_prompt = prompt.replace("{command}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
-                    response.unwrap_or(get_lexicon("music_resume").to_string())
+                    response.unwrap_or(Lexicon::MusicResume.describe().to_string())
                 }
                 MediaPlayingStatus::Playing(_) => {
                     let prompt = llm::get_prompt("/telegram/music/pause");
                     let formatted_prompt = prompt.replace("{command}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
-                    response.unwrap_or(get_lexicon("music_pause").to_string())
+                    response.unwrap_or(Lexicon::MusicPause.describe().to_string())
                 }
-                MediaPlayingStatus::Unknown => get_lexicon("music_stopped").to_string(),
+                MediaPlayingStatus::Unknown => Lexicon::MusicStopped.describe().to_string(),
             }
         }
         "status" => {
             let music_status = music::get_status();
             match music_status {
-                MediaPlayingStatus::Stopped => get_lexicon("music_stopped").to_string(),
+                MediaPlayingStatus::Stopped => Lexicon::MusicStopped.describe().to_string(),
                 MediaPlayingStatus::Paused(status) => {
                     let prompt = llm::get_prompt("/telegram/music/status");
                     let formatted_prompt = prompt
@@ -52,9 +50,9 @@ pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
                     // todo: beautify
                     // music output
                 }
-                MediaPlayingStatus::Unknown => get_lexicon("music_stopped").to_string(),
+                MediaPlayingStatus::Unknown => Lexicon::MusicStopped.describe().to_string(),
             }
         }
-        _ => get_lexicon("error").to_string(),
+        _ => Lexicon::Error.describe().to_string(),
     }
 }

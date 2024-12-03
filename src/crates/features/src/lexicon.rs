@@ -1,17 +1,27 @@
-use std::collections::HashMap;
+pub enum Lexicon {
+    Help,
+    MusicStopped,
+    MusicPause,
+    MusicResume,
+    ExecuteSuccess,
+    ExecuteError,
+    Error,
+    Unauthorized,
+    KostinError,
+}
 
-pub fn get_lexicon(key: &str) -> &str {
-    let lexicon: HashMap<&'static str, &'static str> = HashMap::from([
-        ("help", "<b>Доступные команды</b>:\n<code>/help</code>  —  справка\n<code>/music [ pause | resume | status ]</code>  —  управление музыкой\n<code>/execute</code>  —  выполнить команду в терминале"),
-        ("music_stopped", "Музыка не играет"),
-        ("music_pause", "Остановила музыку"),
-        ("music_resume", "Включила музыку"),
-        ("execute_success", "Выполнила команду!"),
-        ("execute_error", "Не удалось выполнить команду!"),
-        ("error", "Произошла ошибка!"),
-        ("unauthorized", "Это не твой компьютер. Не могу тебе помочь, ковбой!"),
-        ("kostin_error", "Что-то пошло не так...\n=> Пропишите /help"),
-    ]);
-
-    lexicon[key]
+impl Lexicon {
+    pub fn describe(&self) -> &'static str {
+        match self {
+            Lexicon::Help  => "<b>Доступные команды</b>:\n<code>/help</code>  —  справка\n<code>/music [ pause | resume | status ]</code>  —  управление музыкой\n<code>/execute</code>  —  выполнить команду в терминале",
+            Lexicon::MusicStopped => "Музыка не играет",
+            Lexicon::MusicPause => "Остановила музыку",
+            Lexicon::MusicResume => "Включила музыку",
+            Lexicon::ExecuteSuccess => "Выполнила команду!",
+            Lexicon::ExecuteError => "Не удалось выполнить команду!",
+            Lexicon::Error => "Произошла ошибка!",
+            Lexicon::Unauthorized => "Это не твой компьютер. Не могу тебе помочь, ковбой!",
+            Lexicon::KostinError => "Что-то пошло не так...\n=> Пропишите /help",
+        }
+    }
 }

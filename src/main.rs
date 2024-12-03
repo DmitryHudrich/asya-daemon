@@ -14,10 +14,11 @@ async fn main() {
         std::process::exit(0);
     })
     .expect("Error setting Ctrl-C handler");
+
     preview::show_preview();
     logging::init_logging();
     let run_workers = workers::run_workers();
-    let tg_bot_launching = tgbot::prerun::run_telegram();
+    let tg_bot_launching = tgbot::run_telegram_bot();
     let server_launching = server::start();
     info!("Bootstrapping");
 

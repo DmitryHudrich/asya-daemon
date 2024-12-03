@@ -11,12 +11,16 @@ mod groq_api;
 pub enum AiRequestError {
     GroqApiKey,
     GroqRequest,
+    AltaSUrl,
+    AltaSRequest
 }
 
 // todo: rewrite to result
 /// Returns `None` if token unspecified or ошибка случилась
 pub async fn send_request(req: String) -> Result<String, AiRequestError> {
-    match state::get_ai_req_method().expect("ai_req_method unspecified.") {
+    match state::get_ai_recognize_method()
+        .expect("The AI recognize method should be specified in lua config")
+    {
         AiRecognizeMethod::Groq => send_to_groq(req).await,
         AiRecognizeMethod::AltaS => send_to_altas(req).await,
         AiRecognizeMethod::None => Ok(req), // nothing for recognize, so just return command

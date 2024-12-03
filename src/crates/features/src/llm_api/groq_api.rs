@@ -7,16 +7,11 @@ use super::{request, AiRequestError};
 pub async fn send_to_groq(req: String) -> Result<String, AiRequestError> {
     let client = Client::new();
     let url = "https://api.groq.com/openai/v1/chat/completions";
-    let api_key = state::get_mistral_token();
-    if let Some(api_key) = api_key {
-        if let Some(response) = construct_and_send_reqwest(req, client, url, api_key).await {
-            Ok(response)
-        } else {
-            Err(AiRequestError::GroqRequest)
-        }
-    } else {
-        Err(AiRequestError::GroqApiKey)
-    }
+    let api_key = state::get_mistral_token().ok_or(AiRequestError::GroqApiKey)?;
+
+    construct_and_send_reqwest(req, client, url, api_key)
+        .await
+        .ok_or(AiRequestError::GroqRequest)
 }
 
 async fn construct_and_send_reqwest(

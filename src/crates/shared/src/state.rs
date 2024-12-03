@@ -12,7 +12,7 @@ pub fn get_alta_s_addr() -> Option<String> {
     get("/ai/alta_s_addr")
 }
 
-pub fn get_ai_req_method() -> Option<AiRecognizeMethod> {
+pub fn get_ai_recognize_method() -> Option<AiRecognizeMethod> {
     get("/ai/recognize_method")
 }
 
@@ -28,7 +28,7 @@ pub fn get_mistral_token() -> Option<String> {
     get("/ai/groq_token")
 }
 
-pub fn get_tgtoken() -> Option<String> {
+pub fn get_tg_token() -> Option<String> {
     get("/telegram/token")
 }
 
