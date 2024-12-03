@@ -139,11 +139,10 @@ fn format_for_groq(msg: String) -> String {
     "#;
 
     let prompt = llm::get_prompt("/telegram/recognize_command");
-    let formatted_prompt = prompt
-        .replace("{commands}", COMMANDS)
-        .replace("{message}", &msg);
 
-    formatted_prompt
+    prompt
+        .replace("{commands}", COMMANDS)
+        .replace("{message}", &msg)
 }
 
 // TODO: use it in future

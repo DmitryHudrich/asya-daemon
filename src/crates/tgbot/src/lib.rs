@@ -1,5 +1,3 @@
-use teloxide::dptree;
-use teloxide::types::Message;
 use teloxide::Bot;
 
 mod handlers;
