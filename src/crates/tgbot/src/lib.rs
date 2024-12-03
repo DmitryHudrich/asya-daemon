@@ -51,5 +51,5 @@ pub(crate) fn get_users_safely() -> Option<Vec<String>> {
 
     shared::state::get_tg_accepted_users()
         .and_then(|users| (!users.is_empty()).then_some(users))
-        .or(no_auth_users())
+        .or_else(no_auth_users)
 }
