@@ -38,7 +38,7 @@ impl Structure {
             .derive
             .as_ref()
             .map(|derive| quote! { #derive })
-            .unwrap_or(quote! {});
+            .unwrap_or_default();
 
         let ident = &attribute_info.struct_attribute_info.name;
         let Structure {
@@ -180,8 +180,8 @@ impl AttributeInfo {
                 proc_macro2::Span::call_site(),
                 "Expected #[property(name(StructName))] before struct declaration",
             ))
-            .and_then(|attribute| Self::attribute_inner_tokens(attribute))
-            .and_then(|tokens| syn::parse2(tokens))?;
+            .and_then(Self::attribute_inner_tokens)
+            .and_then(syn::parse2)?;
 
         let mut field_attribute_infos = HashMap::new();
         for field in structure.fields.clone() {
@@ -193,7 +193,7 @@ impl AttributeInfo {
 
             field_attribute_infos.insert(
                 field_name,
-                Self::attribute_inner_tokens(attribute).and_then(|tokens| syn::parse2(tokens))?,
+                Self::attribute_inner_tokens(attribute).and_then(syn::parse2)?,
             );
         }
 
