@@ -1,5 +1,11 @@
 [workspace]
-members = ["./src/crates/server", "./src/crates/features/", "./src/crates/shared", "./src/crates/tgbot"]
+members = [
+  "src/crates/server",
+  "src/crates/features",
+  "src/crates/shared",
+  "src/crates/tgbot",
+  "src/crates/macros"
+]
 
 resolver = "2"
 
@@ -14,10 +20,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-server = { path = "./src/crates/server/" }
-features = { path = "./src/crates/features/" }
-shared = { path = "./src/crates/shared/" }
-tgbot = { path = "./src/crates/tgbot/"}
+server = { path = "src/crates/server" }
+features = { path = "src/crates/features" }
+shared = { path = "src/crates/shared" }
+tgbot = { path = "src/crates/tgbot"}
+macros = { path = "src/crates/macros" }
 
 ctrlc = "3.4.5"
 
