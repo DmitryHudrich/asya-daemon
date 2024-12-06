@@ -1,7 +1,6 @@
 use features::{
     lexicon::Lexicon, llm_api, services::commands::music::{self, MediaPlayingStatus}
 };
-use log::info;
 use shared::{llm, traits::Beautify};
 use teloxide::types::Message;
 
