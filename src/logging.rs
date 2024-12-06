@@ -42,6 +42,9 @@ fn log_check() {
 fn build_config(config: log4rs::config::runtime::ConfigBuilder, logfile: FileAppender) -> Config {
     config
         .appender(Appender::builder().build("file", Box::new(logfile)))
+        .logger(log4rs::config::Logger::builder().build("teloxide", log::LevelFilter::Off))
+        .logger(log4rs::config::Logger::builder().build("hyper", log::LevelFilter::Off))
+        .logger(log4rs::config::Logger::builder().build("reqwest", log::LevelFilter::Off))
         .build(
             Root::builder()
                 .appender("console")
