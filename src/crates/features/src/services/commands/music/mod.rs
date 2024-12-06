@@ -12,11 +12,18 @@ pub struct TrackInfo {
 
 impl Display for TrackInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "artist: {:?}\ntitle:{:?}\nalbum:{:?}\n",
-            self.artist, self.title, self.album
-        )
+        let mut formatting_query = vec![];
+        if let Some(artist_value) = &self.artist {
+            formatting_query.push(format!("artist: {}\n", artist_value))
+        }
+        if let Some(album_value) = &self.album {
+            formatting_query.push(format!("album: {}\n", album_value))
+        }
+        if let Some(title_value) = &self.title {
+            formatting_query.push(format!("title: {}\n", title_value))
+        }
+        let res = String::from_iter(formatting_query);
+        write!(f, "{}", res)
     }
 }
 
@@ -69,44 +76,14 @@ pub fn play_pause() {
 
 #[cfg(target_family = "unix")]
 pub fn get_status() -> MediaPlayingStatus {
-    //playerctl metadata --format "{{ artist }}{{ album }}{{ title }}"
     let status_opt = shell::execute_command(vec!["playerctl", "status"]);
-    let metadata = shell::execute_command(vec![
-        "playerctl",
-        "metadata",
-        "--format",
-        "{{ title }};{{ artist }};{{ album }}",
-        // FIXME: альбом не отображается кстати
-        // я проверял через музыку в телеге
-    ])
-    .expect("Error while unwrapping metadata from current track.");
-
-    let splited_metadata = Vec::from_iter(metadata.split_terminator(';'))
-        .iter_mut()
-        .map(|el| el.to_string())
-        .collect::<Vec<String>>();
-
-    let title = if !splited_metadata[0].trim().is_empty() {
-        Some(splited_metadata[0].clone())
-    } else {
-        None
-    };
-    let artist = if !splited_metadata[1].trim().is_empty() {
-        Some(splited_metadata[1].clone())
-    } else {
-        None
-    };
-    let album = if !splited_metadata[2].trim().is_empty() {
-        Some(splited_metadata[2].clone())
-    } else {
-        None
-    };
 
     let track_info = TrackInfo {
-        title,
-        artist,
-        album,
+        title: pctl_metadat_prop("title"),
+        artist: pctl_metadat_prop("artist"),
+        album: pctl_metadat_prop("album"),
     };
+
     match status_opt {
         Some(status) => match status.as_str().trim() {
             "Playing" => MediaPlayingStatus::Playing(track_info),
@@ -115,6 +92,18 @@ pub fn get_status() -> MediaPlayingStatus {
             _ => MediaPlayingStatus::Unknown,
         },
         None => todo!(),
+    }
+}
+
+#[cfg(target_family = "unix")]
+fn pctl_metadat_prop(prop: &str) -> Option<String> {
+    let prop_formatted = format!("{{{{{}}}}}", prop);
+    let query = vec!["playerctl", "metadata", "--format", prop_formatted.as_str()];
+    let prop_res = shell::execute_command(query).unwrap();
+    if prop_res.trim().is_empty() {
+        None
+    } else {
+        Some(prop_res)
     }
 }
 
