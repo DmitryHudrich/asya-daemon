@@ -22,7 +22,7 @@ impl Display for TrackInfo {
         if let Some(title_value) = &self.title {
             formatting_query.push(format!("title: {}", title_value))
         }
-        let res = String::from_iter(formatting_query).replace("\n", " ");
+        let res = String::from_iter(formatting_query);
         write!(f, "{}", res)
     }
 }

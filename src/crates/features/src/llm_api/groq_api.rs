@@ -37,4 +37,5 @@ async fn construct_and_send_reqwest(
         &response.text().await.unwrap(),
         "/choices/0/message/content",
     )
+    .map(|s| s.replace("\\", ""))
 }
