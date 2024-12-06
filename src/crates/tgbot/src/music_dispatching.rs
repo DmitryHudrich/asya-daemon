@@ -1,6 +1,7 @@
 use features::{
     lexicon::Lexicon, llm_api, services::commands::music::{self, MediaPlayingStatus}
 };
+use log::info;
 use shared::{llm, traits::Beautify};
 use teloxide::types::Message;
 
@@ -33,7 +34,7 @@ pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
                 MediaPlayingStatus::Paused(status) => {
                     let prompt = llm::get_prompt("/telegram/music/status");
                     let formatted_prompt = prompt
-                        .replace("{status}", format!("{:?}", status).as_str())
+                        .replace("{status}", format!("{}", status).as_str())
                         .replace("{message}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
                     response.unwrap_or(status.beautiful_out())
@@ -43,7 +44,7 @@ pub async fn dispatch_music_command(command: String, msg: &Message) -> String {
                 MediaPlayingStatus::Playing(status) => {
                     let prompt = llm::get_prompt("/telegram/music/status");
                     let formatted_prompt = prompt
-                        .replace("{status}", format!("{:?}", status).as_str())
+                        .replace("{status}", format!("{}", status).as_str())
                         .replace("{message}", msg.text().unwrap());
                     let response = llm_api::send_request(formatted_prompt).await;
                     response.unwrap_or(status.beautiful_out())

@@ -14,13 +14,13 @@ impl Display for TrackInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut formatting_query = vec![];
         if let Some(artist_value) = &self.artist {
-            formatting_query.push(format!("artist: {}\n", artist_value))
+            formatting_query.push(format!("artist: {}", artist_value))
         }
         if let Some(album_value) = &self.album {
-            formatting_query.push(format!("album: {}\n", album_value))
+            formatting_query.push(format!("album: {}", album_value))
         }
         if let Some(title_value) = &self.title {
-            formatting_query.push(format!("title: {}\n", title_value))
+            formatting_query.push(format!("title: {}", title_value))
         }
         let res = String::from_iter(formatting_query);
         write!(f, "{}", res)
