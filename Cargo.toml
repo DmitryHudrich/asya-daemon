@@ -1,7 +1,7 @@
 [workspace]
 members = [
   "src/crates/server",
-  "src/crates/features",
+  "src/crates/services",
   "src/crates/shared",
   "src/crates/tgbot",
   "src/crates/macros"
@@ -21,7 +21,7 @@ edition = "2021"
 
 [dependencies]
 server = { path = "src/crates/server" }
-features = { path = "src/crates/features" }
+services = { path = "src/crates/services" }
 shared = { path = "src/crates/shared" }
 tgbot = { path = "src/crates/tgbot"}
 macros = { path = "src/crates/macros" }

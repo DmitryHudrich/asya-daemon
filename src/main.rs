@@ -1,4 +1,4 @@
-use features::workers;
+use services::workers;
 use tokio::join;
 
 #[macro_use]

@@ -3,7 +3,7 @@ use std::sync::Arc;
 use actix_web::{rt, web, Error, HttpRequest, HttpResponse};
 use actix_ws::{AggregatedMessage, Session};
 use async_trait::async_trait;
-use features::{services::commands::music, workers::Observer};
+use services::{services::commands::music, workers::Observer};
 use futures_util::StreamExt;
 use log::warn;
 use tokio::sync::RwLock;
@@ -37,7 +37,7 @@ pub async fn ws_events_handler(
     stream: web::Payload,
 ) -> Result<HttpResponse, Error> {
     let (res, session, _) = actix_ws::handle(&req, stream)?;
-    let worker = features::workers::get_actionworker().await;
+    let worker = services::workers::get_actionworker().await;
 
     worker
         .subscribe(Box::new(PrintObserver {

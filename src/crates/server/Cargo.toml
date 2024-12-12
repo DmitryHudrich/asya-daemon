@@ -8,7 +8,7 @@ path = "./src/lib.rs"
 
 [dependencies]
 shared = { path = "../shared" }
-features = { path = "../features" }
+services = { path = "../services" }
 log = "0.4.22"
 log4rs = "1.3.0"
 tokio = { version = "1.39.2", features = ["full"] }

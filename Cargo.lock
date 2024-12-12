@@ -373,7 +373,6 @@ dependencies = [
  "clap",
  "colored",
  "ctrlc",
- "features",
  "form_urlencoded",
  "http-body-util",
  "lazy_static",
@@ -388,6 +387,7 @@ dependencies = [
  "serde-env",
  "serde_json",
  "server",
+ "services",
  "shared",
  "sysinfo",
  "tgbot",
@@ -905,38 +905,6 @@ name = "fastrand"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "486f806e73c5707928240ddc295403b1b93c96a02038563881c4a2fd84b81ac4"
-
-[[package]]
-name = "features"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "bytes",
- "chrono",
- "clap",
- "colored",
- "criterion",
- "form_urlencoded",
- "http-body-util",
- "lazy_static",
- "log",
- "log4rs",
- "merge-struct",
- "multimap",
- "queues",
- "rand",
- "regex",
- "reqwest 0.12.9",
- "serde",
- "serde-env",
- "serde_json",
- "shared",
- "sysinfo",
- "tokio",
- "toml",
- "tonic-build",
- "tower",
-]
 
 [[package]]
 name = "fixedbitset"
@@ -2642,7 +2610,6 @@ dependencies = [
  "clap",
  "colored",
  "criterion",
- "features",
  "form_urlencoded",
  "futures-util",
  "http-body-util",
@@ -2656,10 +2623,43 @@ dependencies = [
  "serde",
  "serde-env",
  "serde_json",
+ "services",
  "shared",
  "sysinfo",
  "tokio",
  "toml",
+ "tower",
+]
+
+[[package]]
+name = "services"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "bytes",
+ "chrono",
+ "clap",
+ "colored",
+ "criterion",
+ "form_urlencoded",
+ "http-body-util",
+ "lazy_static",
+ "log",
+ "log4rs",
+ "merge-struct",
+ "multimap",
+ "queues",
+ "rand",
+ "regex",
+ "reqwest 0.12.9",
+ "serde",
+ "serde-env",
+ "serde_json",
+ "shared",
+ "sysinfo",
+ "tokio",
+ "toml",
+ "tonic-build",
  "tower",
 ]
 
@@ -2979,11 +2979,11 @@ name = "tgbot"
 version = "0.1.0"
 dependencies = [
  "async-trait",
- "features",
  "log",
  "log4rs",
  "serde",
  "serde_json",
+ "services",
  "shared",
  "teloxide",
  "tokio",

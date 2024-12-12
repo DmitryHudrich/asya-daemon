@@ -1,4 +1,4 @@
-use features::{
+use services::{
     lexicon::Lexicon, llm_api, services::commands::music::{self, MediaPlayingStatus}
 };
 use shared::{llm, traits::Beautify};

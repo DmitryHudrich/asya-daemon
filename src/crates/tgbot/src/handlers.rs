@@ -1,7 +1,7 @@
 use core::panic;
 
 use async_trait::async_trait;
-use features::{
+use services::{
     lexicon::Lexicon,
     llm_api::{self},
     workers::Observer,
