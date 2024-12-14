@@ -8,8 +8,13 @@ use tokio::{
 };
 
 pub mod music_control;
+pub mod workers;
 
 static EVENT_DISPATCHER: OnceCell<Arc<AsyncEventDispatcher>> = OnceCell::const_new();
+
+pub fn run_backgorund_workers() {
+    tokio::spawn(workers::action_worker::run());
+}
 
 pub async fn dispatch_usecase(command: String, userinput: String) {
     debug!("Dispatching command: {:?}", command);

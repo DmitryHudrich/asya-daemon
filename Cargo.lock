@@ -395,6 +395,7 @@ dependencies = [
  "toml",
  "tonic-build",
  "tower",
+ "usecases",
 ]
 
 [[package]]

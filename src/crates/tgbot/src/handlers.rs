@@ -1,11 +1,6 @@
 use std::sync::Arc;
-
-use async_trait::async_trait;
 use log::{debug, info, warn};
-use services::{
-    lexicon::Lexicon,
-    workers::Observer,
-};
+use services::lexicon::Lexicon;
 use shared::
     state::get_tg_accepted_users
 ;
@@ -116,11 +111,4 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
 pub struct PrintObserver {
     chat_id: ChatId,
     bot: Bot,
-}
-
-#[async_trait]
-impl Observer<String> for PrintObserver {
-    async fn update(&self, phrase: &String) {
-        self.bot.send_message(self.chat_id, phrase).await.unwrap();
-    }
 }

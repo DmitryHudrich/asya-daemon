@@ -2,11 +2,9 @@ use std::sync::Arc;
 
 use actix_web::{rt, web, Error, HttpRequest, HttpResponse};
 use actix_ws::{AggregatedMessage, Session};
-use async_trait::async_trait;
 use futures_util::StreamExt;
 use log::warn;
-use services::workers::Observer;
-use tokio::{sync::RwLock, task};
+use tokio::task;
 use usecases::AsyaResponse;
 
 use crate::{requests::Requests, responses::Responses};
@@ -28,10 +26,6 @@ pub async fn ws_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpRe
     });
 
     Ok(res)
-}
-
-pub struct PrintObserver {
-    session: Arc<RwLock<Session>>,
 }
 
 async fn handle_message(session: &mut Session, input: String) {

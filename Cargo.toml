@@ -26,6 +26,7 @@ services = { path = "src/crates/services" }
 shared = { path = "src/crates/shared" }
 tgbot = { path = "src/crates/tgbot"}
 macros = { path = "src/crates/macros" }
+usecases = { path = "src/crates/usecases" }
 
 ctrlc = "3.4.5"
 
