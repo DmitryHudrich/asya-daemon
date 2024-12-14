@@ -30,44 +30,17 @@ pub async fn ws_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpRe
     Ok(res)
 }
 
-pub async fn ws_events_handler(
-    req: HttpRequest,
-    stream: web::Payload,
-) -> Result<HttpResponse, Error> {
-    let (res, session, _) = actix_ws::handle(&req, stream)?;
-    let worker = services::workers::get_actionworker().await;
-
-    worker
-        .subscribe(Box::new(PrintObserver {
-            session: Arc::new(RwLock::new(session)),
-        }))
-        .await;
-
-    Ok(res)
-}
-
 pub struct PrintObserver {
     session: Arc<RwLock<Session>>,
-}
-
-#[async_trait]
-impl Observer<String> for PrintObserver {
-    async fn update(&self, phrase: &String) {
-        let _ = self.session.write().await.text(phrase.to_owned()).await;
-    }
 }
 
 async fn handle_message(session: &mut Session, input: String) {
     let request = extract_request(input);
 
     let Requests::General { action } = request;
-    handle_music(action, session).await;
-}
-
-async fn handle_music(action: String, session: &mut Session) {
     const DEFAULT_EXPECT_MSG: &str = "The Responses enum should be able to be converted into JSON";
     usecases::subscribe_once({
-        let session = session.clone();
+        let session = session.clone(); // should be a clone of the session?
         move |event: Arc<AsyaResponse>| {
             let mut session = session.clone();
             task::spawn(async move {

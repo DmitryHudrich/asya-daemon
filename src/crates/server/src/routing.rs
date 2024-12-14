@@ -16,5 +16,7 @@ pub fn route_all() -> App<
         .route("/hey", web::get().to(|| async { "bebra" }))
         .route("/sex", web::get().to(|| async { "не было" }))
         .route("/ws", web::get().to(ws_utils::ws_handler))
-        .route("/ws/events", web::get().to(ws_utils::ws_events_handler))
+
+        // todo: add events handler
+        // .route("/ws/events", web::get().to(ws_utils::ws_events_handler))
 }
