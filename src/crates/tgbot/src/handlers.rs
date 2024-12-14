@@ -9,7 +9,8 @@ use services::{
     workers::Observer,
 };
 use shared::{
-    llm, state::{self, get_tg_accepted_users},
+    llm,
+    state::{self, get_tg_accepted_users},
     types::AiRecognizeMethod,
 };
 use teloxide::{
@@ -32,7 +33,7 @@ enum Command {
     #[command(description = "display this text.")]
     Help,
     #[command(description = "control music. examples: \n\t/music pause\n\t/music resume")]
-    Music,
+    Do(String),
     #[command(description = "execute shell command")]
     Execute,
 }
@@ -78,9 +79,9 @@ async fn handle_command(text: &str, bot: Bot, msg: &Message) -> Result<(), telox
     info!("Recognized command: {}", slash_command);
 
     if slash_command.starts_with('/') {
-        // let bot_username = bot.get_me().await?.username().to_owned();
-        // let cmd = Command::parse(&slash_command, &bot_username).unwrap();
-        dispatch(text.to_string(), &bot, msg).await?;
+        let bot_username = bot.get_me().await?.username().to_owned();
+        let cmd = Command::parse(&slash_command, &bot_username).unwrap();
+        dispatch(cmd, &bot, msg).await?;
     } else {
         bot.send_message(msg.chat.id, Lexicon::Help.describe())
             .parse_mode(ParseMode::Html)
@@ -90,20 +91,32 @@ async fn handle_command(text: &str, bot: Bot, msg: &Message) -> Result<(), telox
     Ok(())
 }
 
-async fn dispatch(cmd: String, bot: &Bot, msg: &Message) -> Result<(), teloxide::RequestError> {
-    usecases::dispatch_usecase(cmd, msg.text().unwrap().to_string()).await;
-    let bot_clone = bot.clone();
-    let chat_id = msg.chat.id;
-    usecases::subscribe(move |event: Arc<AsyaResponse>| {
-        let bot_clone = bot_clone.clone();
-        task::spawn(async move {
-            bot_clone.send_message(chat_id, format!("{:?}", event))
+async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide::RequestError> {
+    match cmd {
+        Command::Help => {
+            bot.send_message(msg.chat.id, Lexicon::Help.describe())
                 .parse_mode(ParseMode::Html)
-                .await
-                .unwrap();
-        })
-    })
-    .await;
+                .await?;
+            return Ok(());
+        }
+        Command::Do(string_cmd) => {
+            usecases::dispatch_usecase(string_cmd, msg.text().unwrap().to_string()).await;
+            let bot_clone = bot.clone();
+            let chat_id = msg.chat.id;
+            usecases::subscribe(move |event: Arc<AsyaResponse>| {
+                let bot_clone = bot_clone.clone();
+                task::spawn(async move {
+                    bot_clone
+                        .send_message(chat_id, format!("{:?}", event))
+                        .parse_mode(ParseMode::Html)
+                        .await
+                        .unwrap();
+                })
+            })
+            .await;
+        }
+        _ => (),
+    }
     Ok(())
 }
 

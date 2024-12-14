@@ -13,7 +13,7 @@ pub enum Lexicon {
 impl Lexicon {
     pub fn describe(&self) -> &'static str {
         match self {
-            Lexicon::Help  => "<b>Доступные команды</b>:\n<code>/help</code>  —  справка\n<code>/music [ pause | resume | status ]</code>  —  управление музыкой\n<code>/execute</code>  —  выполнить команду в терминале",
+            Lexicon::Help  => "<b>Доступные команды</b>:\n<code>/help</code>  —  справка\n<code>/do [descriptor]</code>  —  выполнить команду\n<code>/execute</code>  —  выполнить команду в терминале",
             Lexicon::MusicStopped => "Музыка не играет",
             Lexicon::MusicPause => "Остановила музыку",
             Lexicon::MusicResume => "Включила музыку",
