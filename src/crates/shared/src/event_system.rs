@@ -51,7 +51,7 @@ impl AsyncEventDispatcher {
 
             for handler in handlers {
                 let cloned_event = event.clone();
-                debug!("Publishing event: {:?}", cloned_event);
+                debug!("Publishing event: {} - {:?}", event_type, cloned_event);
                 handler(cloned_event).await.unwrap();
             }
         }
