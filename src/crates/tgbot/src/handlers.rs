@@ -9,8 +9,7 @@ use services::{
     workers::Observer,
 };
 use shared::{
-    llm, shell,
-    state::{self, get_tg_accepted_users},
+    llm, state::{self, get_tg_accepted_users},
     types::AiRecognizeMethod,
 };
 use teloxide::{
@@ -33,9 +32,9 @@ enum Command {
     #[command(description = "display this text.")]
     Help,
     #[command(description = "control music. examples: \n\t/music pause\n\t/music resume")]
-    Music(String),
+    Music,
     #[command(description = "execute shell command")]
-    Execute(String),
+    Execute,
 }
 
 pub(crate) async fn handle_message(bot: Bot, msg: Message) -> ResponseResult<()> {

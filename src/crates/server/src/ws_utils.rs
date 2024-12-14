@@ -5,11 +5,11 @@ use actix_ws::{AggregatedMessage, Session};
 use async_trait::async_trait;
 use futures_util::StreamExt;
 use log::warn;
-use services::{services::commands::music, workers::Observer};
+use services::workers::Observer;
 use tokio::sync::RwLock;
 
 use crate::{
-    requests::{Requests},
+    requests::Requests,
     responses::Responses,
 };
 
