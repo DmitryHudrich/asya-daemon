@@ -3,13 +3,13 @@ use std::sync::Arc;
 use actix_web::{rt, web, Error, HttpRequest, HttpResponse};
 use actix_ws::{AggregatedMessage, Session};
 use async_trait::async_trait;
-use services::{services::commands::music, workers::Observer};
 use futures_util::StreamExt;
 use log::warn;
+use services::{services::commands::music, workers::Observer};
 use tokio::sync::RwLock;
 
 use crate::{
-    requests::{MusicAction, Requests},
+    requests::{Requests},
     responses::Responses,
 };
 
@@ -62,58 +62,34 @@ impl Observer<String> for PrintObserver {
 async fn handle_message(session: &mut Session, input: String) {
     let request = extract_request(input);
 
-    if let Requests::Music { action } = request {
-        handle_music(action, session).await;
-    }
+    let Requests::General { action } = request;
+    handle_music(action, session).await;
 }
 
-async fn handle_music(action: MusicAction, session: &mut Session) {
-    const DEFAULT_EXPECT_MSG: &str =
-        "The Responses enum should be able to be converted into JSON";
+async fn handle_music(action: String, session: &mut Session) {
+    const DEFAULT_EXPECT_MSG: &str = "The Responses enum should be able to be converted into JSON";
+    usecases::dispatch_usecase(action, "".to_string()).await;
 
-    match action {
-        MusicAction::PlayPause => {
-            music::play_pause();
+    let response = Responses::Base {
+        is_err: false,
+        message: "Toggled between play/pause in the player".to_string(),
+    };
 
-            let response = Responses::Base {
-                is_err: false,
-                message: "Toggled between play/pause in the player".to_string(),
-            };
-
-            session
-                .text(
-                    serde_json::to_string(&response)
-                        .expect(DEFAULT_EXPECT_MSG)
-                        .to_string(),
-                )
-                .await
-                .unwrap();
-        }
-        MusicAction::GetStatus => {
-            let status = music::get_status();
-
-            let response = Responses::Base {
-                is_err: false,
-                message: status.to_string(),
-            };
-
-            session
-                .text(
-                    serde_json::to_string(&response)
-                        .expect(DEFAULT_EXPECT_MSG)
-                        .to_string(),
-                )
-                .await
-                .unwrap();
-        }
-        MusicAction::Next => todo!(),
-        MusicAction::Previous => todo!(),
-    }
+    session
+        .text(
+            serde_json::to_string(&response)
+                .expect(DEFAULT_EXPECT_MSG)
+                .to_string(),
+        )
+        .await
+        .unwrap();
 }
 
 fn extract_request(input: String) -> Requests {
     serde_json::from_str::<Requests>(&input).unwrap_or_else(|err| {
         warn!("{:?}", err);
-        Requests::Empty
+        Requests::General {
+            action: "".to_string(),
+        }
     })
 }

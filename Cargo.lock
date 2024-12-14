@@ -2654,6 +2654,7 @@ dependencies = [
  "tokio",
  "toml",
  "tower",
+ "usecases",
 ]
 
 [[package]]
