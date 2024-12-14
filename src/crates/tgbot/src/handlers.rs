@@ -1,18 +1,14 @@
-use core::panic;
 use std::sync::Arc;
 
 use async_trait::async_trait;
 use log::{debug, info, warn};
 use services::{
     lexicon::Lexicon,
-    llm_api::{self},
     workers::Observer,
 };
-use shared::{
-    llm,
-    state::{self, get_tg_accepted_users},
-    types::AiRecognizeMethod,
-};
+use shared::
+    state::get_tg_accepted_users
+;
 use teloxide::{
     dispatching::dialogue::GetChatId,
     payloads::SendMessageSetters,
@@ -97,7 +93,6 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
         Command::Do(string_cmd) => {
             println!("Dispatching command: {}", string_cmd);
             println!("Message: {}", msg.text().unwrap());
-            usecases::dispatch_usecase(string_cmd, msg.text().unwrap().to_string()).await;
             let bot_clone = bot.clone();
             let chat_id = msg.chat.id;
             usecases::subscribe_once(move |event: Arc<AsyaResponse>| {
@@ -113,6 +108,7 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
                 })
             })
             .await;
+            usecases::dispatch_usecase(string_cmd, msg.text().unwrap().to_string()).await;
         }
         _ => (),
     }

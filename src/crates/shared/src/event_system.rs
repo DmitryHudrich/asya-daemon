@@ -1,3 +1,4 @@
+use log::debug;
 use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -26,7 +27,6 @@ impl AsyncEventDispatcher {
     {
         let mut listeners = self.listeners.write().await;
         let event_type = std::any::type_name::<E>().to_string();
-
         if !listeners.contains_key(&event_type) {
             listeners.entry(event_type).or_default().push(Box::new(
                 move |event: Arc<dyn Any + Send + Sync>| {
@@ -42,16 +42,16 @@ impl AsyncEventDispatcher {
 
     pub async fn publish<E>(&self, event: E)
     where
-        E: 'static + Any + Send + Sync,
+        E: 'static + Any + Send + Sync + std::fmt::Debug,
     {
         let listeners = self.listeners.read().await;
         let event_type = std::any::type_name::<E>().to_string();
-
         if let Some(handlers) = listeners.get(&event_type) {
             let event = Arc::new(event);
 
             for handler in handlers {
                 let cloned_event = event.clone();
+                debug!("Publishing event: {:?}", cloned_event);
                 handler(cloned_event).await.unwrap();
             }
         }

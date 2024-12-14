@@ -3,13 +3,13 @@ use music_control::Usecases;
 use shared::event_system::AsyncEventDispatcher;
 use std::{any::Any, sync::Arc};
 use tokio::{
-    sync::{OnceCell, RwLock},
+    sync::OnceCell,
     task,
 };
 
 pub mod music_control;
 
-static EVENT_DISPATCHER: OnceCell<Arc<RwLock<AsyncEventDispatcher>>> = OnceCell::const_new();
+static EVENT_DISPATCHER: OnceCell<Arc<AsyncEventDispatcher>> = OnceCell::const_new();
 
 pub async fn dispatch_usecase(command: String, userinput: String) {
     debug!("Dispatching music command: {:?}", command);
@@ -17,10 +17,10 @@ pub async fn dispatch_usecase(command: String, userinput: String) {
     match usecase {
         Ok(usecase) => match usecase {
             Usecases::TurnOffMusic | Usecases::TurnOnMusic => {
-                music_control::play_or_resume_music(command, userinput).await;
+                music_control::play_or_resume_music(command).await;
             }
             Usecases::GetMusicStatus => {
-                music_control::get_music_status(command, userinput).await;
+                music_control::get_music_status(userinput).await;
             }
         },
 
@@ -29,9 +29,9 @@ pub async fn dispatch_usecase(command: String, userinput: String) {
     }
 }
 
-async fn get_event_dispatcher() -> Arc<RwLock<AsyncEventDispatcher>> {
+async fn get_event_dispatcher() -> Arc<AsyncEventDispatcher> {
     let dispatcher = EVENT_DISPATCHER
-        .get_or_init(|| async { Arc::new(RwLock::new(AsyncEventDispatcher::new())) })
+        .get_or_init(|| async { Arc::new(AsyncEventDispatcher::new()) })
         .await;
     dispatcher.clone()
 }
@@ -43,19 +43,15 @@ where
 {
     get_event_dispatcher()
         .await
-        .read()
-        .await
         .subscribe(handler)
         .await;
 }
 
 pub async fn publish<E>(event: E)
 where
-    E: 'static + Any + Send + Sync,
+    E: 'static + Any + Send + Sync + std::fmt::Debug,
 {
     get_event_dispatcher()
-        .await
-        .read()
         .await
         .publish(event)
         .await;

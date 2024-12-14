@@ -24,7 +24,7 @@ pub enum Usecases {
     // MusicPrevious,
 }
 
-pub async fn play_or_resume_music(executed_command: String, userinput: String) {
+pub async fn play_or_resume_music(executed_command: String) {
     let music_status = music::get_status();
     music::play_pause();
     match music_status {
@@ -34,6 +34,7 @@ pub async fn play_or_resume_music(executed_command: String, userinput: String) {
             let formatted_prompt = prompt.replace("{command}", executed_command.as_str());
             let response = llm_api::send_request(formatted_prompt).await;
             let res = response.unwrap_or(Lexicon::MusicResume.describe().to_string());
+            println!("res: {}", res);
             crate::publish(AsyaResponse::Ok {
                 message: res.to_string(),
             })
@@ -53,7 +54,7 @@ pub async fn play_or_resume_music(executed_command: String, userinput: String) {
     };
 }
 
-pub async fn get_music_status(executed_command: String, userinput: String) {
+pub async fn get_music_status(userinput: String) {
     let music_status = music::get_status();
     match music_status {
         // MediaPlayingStatus::Stopped => Lexicon::MusicStopped.describe().to_string(),

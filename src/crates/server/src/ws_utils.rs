@@ -66,7 +66,6 @@ async fn handle_message(session: &mut Session, input: String) {
 
 async fn handle_music(action: String, session: &mut Session) {
     const DEFAULT_EXPECT_MSG: &str = "The Responses enum should be able to be converted into JSON";
-    usecases::dispatch_usecase(action, "".to_string()).await;
     usecases::subscribe_once({
         let session = session.clone();
         move |event: Arc<AsyaResponse>| {
@@ -87,7 +86,9 @@ async fn handle_music(action: String, session: &mut Session) {
                     .unwrap();
             })
         }
-    }).await;
+    })
+    .await;
+    usecases::dispatch_usecase(action, "".to_string()).await;
 }
 
 fn extract_request(input: String) -> Requests {
