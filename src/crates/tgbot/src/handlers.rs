@@ -91,8 +91,6 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
             return Ok(());
         }
         Command::Do(string_cmd) => {
-            println!("Dispatching command: {}", string_cmd);
-            println!("Message: {}", msg.text().unwrap());
             let bot_clone = bot.clone();
             let chat_id = msg.chat.id;
             usecases::subscribe_once(move |event: Arc<AsyaResponse>| {

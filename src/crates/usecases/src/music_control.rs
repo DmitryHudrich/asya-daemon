@@ -34,7 +34,6 @@ pub async fn play_or_resume_music(executed_command: String) {
             let formatted_prompt = prompt.replace("{command}", executed_command.as_str());
             let response = llm_api::send_request(formatted_prompt).await;
             let res = response.unwrap_or(Lexicon::MusicResume.describe().to_string());
-            println!("res: {}", res);
             crate::publish(AsyaResponse::Ok {
                 message: res.to_string(),
             })
