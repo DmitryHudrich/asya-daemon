@@ -23,7 +23,7 @@ pub async fn send_request(req: String) -> Result<String, AiRequestError> {
     {
         AiRecognizeMethod::Groq => send_to_groq(req).await,
         AiRecognizeMethod::AltaS => send_to_altas(req).await,
-        AiRecognizeMethod::None => Ok(req), // nothing for recognize, so just return command
+        AiRecognizeMethod::None => Err(AiRequestError::GroqRequest), // nothing for recognize, so just return command
     }
 }
 

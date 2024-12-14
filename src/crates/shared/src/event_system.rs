@@ -4,7 +4,6 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use tokio::task;
 
-
 type AsyncEventHandler =
     Box<dyn Fn(Arc<dyn Any + Send + Sync>) -> task::JoinHandle<()> + Send + Sync>;
 
@@ -28,15 +27,17 @@ impl AsyncEventDispatcher {
         let mut listeners = self.listeners.write().await;
         let event_type = std::any::type_name::<E>().to_string();
 
-        listeners.entry(event_type).or_default().push(Box::new(
-            move |event: Arc<dyn Any + Send + Sync>| {
-                if let Ok(event) = Arc::downcast::<E>(event.clone()) {
-                    handler(event)
-                } else {
-                    panic!();
-                }
-            },
-        ));
+        if !listeners.contains_key(&event_type) {
+            listeners.entry(event_type).or_default().push(Box::new(
+                move |event: Arc<dyn Any + Send + Sync>| {
+                    if let Ok(event) = Arc::downcast::<E>(event.clone()) {
+                        handler(event)
+                    } else {
+                        panic!();
+                    }
+                },
+            ));
+        }
     }
 
     pub async fn publish<E>(&self, event: E)
@@ -56,4 +57,3 @@ impl AsyncEventDispatcher {
         }
     }
 }
-

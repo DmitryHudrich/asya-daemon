@@ -24,25 +24,24 @@ pub enum Usecases {
     // MusicPrevious,
 }
 
-pub async fn play_or_resume_music(userinput: String) {
+pub async fn play_or_resume_music(executed_command: String, userinput: String) {
     let music_status = music::get_status();
     music::play_pause();
     match music_status {
         MediaPlayingStatus::Stopped => (),
         MediaPlayingStatus::Paused(_) => {
             let prompt = llm::get_prompt("/telegram/music/resume");
-            let formatted_prompt = prompt.replace("{command}", userinput.as_str());
+            let formatted_prompt = prompt.replace("{command}", executed_command.as_str());
             let response = llm_api::send_request(formatted_prompt).await;
+            let res = response.unwrap_or(Lexicon::MusicResume.describe().to_string());
             crate::publish(AsyaResponse::Ok {
-                message: format!("Music че то там {}", music::get_status()),
+                message: res.to_string(),
             })
             .await;
-
-            response.unwrap_or(Lexicon::MusicResume.describe().to_string());
         }
         MediaPlayingStatus::Playing(_) => {
             let prompt = llm::get_prompt("/telegram/music/pause");
-            let formatted_prompt = prompt.replace("{command}", userinput.as_str());
+            let formatted_prompt = prompt.replace("{command}", executed_command.as_str());
             let response = llm_api::send_request(formatted_prompt).await;
             let res = response.unwrap_or(Lexicon::MusicPause.describe().to_string());
             crate::publish(AsyaResponse::Ok {
@@ -54,7 +53,7 @@ pub async fn play_or_resume_music(userinput: String) {
     };
 }
 
-pub async fn get_music_status(userinput: String) {
+pub async fn get_music_status(executed_command: String, userinput: String) {
     let music_status = music::get_status();
     match music_status {
         // MediaPlayingStatus::Stopped => Lexicon::MusicStopped.describe().to_string(),

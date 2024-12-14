@@ -17,10 +17,10 @@ pub async fn dispatch_usecase(command: String, userinput: String) {
     match usecase {
         Ok(usecase) => match usecase {
             Usecases::TurnOffMusic | Usecases::TurnOnMusic => {
-                music_control::play_or_resume_music(userinput).await;
+                music_control::play_or_resume_music(command, userinput).await;
             }
             Usecases::GetMusicStatus => {
-                music_control::get_music_status(userinput).await;
+                music_control::get_music_status(command, userinput).await;
             }
         },
 
@@ -37,7 +37,7 @@ async fn get_event_dispatcher() -> Arc<RwLock<AsyncEventDispatcher>> {
     dispatcher.clone()
 }
 
-pub async fn subscribe<E, F>(handler: F)
+pub async fn subscribe_once<E, F>(handler: F)
 where
     E: 'static + Any + Send + Sync,
     F: Fn(Arc<E>) -> task::JoinHandle<()> + Send + Sync + 'static,

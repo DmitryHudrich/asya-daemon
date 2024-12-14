@@ -2,7 +2,7 @@ use core::panic;
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use log::{info, warn};
+use log::{debug, info, warn};
 use services::{
     lexicon::Lexicon,
     llm_api::{self},
@@ -71,16 +71,11 @@ pub(crate) async fn check_user_authority(bot: Bot, msg: Message) -> bool {
 
 async fn handle_command(text: &str, bot: Bot, msg: &Message) -> Result<(), teloxide::RequestError> {
     info!("Received message: {}", text);
-    let slash_command = if state::is_llm_obtained() && !text.starts_with('/') {
-        recognize_command_with_llm(text.to_string()).await
-    } else {
-        text.to_string()
-    };
-    info!("Recognized command: {}", slash_command);
+    // here should be the logic to handle the command with ai
 
-    if slash_command.starts_with('/') {
+    if text.starts_with('/') {
         let bot_username = bot.get_me().await?.username().to_owned();
-        let cmd = Command::parse(&slash_command, &bot_username).unwrap();
+        let cmd = Command::parse(text, &bot_username).unwrap();
         dispatch(cmd, &bot, msg).await?;
     } else {
         bot.send_message(msg.chat.id, Lexicon::Help.describe())
@@ -100,14 +95,18 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
             return Ok(());
         }
         Command::Do(string_cmd) => {
+            println!("Dispatching command: {}", string_cmd);
+            println!("Message: {}", msg.text().unwrap());
             usecases::dispatch_usecase(string_cmd, msg.text().unwrap().to_string()).await;
             let bot_clone = bot.clone();
             let chat_id = msg.chat.id;
-            usecases::subscribe(move |event: Arc<AsyaResponse>| {
+            usecases::subscribe_once(move |event: Arc<AsyaResponse>| {
                 let bot_clone = bot_clone.clone();
                 task::spawn(async move {
+                    debug!("Received event: {:?}", event);
+                    let AsyaResponse::Ok { message, .. } = event.as_ref();
                     bot_clone
-                        .send_message(chat_id, format!("{:?}", event))
+                        .send_message(chat_id, message.to_string())
                         .parse_mode(ParseMode::Html)
                         .await
                         .unwrap();
@@ -119,46 +118,6 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
     }
     Ok(())
 }
-
-async fn recognize_command_with_llm(msg: String) -> String {
-    let prompt = match state::get_ai_recognize_method().unwrap() {
-        AiRecognizeMethod::Groq => format_for_groq(msg),
-        AiRecognizeMethod::AltaS => msg,
-        AiRecognizeMethod::None => panic!("Ai recognizing with unspecified model"),
-    };
-
-    llm_api::send_request(prompt)
-        .await
-        .expect("The LLM should recognize arbitrary command")
-}
-
-fn format_for_groq(msg: String) -> String {
-    const COMMANDS: &str = r#"
-        /music resume, 
-        /music pause
-        /music status",
-    "#;
-
-    let prompt = llm::get_prompt("/telegram/recognize_command");
-
-    prompt
-        .replace("{commands}", COMMANDS)
-        .replace("{message}", &msg)
-}
-
-// TODO: use it in future
-// async fn sub_to_getactionworker(msg: &Message, bot: &Bot) {
-//     static INIT: OnceCell<()> = OnceCell::const_new();
-//     let worker = workers::get_actionworker().await;
-//     let observer = Box::new(PrintObserver {
-//         chatid: msg.chat.id,
-//         bot: bot.clone(), // todo: fix cloning
-//     });
-//     INIT.get_or_init(|| async {
-//         worker.subscribe(observer).await;
-//     })
-//     .await;
-// }
 
 pub struct PrintObserver {
     chat_id: ChatId,
