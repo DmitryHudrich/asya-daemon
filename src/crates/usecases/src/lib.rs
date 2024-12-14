@@ -12,7 +12,7 @@ pub mod music_control;
 static EVENT_DISPATCHER: OnceCell<Arc<AsyncEventDispatcher>> = OnceCell::const_new();
 
 pub async fn dispatch_usecase(command: String, userinput: String) {
-    debug!("Dispatching music command: {:?}", command);
+    debug!("Dispatching command: {:?}", command);
     let usecase = command.parse::<Usecases>();
     match usecase {
         Ok(usecase) => match usecase {
