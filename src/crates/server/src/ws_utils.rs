@@ -6,12 +6,10 @@ use async_trait::async_trait;
 use futures_util::StreamExt;
 use log::warn;
 use services::workers::Observer;
-use tokio::sync::RwLock;
+use tokio::{sync::RwLock, task};
+use usecases::AsyaResponse;
 
-use crate::{
-    requests::Requests,
-    responses::Responses,
-};
+use crate::{requests::Requests, responses::Responses};
 
 pub async fn ws_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
     let (res, mut session, stream) = actix_ws::handle(&req, stream)?;
@@ -69,20 +67,27 @@ async fn handle_message(session: &mut Session, input: String) {
 async fn handle_music(action: String, session: &mut Session) {
     const DEFAULT_EXPECT_MSG: &str = "The Responses enum should be able to be converted into JSON";
     usecases::dispatch_usecase(action, "".to_string()).await;
+    usecases::subscribe_once({
+        let session = session.clone();
+        move |event: Arc<AsyaResponse>| {
+            let mut session = session.clone();
+            task::spawn(async move {
+                let response = Responses::Base {
+                    is_err: false,
+                    message: event.to_string(),
+                };
 
-    let response = Responses::Base {
-        is_err: false,
-        message: "Toggled between play/pause in the player".to_string(),
-    };
-
-    session
-        .text(
-            serde_json::to_string(&response)
-                .expect(DEFAULT_EXPECT_MSG)
-                .to_string(),
-        )
-        .await
-        .unwrap();
+                session
+                    .text(
+                        serde_json::to_string(&response)
+                            .expect(DEFAULT_EXPECT_MSG)
+                            .to_string(),
+                    )
+                    .await
+                    .unwrap();
+            })
+        }
+    }).await;
 }
 
 fn extract_request(input: String) -> Requests {

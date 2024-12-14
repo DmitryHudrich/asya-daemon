@@ -29,7 +29,6 @@ pub async fn dispatch_usecase(command: String, userinput: String) {
     }
 }
 
-
 async fn get_event_dispatcher() -> Arc<RwLock<AsyncEventDispatcher>> {
     let dispatcher = EVENT_DISPATCHER
         .get_or_init(|| async { Arc::new(RwLock::new(AsyncEventDispatcher::new())) })
@@ -64,10 +63,9 @@ where
 
 // general purpose events
 
-
 /// General response event. Should be used to send only responses to the user.
 #[derive(Debug, parse_display::Display)]
 pub enum AsyaResponse {
-    #[display("{}")]
+    #[display("{message}")]
     Ok { message: String },
 }
