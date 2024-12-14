@@ -4,7 +4,8 @@ members = [
   "src/crates/services",
   "src/crates/shared",
   "src/crates/tgbot",
-  "src/crates/macros"
+  "src/crates/macros",
+  "src/crates/usecases"
 ]
 
 resolver = "2"

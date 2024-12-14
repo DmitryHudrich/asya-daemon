@@ -1,6 +1,8 @@
 use core::panic;
+use std::sync::Arc;
 
 use async_trait::async_trait;
+use log::{info, warn};
 use services::{
     lexicon::Lexicon,
     llm_api::{self},
@@ -19,6 +21,8 @@ use teloxide::{
     utils::command::BotCommands,
     Bot,
 };
+use tokio::task;
+use usecases::AsyaResponse;
 
 #[derive(BotCommands, Clone, Debug)]
 #[command(
@@ -56,6 +60,7 @@ pub(crate) async fn check_user_authority(bot: Bot, msg: Message) -> bool {
     let is_authorized_user = accepted_users.contains(&authorized_user);
 
     if !is_authorized_user {
+        warn!("User without access: {}", authorized_user);
         bot.send_message(chat_id, Lexicon::Unauthorized.describe())
             .await
             .expect("The bot should be able to send message to user");
@@ -65,16 +70,18 @@ pub(crate) async fn check_user_authority(bot: Bot, msg: Message) -> bool {
 }
 
 async fn handle_command(text: &str, bot: Bot, msg: &Message) -> Result<(), teloxide::RequestError> {
+    info!("Received message: {}", text);
     let slash_command = if state::is_llm_obtained() && !text.starts_with('/') {
         recognize_command_with_llm(text.to_string()).await
     } else {
         text.to_string()
     };
+    info!("Recognized command: {}", slash_command);
 
     if slash_command.starts_with('/') {
-        let bot_username = bot.get_me().await?.username().to_owned();
-        let cmd = Command::parse(&slash_command, &bot_username).unwrap();
-        dispatch(cmd, &bot, msg).await?;
+        // let bot_username = bot.get_me().await?.username().to_owned();
+        // let cmd = Command::parse(&slash_command, &bot_username).unwrap();
+        dispatch(text.to_string(), &bot, msg).await?;
     } else {
         bot.send_message(msg.chat.id, Lexicon::Help.describe())
             .parse_mode(ParseMode::Html)
@@ -84,38 +91,20 @@ async fn handle_command(text: &str, bot: Bot, msg: &Message) -> Result<(), telox
     Ok(())
 }
 
-async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide::RequestError> {
-    match cmd {
-        Command::Help => {
-            // bot.send_message(msg.chat.id, Command::descriptions().to_string())
-            //     .await?;
-            bot.send_message(msg.chat.id, Lexicon::Help.describe())
+async fn dispatch(cmd: String, bot: &Bot, msg: &Message) -> Result<(), teloxide::RequestError> {
+    usecases::dispatch_usecase(cmd, msg.text().unwrap().to_string()).await;
+    let bot_clone = bot.clone();
+    let chat_id = msg.chat.id;
+    usecases::subscribe(move |event: Arc<AsyaResponse>| {
+        let bot_clone = bot_clone.clone();
+        task::spawn(async move {
+            bot_clone.send_message(chat_id, format!("{:?}", event))
                 .parse_mode(ParseMode::Html)
-                .await?;
-        }
-        Command::Music(command) => {
-            let response = crate::music_dispatching::dispatch_music_command(command, msg).await;
-
-            bot.send_message(msg.chat.id, response)
-                .parse_mode(ParseMode::Html)
-                .await?;
-        }
-        Command::Execute(command) => {
-            let args = command.split_whitespace().collect();
-            let response = shell::execute_command(args)
-                .map(|result| {
-                    format!(
-                        "{description}\n<pre>{result}</pre>",
-                        description = Lexicon::ExecuteSuccess.describe()
-                    )
-                })
-                .unwrap_or(Lexicon::ExecuteError.describe().to_owned());
-
-            bot.send_message(msg.chat.id, response)
-                .parse_mode(ParseMode::Html)
-                .await?;
-        }
-    };
+                .await
+                .unwrap();
+        })
+    })
+    .await;
     Ok(())
 }
 

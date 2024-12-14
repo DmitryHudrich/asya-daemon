@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 services = { path = "../services/" }
 shared = { path = "../shared/" }
+usecases = { path = "../usecases/" }
 
 teloxide = { version = "0.13", features = ["macros"] }
 
