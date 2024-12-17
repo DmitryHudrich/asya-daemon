@@ -1,10 +1,8 @@
-use crate::AsyaResponse;
+use crate::{AsyaResponse, PromptBuilder};
 use services::{
     lexicon::Lexicon,
-    llm_api,
     services::commands::music::{self, MediaPlayingStatus},
 };
-use shared::llm;
 use shared::traits::Beautify;
 
 // for future use
@@ -30,24 +28,28 @@ pub async fn play_or_resume_music(executed_command: String) {
     match music_status {
         MediaPlayingStatus::Stopped => (),
         MediaPlayingStatus::Paused(_) => {
-            let prompt = llm::get_prompt("/telegram/music/resume");
-            let formatted_prompt = prompt.replace("{command}", executed_command.as_str());
-            let response = llm_api::send_request(formatted_prompt).await;
-            let res = response.unwrap_or(Lexicon::MusicResume.describe().to_string());
+            let res = PromptBuilder::new()
+                .set_path("/telegram/music/resume")
+                .set_variable("{command}", executed_command.as_str())
+                .set_fallback_phrase(Lexicon::MusicResume)
+                .get_result()
+                .await;
+
             crate::publish(AsyaResponse::Ok {
                 message: res.to_string(),
-            })
-            .await;
+            }).await;
         }
         MediaPlayingStatus::Playing(_) => {
-            let prompt = llm::get_prompt("/telegram/music/pause");
-            let formatted_prompt = prompt.replace("{command}", executed_command.as_str());
-            let response = llm_api::send_request(formatted_prompt).await;
-            let res = response.unwrap_or(Lexicon::MusicPause.describe().to_string());
+            let res = PromptBuilder::new()
+                .set_path("/telegram/music/pause")
+                .set_variable("{command}", executed_command.as_str())
+                .set_fallback_phrase(Lexicon::MusicPause)
+                .get_result()
+                .await;
+
             crate::publish(AsyaResponse::Ok {
                 message: res.to_string(),
-            })
-            .await;
+            }).await;
         }
         MediaPlayingStatus::Unknown => (),
     };
@@ -59,35 +61,26 @@ pub async fn get_music_status(userinput: String) {
         // MediaPlayingStatus::Stopped => Lexicon::MusicStopped.describe().to_string(),
         MediaPlayingStatus::Stopped => (),
         MediaPlayingStatus::Paused(status) => {
-            let prompt = llm::get_prompt("/telegram/music/status");
-            let formatted_prompt = prompt
-                .replace("{status}", format!("{}", status).as_str())
-                .replace("{message}", userinput.as_str());
-            let response = llm_api::send_request(formatted_prompt).await;
-            let res = response.unwrap_or(status.beautiful_out());
-            crate::publish(AsyaResponse::Ok {
-                message: res.to_string(),
-            })
-            .await;
-
-            // todo: beautify
-            // music output
+            publish_music_status(status, &userinput).await;
         }
         MediaPlayingStatus::Playing(status) => {
-            let prompt = llm::get_prompt("/telegram/music/status");
-            let formatted_prompt = prompt
-                .replace("{status}", format!("{}", status).as_str())
-                .replace("{message}", userinput.as_str());
-            let response = llm_api::send_request(formatted_prompt).await;
-            let res = response.unwrap_or(status.beautiful_out());
-            crate::publish(AsyaResponse::Ok {
-                message: res.to_string(),
-            })
-            .await;
-            // todo: beautify
-            // music output
+            publish_music_status(status, &userinput).await;
         }
         // MediaPlayingStatus::Unknown => Lexicon::MusicStopped.describe().to_string(),
         MediaPlayingStatus::Unknown => (),
     };
+}
+
+async fn publish_music_status(status: music::TrackInfo, userinput: &str) {
+    let res = PromptBuilder::new()
+        .set_path("/telegram/music/status")
+        .set_variable("{status}", status.beautiful_out().as_str())
+        .set_variable("{message}", userinput)
+        .set_fallback_phrase(Lexicon::ExecuteSuccess)
+        .get_result()
+        .await;
+    crate::publish(AsyaResponse::Ok {
+        message: res.to_string(),
+    })
+    .await;
 }
