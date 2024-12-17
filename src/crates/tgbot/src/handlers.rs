@@ -107,8 +107,3 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
     }
     Ok(())
 }
-
-pub struct PrintObserver {
-    chat_id: ChatId,
-    bot: Bot,
-}

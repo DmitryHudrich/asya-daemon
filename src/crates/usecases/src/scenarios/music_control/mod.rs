@@ -14,15 +14,6 @@ use shared::traits::Beautify;
 //     MusicResumed { song_name: String },
 // }
 
-#[derive(Debug, parse_display::FromStr)]
-#[display(style = "snake_case")]
-pub enum Usecases {
-    TurnOffMusic,
-    TurnOnMusic,
-    GetMusicStatus,
-    // MusicPrevious,
-}
-
 pub async fn play_or_resume_music(executed_command: String) {
     let music_status = music::get_status();
     music::play_pause();

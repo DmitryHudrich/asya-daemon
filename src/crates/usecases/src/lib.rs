@@ -1,6 +1,6 @@
 use crate::scenarios::music_control;
 use log::*;
-use scenarios::music_control::Usecases;
+use crate::usecases::Usecases;
 use shared::event_system::AsyncEventDispatcher;
 use std::{any::Any, sync::Arc};
 use tokio::{
@@ -10,6 +10,7 @@ use tokio::{
 
 pub mod scenarios;
 pub mod workers;
+pub mod usecases;
 mod tools;
 
 static EVENT_DISPATCHER: OnceCell<Arc<AsyncEventDispatcher>> = OnceCell::const_new();
