@@ -1,4 +1,5 @@
-use crate::{AsyaResponse, PromptBuilder};
+use crate::tools::PromptBuilder;
+use crate::AsyaResponse;
 use services::{
     lexicon::Lexicon,
     services::commands::music::{self, MediaPlayingStatus},
@@ -84,3 +85,4 @@ async fn publish_music_status(status: music::TrackInfo, userinput: &str) {
     })
     .await;
 }
+
