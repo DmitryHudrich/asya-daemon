@@ -13,6 +13,8 @@ pub struct AsyncEventDispatcher {
     listeners: Arc<RwLock<HashMap<String, Vec<AsyncEventHandler>>>>,
 }
 
+// maybe we should make another version `subscribe` and `publish` methods which works with
+// multiple events.
 impl AsyncEventDispatcher {
     pub fn new() -> Self {
         Self {
