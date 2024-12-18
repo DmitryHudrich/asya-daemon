@@ -1,72 +1,51 @@
+use crate::scenarios::music_control;
+use crate::usecases::Usecases;
 use log::*;
-use music_control::Usecases;
-use shared::event_system::AsyncEventDispatcher;
-use std::{any::Any, sync::Arc};
-use tokio::{
-    sync::OnceCell,
-    task,
-};
+use scenarios::system_monitoring;
 
-pub mod music_control;
-pub mod workers;
+pub mod scenarios;
+pub mod shared_workers;
+mod tools;
+pub mod usecases;
 
-static EVENT_DISPATCHER: OnceCell<Arc<AsyncEventDispatcher>> = OnceCell::const_new();
-
-pub fn run_backgorund_workers() {
-    tokio::spawn(workers::action_worker::run());
-}
-
-pub async fn dispatch_usecase(command: String, userinput: String) {
+/// Dispatches the usecase to the appropriate scenario.
+pub async fn dispatch_usecase(command: Usecases, userinput: String) {
     debug!("Dispatching command: {:?}", command);
-    let usecase = command.parse::<Usecases>();
-    match usecase {
-        Ok(usecase) => match usecase {
-            Usecases::TurnOffMusic | Usecases::TurnOnMusic => {
-                music_control::play_or_resume_music(command).await;
-            }
-            Usecases::GetMusicStatus => {
-                music_control::get_music_status(userinput).await;
-            }
-        },
-
-        Err(err) => warn!("Error parsing usecase: {:?}", err),
-        // _ => Lexicon::Error.describe().to_string(),
+    match command {
+        Usecases::TurnOffMusic | Usecases::TurnOnMusic => {
+            music_control::play_or_resume_music(userinput).await;
+        }
+        Usecases::GetMusicStatus => {
+            music_control::get_music_status(userinput).await;
+        }
+        Usecases::PlayNextTrack => music_control::play_next_track(userinput).await,
+        Usecases::PlayPrevTrack => music_control::play_previous_track(userinput).await,
+        Usecases::StartBasicSystemMonitoring => {
+            system_monitoring::start_basic_monitoring(userinput).await
+        }
     }
-}
-
-async fn get_event_dispatcher() -> Arc<AsyncEventDispatcher> {
-    let dispatcher = EVENT_DISPATCHER
-        .get_or_init(|| async { Arc::new(AsyncEventDispatcher::new()) })
-        .await;
-    dispatcher.clone()
-}
-
-pub async fn subscribe_once<E, F>(handler: F)
-where
-    E: 'static + Any + Send + Sync,
-    F: Fn(Arc<E>) -> task::JoinHandle<()> + Send + Sync + 'static,
-{
-    get_event_dispatcher()
-        .await
-        .subscribe(handler)
-        .await;
-}
-
-pub async fn publish<E>(event: E)
-where
-    E: 'static + Any + Send + Sync + std::fmt::Debug,
-{
-    get_event_dispatcher()
-        .await
-        .publish(event)
-        .await;
 }
 
 // general purpose events
 
-/// General response event. Should be used to send only responses to the user.
+/// General response event. Use it to send responses to the client.
+/// How event works see [`shared::event_system`].
 #[derive(Debug, parse_display::Display)]
 pub enum AsyaResponse {
+    /// Success response with message from Asya.
+    ///
+    /// # Arguments
+    ///     * `message` - human readable message from Asya, e.g.
+    ///         "I've turned off the music. Don't listen this shit anymore."
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// event_system::publish(AsyaResponse::Ok {
+    ///     message: "Hi, Vitaliy! I heard that u like thinkpads? Me too!"
+    /// }
+    ///
+    /// ```
     #[display("{message}")]
     Ok { message: String },
 }

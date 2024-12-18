@@ -18,7 +18,6 @@ async fn main() {
     logging::init_logging();
     let tg_bot_launching = tgbot::run_telegram_bot();
     let server_launching = server::start();
-    usecases::run_backgorund_workers();
     info!("Bootstrapping");
 
     _ = join!(server_launching, tg_bot_launching);

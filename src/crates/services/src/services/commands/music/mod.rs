@@ -96,6 +96,11 @@ pub fn get_status() -> MediaPlayingStatus {
 }
 
 #[cfg(target_family = "unix")]
+pub fn play_next() {
+    shell::execute_command(vec!["playerctl", "next"]).expect("playerctl next caused error");
+}
+
+#[cfg(target_family = "unix")]
 fn pctl_metadat_prop(prop: &str) -> Option<String> {
     let prop_formatted = format!("{{{{{}}}}}", prop);
     let query = vec!["playerctl", "metadata", "--format", prop_formatted.as_str()];
@@ -107,7 +112,7 @@ fn pctl_metadat_prop(prop: &str) -> Option<String> {
     }
 }
 
-#[cfg(target_family = "windows")]
-pub fn play_pause() {
-    todo!()
+#[cfg(target_family = "unix")]
+pub fn play_prev() {
+    shell::execute_command(vec!["playerctl", "previous"]).expect("playerctl prev caused error");
 }

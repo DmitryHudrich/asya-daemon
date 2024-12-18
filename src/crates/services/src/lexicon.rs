@@ -1,8 +1,10 @@
+#[derive(Debug, Default)]
 pub enum Lexicon {
     Help,
     MusicStopped,
     MusicPause,
     MusicResume,
+    #[default]
     ExecuteSuccess,
     ExecuteError,
     Error,

@@ -5,14 +5,9 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use tokio::task;
 
-type AsyncEventHandler =
-    Box<dyn Fn(Arc<dyn Any + Send + Sync>) -> task::JoinHandle<()> + Send + Sync>;
-
-#[derive(Default)]
-pub struct AsyncEventDispatcher {
-    listeners: Arc<RwLock<HashMap<String, Vec<AsyncEventHandler>>>>,
-}
-
+use super::AsyncEventDispatcher;
+// maybe we should make another version `subscribe` and `publish` methods which works with
+// multiple events.
 impl AsyncEventDispatcher {
     pub fn new() -> Self {
         Self {
@@ -20,12 +15,15 @@ impl AsyncEventDispatcher {
         }
     }
 
+    //change &str to enum
     pub async fn subscribe<E, F>(&self, handler: F)
     where
         E: 'static + Any + Send + Sync,
         F: Fn(Arc<E>) -> task::JoinHandle<()> + Send + Sync + 'static,
     {
         let mut listeners = self.listeners.write().await;
+        // todo:
+        // dedicate entries for platforms. that each platform has its own listeners.
         let event_type = std::any::type_name::<E>().to_string();
         if !listeners.contains_key(&event_type) {
             listeners.entry(event_type).or_default().push(Box::new(
@@ -38,6 +36,11 @@ impl AsyncEventDispatcher {
                 },
             ));
         }
+    }
+
+    pub async fn unsubscribe_all(&self) {
+        let mut listeners = self.listeners.write().await;
+        listeners.clear();
     }
 
     pub async fn publish<E>(&self, event: E)

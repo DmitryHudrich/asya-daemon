@@ -1,8 +1,8 @@
 use std::sync::Arc;
 use log::{debug, info, warn};
 use services::lexicon::Lexicon;
-use shared::
-    state::get_tg_accepted_users
+use shared::{event_system, 
+    state::get_tg_accepted_users}
 ;
 use teloxide::{
     dispatching::dialogue::GetChatId,
@@ -88,7 +88,7 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
         Command::Do(string_cmd) => {
             let bot_clone = bot.clone();
             let chat_id = msg.chat.id;
-            usecases::subscribe_once(move |event: Arc<AsyaResponse>| {
+            event_system::subscribe_once(move |event: Arc<AsyaResponse>| {
                 let bot_clone = bot_clone.clone();
                 task::spawn(async move {
                     debug!("Received event: {:?}", event);
@@ -101,14 +101,9 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
                 })
             })
             .await;
-            usecases::dispatch_usecase(string_cmd, msg.text().unwrap().to_string()).await;
+            // usecases::dispatch_usecase(string_cmd, msg.text().unwrap().to_string()).await;
         }
         _ => (),
     }
     Ok(())
-}
-
-pub struct PrintObserver {
-    chat_id: ChatId,
-    bot: Bot,
 }
