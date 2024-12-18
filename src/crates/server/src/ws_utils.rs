@@ -28,11 +28,39 @@ pub async fn ws_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpRe
     Ok(res)
 }
 
-async fn handle_message(session: &mut Session, input: String) {
-    let request = extract_request(input);
+const DEFAULT_EXPECT_MSG: &str = "The Responses enum should be able to be converted into JSON";
 
+async fn handle_message(session: &mut Session, input: String) {
+    let request = serde_json::from_str::<Requests>(&input);
+    match request {
+        Ok(request) => {
+            handle_request(request, session).await;
+        }
+        Err(err) => {
+            handle_error(err, session).await;
+        }
+    }
+}
+
+async fn handle_error(err: serde_json::Error, session: &mut Session) {
+    warn!("Error parsing request: {:?}", err);
+
+    let response = Responses::Base {
+        is_err: true,
+        message: err.to_string(),
+    };
+    session
+        .text(
+            serde_json::to_string(&response)
+                .expect(DEFAULT_EXPECT_MSG)
+                .to_string(),
+        )
+        .await
+        .unwrap();
+}
+
+async fn handle_request(request: Requests, session: &mut Session) {
     let Requests::General { action } = request;
-    const DEFAULT_EXPECT_MSG: &str = "The Responses enum should be able to be converted into JSON";
     usecases::subscribe_once({
         let session = session.clone(); // should be a clone of the session?
         move |event: Arc<AsyaResponse>| {
@@ -56,13 +84,4 @@ async fn handle_message(session: &mut Session, input: String) {
     })
     .await;
     usecases::dispatch_usecase(action, "".to_string()).await;
-}
-
-fn extract_request(input: String) -> Requests {
-    serde_json::from_str::<Requests>(&input).unwrap_or_else(|err| {
-        warn!("{:?}", err);
-        Requests::General {
-            action: "".to_string(),
-        }
-    })
 }
