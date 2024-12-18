@@ -85,10 +85,14 @@ impl Structure {
         let property_struct_name = &attribute_info.struct_attribute_info.name;
         let origin_struct_name = &self.name;
 
+        let fn_merge = self.build_fn_merge(attribute_info);
+        let fn_verify = self.build_fn_verify(attribute_info);
         let fn_unwrap_or_default = self.build_fn_unwrap_or_default(attribute_info);
 
         quote! {
             impl #property_struct_name {
+                #fn_merge
+                #fn_verify
                 #fn_unwrap_or_default
             }
 
@@ -96,6 +100,84 @@ impl Structure {
                 fn from(val: #property_struct_name) -> Self {
                     val.unwrap_or_default()
                 }
+            }
+        }
+    }
+
+    fn build_fn_merge(&self, attribute_info: &AttributeInfo) -> proc_macro2::TokenStream {
+        let fields: Punctuated<&syn::Ident, Token![,]> = self
+            .fields
+            .iter()
+            .map(|field| field.ident.as_ref().expect("Fields should be named"))
+            .collect();
+
+        let init_members: Punctuated<proc_macro2::TokenStream, Token![,]> = self
+            .fields
+            .iter()
+            .map(|field| {
+                let field_ident = field.ident.as_ref().expect("Fields should be named");
+                let field_name = field_name(field);
+                let mut line = quote! { #field_ident: #field_ident };
+
+                if attribute_info
+                    .field_attribute_infos
+                    .get(&field_name)
+                    .is_some_and(|field_info| field_info.mergeable)
+                {
+                    line = quote! { #line.map(|val| val.merge(other.#field_ident.clone())) }
+                }
+
+                quote! { #line.or(other.#field_ident) }
+            })
+            .collect();
+
+        quote! {
+            fn merge(self, other: Option<Self>) -> Self {
+                let Some(other) = other else {
+                    return self;
+                };
+
+                let Self { #fields } = self;
+                Self {
+                    #init_members
+                }
+            }
+        }
+    }
+
+    fn build_fn_verify(&self, attribute_info: &AttributeInfo) -> proc_macro2::TokenStream {
+        let body: Vec<proc_macro2::TokenStream> = self
+            .fields
+            .iter()
+            .filter_map(|field| {
+                let field_ident = field.ident.as_ref().expect("Fields should be named");
+                let field_name = field_name(field);
+                let field_info = attribute_info.field_attribute_infos.get(&field_name)?;
+
+                Some(match field_info.verifier.as_ref()? {
+                    Verifier::Composite => {
+                        quote! {
+                            if let Some(field) = self.#field_ident.as_ref() {
+                                field.verify()?;
+                            }
+                        }
+                    }
+                    Verifier::FunctionCall(path) => {
+                        quote! {
+                            if let Some(field) = self.#field_ident.as_ref() {
+                                #path(field)?;
+                            }
+                        }
+                    }
+                })
+            })
+            .collect();
+
+        quote! {
+            fn verify(&self) -> std::result::Result<(), std::boxed::Box<dyn std::error::Error>> {
+                #(#body)*
+
+                Ok(())
             }
         }
     }
@@ -296,14 +378,18 @@ impl ToTokens for DeriveInfo {
 }
 
 struct FieldAttributeInfo {
+    mergeable: bool,
     default: DefaultAssignment,
     use_type: Option<syn::Type>,
+    verifier: Option<Verifier>,
 }
 
 impl Parse for FieldAttributeInfo {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let mut default = DefaultAssignment::None;
         let mut use_type = None;
+        let mut mergeable = false;
+        let mut verifier = None;
 
         loop {
             let ident: syn::Ident = input.parse()?;
@@ -318,17 +404,18 @@ impl Parse for FieldAttributeInfo {
                         DefaultAssignment::CallDefault
                     }
                 }
+                "verifier" => {
+                    let content;
+                    let _paren = parenthesized!(content in input);
+                    verifier = Some(content.parse()?);
+                }
+                "mergeable" => mergeable = true,
                 "use_type" => {
                     let content;
                     let _paren = parenthesized!(content in input);
                     use_type = Some(content.parse()?)
                 }
-                _ => {
-                    return Err(syn::Error::new(
-                        proc_macro2::Span::call_site(),
-                        "Unknown attribute",
-                    ))
-                }
+                _ => return Err(syn::Error::new(ident.span(), "Unknown attribute")),
             }
 
             if !input.is_empty() {
@@ -338,7 +425,12 @@ impl Parse for FieldAttributeInfo {
             }
         }
 
-        Ok(Self { use_type, default })
+        Ok(Self {
+            mergeable,
+            default,
+            use_type,
+            verifier,
+        })
     }
 }
 
@@ -395,6 +487,30 @@ fn wrap_by_option(ty: syn::Type) -> syn::Type {
             ]),
         },
     })
+}
+
+enum Verifier {
+    Composite,
+    FunctionCall(syn::Path),
+}
+
+impl Parse for Verifier {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let path_ident: syn::Ident = input.parse()?;
+
+        Ok(match &*path_ident.to_string() {
+            "composite" => Verifier::Composite,
+            "path" => {
+                let _eq_token = input.parse::<Token![=]>()?;
+
+                Verifier::FunctionCall(input.parse()?)
+            }
+            _ => Err(syn::Error::new(
+                path_ident.span(),
+                format!("Expected 'composite' or 'path' arguments, but given {path_ident}"),
+            ))?,
+        })
+    }
 }
 
 fn field_name(field: &syn::Field) -> String {
