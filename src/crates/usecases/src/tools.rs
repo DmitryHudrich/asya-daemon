@@ -36,7 +36,7 @@ impl PromptBuilder {
             prompt = prompt.replace(key, value);
         }
         let response = llm_api::send_request(prompt).await;
-        response.unwrap_or(Lexicon::MusicResume.describe().to_string())
+        response.unwrap_or(self.fallback_phrase.describe().to_string())
     }
 }
 

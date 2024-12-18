@@ -29,7 +29,8 @@ pub async fn play_or_resume_music(executed_command: String) {
 
             event_system::publish(AsyaResponse::Ok {
                 message: res.to_string(),
-            }).await;
+            })
+            .await;
         }
         MediaPlayingStatus::Playing(_) => {
             let res = PromptBuilder::new()
@@ -41,7 +42,8 @@ pub async fn play_or_resume_music(executed_command: String) {
 
             event_system::publish(AsyaResponse::Ok {
                 message: res.to_string(),
-            }).await;
+            })
+            .await;
         }
         MediaPlayingStatus::Unknown => (),
     };
@@ -78,3 +80,16 @@ async fn publish_music_status(status: music::TrackInfo, userinput: &str) {
     .await;
 }
 
+pub async fn play_next_track(_: String) {
+    music::play_next();
+
+    let res = PromptBuilder::new()
+        .set_fallback_phrase(Lexicon::ExecuteSuccess)
+        .get_result()
+        .await;
+
+    event_system::publish(AsyaResponse::Ok {
+        message: res.to_string(),
+    })
+    .await;
+}

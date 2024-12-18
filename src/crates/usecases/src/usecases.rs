@@ -4,6 +4,9 @@ pub enum Usecases {
     TurnOffMusic,
     TurnOnMusic,
     GetMusicStatus,
+
+    PlayNextTrack,
+    PlayPreviousTrack,
     // MusicPrevious,
 }
 
