@@ -24,7 +24,7 @@ pub async fn dispatch_usecase(command: String, userinput: String) {
                 music_control::get_music_status(userinput).await;
             }
             Usecases::PlayNextTrack => music_control::play_next_track(userinput).await,
-            Usecases::PlayPreviousTrack => todo!(),
+            Usecases::PlayPrevTrack => music_control::play_previous_track(userinput).await,
         },
 
         Err(err) => warn!("Error parsing usecase: {:?}", err),

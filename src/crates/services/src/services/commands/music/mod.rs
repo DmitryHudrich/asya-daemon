@@ -112,7 +112,7 @@ fn pctl_metadat_prop(prop: &str) -> Option<String> {
     }
 }
 
-#[cfg(target_family = "windows")]
-pub fn play_pause() {
-    todo!()
+#[cfg(target_family = "unix")]
+pub fn play_prev() {
+    shell::execute_command(vec!["playerctl", "previous"]).expect("playerctl prev caused error");
 }

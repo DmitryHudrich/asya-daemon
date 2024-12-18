@@ -93,3 +93,17 @@ pub async fn play_next_track(_: String) {
     })
     .await;
 }
+
+pub(crate) async fn play_previous_track(_: String) {
+    music::play_prev();
+
+    let res = PromptBuilder::new()
+        .set_fallback_phrase(Lexicon::ExecuteSuccess)
+        .get_result()
+        .await;
+
+    event_system::publish(AsyaResponse::Ok {
+        message: res.to_string(),
+    })
+    .await;
+}

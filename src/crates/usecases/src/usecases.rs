@@ -6,7 +6,7 @@ pub enum Usecases {
     GetMusicStatus,
 
     PlayNextTrack,
-    PlayPreviousTrack,
+    PlayPrevTrack,
     // MusicPrevious,
 }
 
