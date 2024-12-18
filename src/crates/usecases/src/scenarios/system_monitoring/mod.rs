@@ -5,6 +5,7 @@ use tokio::task;
 
 use crate::{shared_workers::{self, HardwareStatus}, AsyaResponse};
 
+/// Asya watches ur hardware. 
 pub async fn start_basic_monitoring(_: String) {
     shared_workers::SystemMonitor::start_basic_monitoring().await;
     event_system::subscribe_once({

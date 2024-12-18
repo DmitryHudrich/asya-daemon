@@ -49,3 +49,4 @@ where
 {
     get_event_dispatcher().await.publish(event).await;
 }
+

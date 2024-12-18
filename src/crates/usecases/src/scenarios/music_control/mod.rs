@@ -14,6 +14,10 @@ use shared::{event_system, traits::Beautify};
 //     MusicResumed { song_name: String },
 // }
 
+/// Plays or resumes music if already playing.
+///
+/// # Events
+///     * [`AsyaResponse::Ok`] - if music was paused or resumed.
 pub async fn play_or_resume_music(executed_command: String) {
     let music_status = music::get_status();
     music::play_pause();
@@ -49,6 +53,10 @@ pub async fn play_or_resume_music(executed_command: String) {
     };
 }
 
+/// Gets the current status of the music player.
+///
+/// Events:
+///     * [`AsyaResponse::Ok`] - message will be contain the current status of the music player.
 pub async fn get_music_status(userinput: String) {
     let music_status = music::get_status();
     match music_status {
@@ -80,6 +88,9 @@ async fn publish_music_status(status: music::TrackInfo, userinput: &str) {
     .await;
 }
 
+/// Plays the next track in the playlist.
+/// # Events
+///     * [`AsyaResponse::Ok`] - message will contain the result of the operation.
 pub async fn play_next_track(_: String) {
     music::play_next();
 
@@ -94,6 +105,9 @@ pub async fn play_next_track(_: String) {
     .await;
 }
 
+/// Plays the next track in the playlist.
+/// # Events
+///     * [`AsyaResponse::Ok`] - message will contain the result of the operation.
 pub(crate) async fn play_previous_track(_: String) {
     music::play_prev();
 
