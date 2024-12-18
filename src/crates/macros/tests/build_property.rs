@@ -10,7 +10,7 @@ struct Config {
         default(InnerConfigProperty { field1: Some(3), field2: Some(EnumType::Variant) }),
         use_type(InnerConfigProperty),
         mergeable,
-        verifier(composite)
+        verifier(composite, force_check)
     )]
     field3: InnerConfig,
 }
@@ -25,7 +25,11 @@ struct InnerConfig {
 }
 
 impl InnerConfig {
-    fn check_enum_type(value: &EnumType) -> Result<(), Box<dyn std::error::Error>> {
+    fn check_enum_type(value: Option<&EnumType>) -> Result<(), Box<dyn std::error::Error>> {
+        let Some(value) = value else {
+            return Err("Value is empty")?;
+        };
+
         match value {
             EnumType::Variant => Ok(()),
             EnumType::Invariant => Err("Invalid value!")?,
@@ -207,6 +211,14 @@ fn check_verify_method() {
     assert!(config.verify().is_ok());
 
     config.field3.as_mut().unwrap().field2 = Some(EnumType::Invariant);
+
+    assert!(config.verify().is_err());
+
+    config.field3 .as_mut().unwrap().field2 = None;
+
+    assert!(config.verify().is_err());
+
+    config.field3 = None;
 
     assert!(config.verify().is_err());
 }

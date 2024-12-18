@@ -193,6 +193,11 @@ Also there is `crate::audio::check_volume` which should be called in `verify` me
 of `AudioConfig` and will not call it. So to tell it need to use `verifier(composite)` that
 tells the macro to use `verify` method of concrete type (in this case - `AudioConfig`).
 
+> [!NOTE]
+> The `verifier(composite)` is soft during verifying because if the field value is `None`
+> it will be skipped. So if you want to throw error if there is `None` in field value, need
+> to use `verifier(composite, force_check)` with which will return error if there is `None`.
+
 ### Conclusions
 
 Generated methods:
@@ -212,5 +217,5 @@ Possible attributes:
   tells that the field can have default value using `Default` trait, expression or function respectively.
 - `use_type(TypeName)` - uses other type that can `Into` to field.
 - `mergeable` - marker that tells that the field can use `merge` in `merge` function of struct.
-- `verifier(composite)` or `verifier(path = path::to::function)` - marker that tells
-  that the field should be verified by provided function or use inner verifier if it is composite.
+- `verifier(composite)`, `verifier(composite, force_check)` or `verifier(path = path::to::function)` - marker
+  that tells that the field should be verified by provided function or use inner verifier if it is composite.

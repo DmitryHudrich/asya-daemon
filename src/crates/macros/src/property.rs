@@ -155,18 +155,28 @@ impl Structure {
                 let field_info = attribute_info.field_attribute_infos.get(&field_name)?;
 
                 Some(match field_info.verifier.as_ref()? {
-                    Verifier::Composite => {
-                        quote! {
+                    Verifier::Composite { force_check } => {
+                        let mut statement = quote! {
                             if let Some(field) = self.#field_ident.as_ref() {
                                 field.verify()?;
                             }
+                        };
+
+                        if *force_check {
+                            let error_message = format!("The '{field_name}' config value wasn't set!");
+
+                            statement = quote! {
+                                #statement else {
+                                    return Err(#error_message)?;
+                                }
+                            }
                         }
+
+                        statement
                     }
                     Verifier::FunctionCall(path) => {
                         quote! {
-                            if let Some(field) = self.#field_ident.as_ref() {
-                                #path(field)?;
-                            }
+                            #path(self.#field_ident.as_ref())?;
                         }
                     }
                 })
@@ -490,7 +500,7 @@ fn wrap_by_option(ty: syn::Type) -> syn::Type {
 }
 
 enum Verifier {
-    Composite,
+    Composite { force_check: bool },
     FunctionCall(syn::Path),
 }
 
@@ -499,7 +509,22 @@ impl Parse for Verifier {
         let path_ident: syn::Ident = input.parse()?;
 
         Ok(match &*path_ident.to_string() {
-            "composite" => Verifier::Composite,
+            "composite" => {
+                if input.peek(Token![,]) {
+                    let _comma: Token![,] = input.parse()?;
+                    let force_check: syn::Ident = input.parse()?;
+                    if force_check != "force_check" {
+                        return Err(syn::Error::new(
+                            force_check.span(),
+                            format!("Expected 'force_check' but given {force_check}"),
+                        ));
+                    }
+
+                    Verifier::Composite { force_check: true }
+                } else {
+                    Verifier::Composite { force_check: false }
+                }
+            }
             "path" => {
                 let _eq_token = input.parse::<Token![=]>()?;
 
