@@ -17,6 +17,9 @@ pub async fn run() {
     loop {
         interval.tick().await;
         let phrase = PHRASES.choose(&mut rand::thread_rng()).unwrap();
-        event_system::publish(AsyaResponse::Ok { message: phrase.to_string() }).await;
+        event_system::publish(AsyaResponse::Ok {
+            message: phrase.to_string(),
+        })
+        .await;
     }
 }
