@@ -4,7 +4,7 @@ use services::{
     lexicon::Lexicon,
     services::commands::music::{self, MediaPlayingStatus},
 };
-use shared::traits::Beautify;
+use shared::{event_system, traits::Beautify};
 
 // for future use
 
@@ -27,7 +27,7 @@ pub async fn play_or_resume_music(executed_command: String) {
                 .get_result()
                 .await;
 
-            crate::publish(AsyaResponse::Ok {
+            event_system::publish(AsyaResponse::Ok {
                 message: res.to_string(),
             }).await;
         }
@@ -39,7 +39,7 @@ pub async fn play_or_resume_music(executed_command: String) {
                 .get_result()
                 .await;
 
-            crate::publish(AsyaResponse::Ok {
+            event_system::publish(AsyaResponse::Ok {
                 message: res.to_string(),
             }).await;
         }
@@ -71,7 +71,8 @@ async fn publish_music_status(status: music::TrackInfo, userinput: &str) {
         .set_fallback_phrase(Lexicon::ExecuteSuccess)
         .get_result()
         .await;
-    crate::publish(AsyaResponse::Ok {
+
+    event_system::publish(AsyaResponse::Ok {
         message: res.to_string(),
     })
     .await;

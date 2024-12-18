@@ -1,4 +1,5 @@
 use rand::seq::SliceRandom;
+use shared::event_system;
 
 use crate::AsyaResponse;
 
@@ -13,9 +14,9 @@ static PHRASES: &[&str] = &["Hi!", "How r u?", "ну шо ти епта"];
 pub async fn run() {
     let mut interval = tokio::time::interval(std::time::Duration::from_secs(1));
     // заебует
-    // loop {
+    loop {
         interval.tick().await;
         let phrase = PHRASES.choose(&mut rand::thread_rng()).unwrap();
-        crate::publish(AsyaResponse::Ok { message: phrase.to_string() }).await;
-    // }
+        event_system::publish(AsyaResponse::Ok { message: phrase.to_string() }).await;
+    }
 }

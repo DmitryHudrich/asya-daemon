@@ -1,8 +1,7 @@
-use log::debug;
 use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::RwLock;
+use tokio::sync::{OnceCell, RwLock};
 use tokio::task;
 
 type AsyncEventHandler =
@@ -13,49 +12,40 @@ pub struct AsyncEventDispatcher {
     listeners: Arc<RwLock<HashMap<String, Vec<AsyncEventHandler>>>>,
 }
 
-// maybe we should make another version `subscribe` and `publish` methods which works with
-// multiple events.
-impl AsyncEventDispatcher {
-    pub fn new() -> Self {
-        Self {
-            listeners: Arc::new(RwLock::new(HashMap::new())),
-        }
-    }
+mod dispatching;
 
-    pub async fn subscribe<E, F>(&self, handler: F)
-    where
-        E: 'static + Any + Send + Sync,
-        F: Fn(Arc<E>) -> task::JoinHandle<()> + Send + Sync + 'static,
-    {
-        let mut listeners = self.listeners.write().await;
-        let event_type = std::any::type_name::<E>().to_string();
-        if !listeners.contains_key(&event_type) {
-            listeners.entry(event_type).or_default().push(Box::new(
-                move |event: Arc<dyn Any + Send + Sync>| {
-                    if let Ok(event) = Arc::downcast::<E>(event.clone()) {
-                        handler(event)
-                    } else {
-                        panic!();
-                    }
-                },
-            ));
-        }
-    }
+async fn get_event_dispatcher() -> Arc<AsyncEventDispatcher> {
+    static EVENT_DISPATCHER: OnceCell<Arc<AsyncEventDispatcher>> = OnceCell::const_new();
+    let dispatcher = EVENT_DISPATCHER
+        .get_or_init(|| async { Arc::new(AsyncEventDispatcher::new()) })
+        .await;
+    dispatcher.clone()
+}
 
-    pub async fn publish<E>(&self, event: E)
-    where
-        E: 'static + Any + Send + Sync + std::fmt::Debug,
-    {
-        let listeners = self.listeners.read().await;
-        let event_type = std::any::type_name::<E>().to_string();
-        if let Some(handlers) = listeners.get(&event_type) {
-            let event = Arc::new(event);
+pub async fn unsubscribe_all()
+where
+{
+    get_event_dispatcher()
+        .await
+        .unsubscribe_all()
+        .await;
+}
 
-            for handler in handlers {
-                let cloned_event = event.clone();
-                debug!("Publishing event: {} - {:?}", event_type, cloned_event);
-                handler(cloned_event).await.unwrap();
-            }
-        }
-    }
+
+pub async fn subscribe_once<E, F>(handler: F)
+where
+    E: 'static + Any + Send + Sync,
+    F: Fn(Arc<E>) -> task::JoinHandle<()> + Send + Sync + 'static,
+{
+    get_event_dispatcher()
+        .await
+        .subscribe(handler)
+        .await;
+}
+
+pub async fn publish<E>(event: E)
+where
+    E: 'static + Any + Send + Sync + std::fmt::Debug,
+{
+    get_event_dispatcher().await.publish(event).await;
 }
