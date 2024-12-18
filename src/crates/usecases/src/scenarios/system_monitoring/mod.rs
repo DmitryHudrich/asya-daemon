@@ -1,10 +1,21 @@
+use std::sync::Arc;
+
+use shared::event_system;
 use tokio::task;
 
+use crate::{shared_workers::{self, HardwareStatus}, AsyaResponse};
+
 pub async fn start_basic_monitoring(_: String) {
-    task::spawn(async {
-        loop {
-            
-            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+    shared_workers::SystemMonitor::start_basic_monitoring().await;
+    event_system::subscribe_once({
+        move |event: Arc<HardwareStatus>| {
+            task::spawn(async move {
+                let response = AsyaResponse::Ok {
+                    message: event.to_string(),
+                };
+
+                event_system::publish(response).await;
+            })
         }
-    });
+    }).await
 }

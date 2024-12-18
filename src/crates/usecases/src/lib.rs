@@ -4,16 +4,15 @@ use log::*;
 use scenarios::system_monitoring;
 
 pub mod scenarios;
-mod tools;
 pub mod usecases;
+pub mod shared_workers;
+mod tools;
 
-pub async fn dispatch_usecase(command: String, userinput: String) {
+pub async fn dispatch_usecase(command: Usecases, userinput: String) {
     debug!("Dispatching command: {:?}", command);
-    let usecase = command.parse::<Usecases>();
-    match usecase {
-        Ok(usecase) => match usecase {
+        match command {
             Usecases::TurnOffMusic | Usecases::TurnOnMusic => {
-                music_control::play_or_resume_music(command).await;
+                music_control::play_or_resume_music(userinput).await;
             }
             Usecases::GetMusicStatus => {
                 music_control::get_music_status(userinput).await;
@@ -23,11 +22,8 @@ pub async fn dispatch_usecase(command: String, userinput: String) {
             Usecases::StartBasicSystemMonitoring => {
                 system_monitoring::start_basic_monitoring(userinput).await
             } // todo. я хочу сделать так, чтобы можно было передавать параметры в сценарии
-        },
-
-        Err(err) => warn!("Error parsing usecase: {:?}", err),
+        }
         // _ => Lexicon::Error.describe().to_string(),
-    }
 }
 
 // general purpose events

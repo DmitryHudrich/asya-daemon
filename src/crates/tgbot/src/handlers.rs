@@ -101,7 +101,7 @@ async fn dispatch(cmd: Command, bot: &Bot, msg: &Message) -> Result<(), teloxide
                 })
             })
             .await;
-            usecases::dispatch_usecase(string_cmd, msg.text().unwrap().to_string()).await;
+            // usecases::dispatch_usecase(string_cmd, msg.text().unwrap().to_string()).await;
         }
         _ => (),
     }
