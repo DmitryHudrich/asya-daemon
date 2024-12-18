@@ -1,16 +1,11 @@
 use crate::scenarios::music_control;
-use log::*;
 use crate::usecases::Usecases;
+use log::*;
+use scenarios::system_monitoring;
 
 pub mod scenarios;
-pub mod workers;
-pub mod usecases;
 mod tools;
-
-
-pub fn run_backgorund_workers() {
-    tokio::spawn(workers::action_worker::run());
-}
+pub mod usecases;
 
 pub async fn dispatch_usecase(command: String, userinput: String) {
     debug!("Dispatching command: {:?}", command);
@@ -25,6 +20,9 @@ pub async fn dispatch_usecase(command: String, userinput: String) {
             }
             Usecases::PlayNextTrack => music_control::play_next_track(userinput).await,
             Usecases::PlayPrevTrack => music_control::play_previous_track(userinput).await,
+            Usecases::StartBasicSystemMonitoring => {
+                system_monitoring::start_basic_monitoring(userinput).await
+            } // todo. я хочу сделать так, чтобы можно было передавать параметры в сценарии
         },
 
         Err(err) => warn!("Error parsing usecase: {:?}", err),
