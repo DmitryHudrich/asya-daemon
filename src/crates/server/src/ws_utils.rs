@@ -5,14 +5,14 @@ use actix_ws::{AggregatedMessage, Session};
 use futures_util::StreamExt;
 use log::{info, warn};
 use shared::event_system;
-use tokio::task;
+use tokio::{sync::RwLock, task};
 use usecases::AsyaResponse;
 
 use crate::{requests::Requests, responses::Responses};
 
 pub async fn ws_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
-    let (res, mut session, stream) = actix_ws::handle(&req, stream)?;
-
+    let (res, session, stream) = actix_ws::handle(&req, stream)?;
+    let session_ptr = Arc::new(RwLock::new(session));
     let mut stream = stream
         .aggregate_continuations()
         // aggregate continuation frames up to 1MiB
@@ -22,7 +22,7 @@ pub async fn ws_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpRe
         while let Some(msg) = stream.next().await {
             match msg {
                 Ok(AggregatedMessage::Text(text)) => {
-                    handle_message(&mut session, text.to_string()).await;
+                    handle_message(session_ptr.clone(), text.to_string()).await;
                 }
                 Ok(AggregatedMessage::Close(_reason)) => {
                     info!("Closing connection");
@@ -38,7 +38,7 @@ pub async fn ws_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpRe
 
 const DEFAULT_EXPECT_MSG: &str = "The Responses enum should be able to be converted into JSON";
 
-async fn handle_message(session: &mut Session, input: String) {
+async fn handle_message(session: Arc<RwLock<Session>>, input: String) {
     let request = serde_json::from_str::<Requests>(&input);
     match request {
         Ok(request) => {
@@ -50,7 +50,7 @@ async fn handle_message(session: &mut Session, input: String) {
     }
 }
 
-async fn handle_error(err: serde_json::Error, session: &mut Session) {
+async fn handle_error(err: serde_json::Error, session: Arc<RwLock<Session>>) {
     warn!("Error parsing request: {:?}", err);
 
     let response = Responses::Base {
@@ -58,6 +58,8 @@ async fn handle_error(err: serde_json::Error, session: &mut Session) {
         message: err.to_string(),
     };
     session
+        .write()
+        .await
         .text(
             serde_json::to_string(&response)
                 .expect(DEFAULT_EXPECT_MSG)
@@ -67,32 +69,32 @@ async fn handle_error(err: serde_json::Error, session: &mut Session) {
         .unwrap();
 }
 
-async fn handle_request(request: Requests, session: &mut Session) {
+async fn handle_request(request: Requests, session: Arc<RwLock<Session>>) {
     let Requests::General { action } = request;
-    event_system::subscribe_once(
-        {
-            let session = session.clone(); // should be a clone of the session?
-            move |event: Arc<AsyaResponse>| {
-                let mut session = session.clone();
-                task::spawn(async move {
-                    let response = Responses::Base {
-                        is_err: false,
-                        message: event.to_string(),
-                    };
+    event_system::subscribe_once({
+        let session = session.clone();
+        move |event: Arc<AsyaResponse>| {
+            let session = session.clone();
+            task::spawn(async move {
+                let response = Responses::Base {
+                    is_err: false,
+                    message: event.to_string(),
+                };
 
-                    session
-                        .text(
-                            serde_json::to_string(&response)
-                                .expect(DEFAULT_EXPECT_MSG)
-                                .to_string(),
-                        )
-                        .await
-                        .unwrap(); // here should be handler for disconnect. asya panicks without it
-                                   // after few seconds after disconnection
-                })
-            }
+                session
+                    .write()
+                    .await
+                    .text(
+                        serde_json::to_string(&response)
+                            .expect(DEFAULT_EXPECT_MSG)
+                            .to_string(),
+                    )
+                    .await
+                    .unwrap(); // here should be handler for disconnect. asya panicks without it
+                               // after few seconds after disconnection
+            })
         }
-    )
+    })
     .await;
     usecases::dispatch_usecase(action, "".to_string()).await;
 }
