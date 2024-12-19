@@ -5,16 +5,14 @@ use log4rs::{
     encode::pattern::PatternEncoder,
     Config,
 };
-use shared::state;
+use shared::configuration::CONFIG;
 
 pub fn init_logging() {
-    let console_pattern = match state::get_logging_place()
-        .expect("missing config position. todo: remove default values")
-    {
+    let console_pattern = match CONFIG.logging.place {
         true => "{f}:{L}: {d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
         false => "{d(%Y-%m-%d %H:%M:%S)} SERVER {h({l}):5.5}>>> {m}\n",
     };
-    let config = match state::get_logging_stdout().unwrap() {
+    let config = match CONFIG.logging.stdout {
         true => Config::builder().appender(
             Appender::builder().build("console", Box::new(enable_console(console_pattern))),
         ),
@@ -23,8 +21,8 @@ pub fn init_logging() {
 
     log4rs::init_config(build_config(config, enable_file())).unwrap();
 
-    info!("Logging level: {}", state::get_logging_level().unwrap());
-    info!("Logging to: {}", state::get_logging_folder().unwrap());
+    info!("Logging level: {}", CONFIG.logging.level);
+    info!("Logging to: {}", CONFIG.logging.folder);
 
     if log_enabled!(log::Level::Trace) {
         log_check();
@@ -49,7 +47,7 @@ fn build_config(config: log4rs::config::runtime::ConfigBuilder, logfile: FileApp
             Root::builder()
                 .appender("console")
                 .appender("file")
-                .build(state::get_logging_level().unwrap()),
+                .build(CONFIG.logging.level),
         )
         .unwrap()
 }
@@ -61,7 +59,7 @@ fn enable_file() -> FileAppender {
         )))
         .build(format!(
             "{}/{}aska_logs.log",
-            state::get_logging_folder().unwrap(),
+            CONFIG.logging.folder,
             chrono::Local::now().format("%Y-%m-%d_%H-%M-%S_")
         ))
         .unwrap()

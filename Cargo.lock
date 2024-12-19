@@ -2717,6 +2717,7 @@ dependencies = [
  "lazy_static",
  "log",
  "log4rs",
+ "macros",
  "merge-struct",
  "mlua",
  "mlua_serde",

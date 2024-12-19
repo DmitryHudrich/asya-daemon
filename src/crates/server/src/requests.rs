@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use usecases::usecases::Usecases;
-/// Represents different types of requests that can be made to the server.
 
+/// Represents different types of requests that can be made to the server.
 ///
 /// The `Requests` enum is used to categorize and handle various actions
 /// that the server can process. Each variant of the enum corresponds to

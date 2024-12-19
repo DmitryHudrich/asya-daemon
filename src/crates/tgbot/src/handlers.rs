@@ -1,9 +1,7 @@
-use std::sync::Arc;
 use log::{debug, info, warn};
 use services::lexicon::Lexicon;
-use shared::{event_system, 
-    state::get_tg_accepted_users}
-;
+use shared::{configuration::CONFIG, event_system};
+use std::sync::Arc;
 use teloxide::{
     dispatching::dialogue::GetChatId,
     payloads::SendMessageSetters,
@@ -45,10 +43,7 @@ pub(crate) async fn check_user_authority(bot: Bot, msg: Message) -> bool {
         .map(ToString::to_string)
         .unwrap_or(chat_id.to_string());
 
-    let accepted_users =
-        get_tg_accepted_users().expect("There should be at least one accepted user");
-
-    let is_authorized_user = accepted_users.contains(&authorized_user);
+    let is_authorized_user = CONFIG.telegram.accepted_users.contains(&authorized_user);
 
     if !is_authorized_user {
         warn!("User without access: {}", authorized_user);

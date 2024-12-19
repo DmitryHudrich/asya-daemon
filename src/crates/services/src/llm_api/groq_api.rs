@@ -1,13 +1,13 @@
 use reqwest::Client;
 use serde_json::json;
-use shared::{serde_extensions::get_json_value, state};
+use shared::{configuration::CONFIG, serde_extensions::get_json_value};
 
 use super::{request, AiRequestError};
 
 pub async fn send_to_groq(req: String) -> Result<String, AiRequestError> {
     let client = Client::new();
     let url = "https://api.groq.com/openai/v1/chat/completions";
-    let api_key = state::get_mistral_token().ok_or(AiRequestError::GroqApiKey)?;
+    let api_key = CONFIG.ai.groq_token.clone();
 
     construct_and_send_reqwest(req, client, url, api_key)
         .await

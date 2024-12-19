@@ -7,6 +7,8 @@ edition = "2021"
 path = "./src/lib.rs"
 
 [dependencies]
+macros.path = "../macros"
+
 log = "0.4.22"
 log4rs = "1.3.0"
 hyper = { version = "1.4.1", features = ["full"] }

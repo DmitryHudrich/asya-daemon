@@ -1,3 +1,4 @@
+use shared::configuration::CONFIG;
 use teloxide::Bot;
 
 mod handlers;
@@ -9,10 +10,11 @@ use teloxide::prelude::Dispatcher;
 use teloxide::types::Update;
 
 pub async fn run_telegram_bot() {
-    let Some(bot_token_opt) = shared::state::get_tg_token() else {
-        warn!("Token not found. Skip telegram bot launch.");
+    if CONFIG.telegram.token.is_empty() {
+        warn!("The telegram token is empty! Skip bot launch.");
         return;
-    };
+    }
+
     info!("Telegram token obtained successfully.");
 
     let Some(accepted_users) = get_users_safely() else {
@@ -20,7 +22,7 @@ pub async fn run_telegram_bot() {
     };
 
     info!("Users who can use your bot: {:?}", accepted_users);
-    launch(bot_token_opt).await;
+    launch(CONFIG.telegram.token.clone()).await;
 }
 
 pub(crate) async fn launch(bot_token: String) {
@@ -30,7 +32,7 @@ pub(crate) async fn launch(bot_token: String) {
         .endpoint(handlers::handle_message);
 
     Dispatcher::builder(bot, handler)
-        .default_handler(|_update| async { 
+        .default_handler(|_update| async {
             // INFO: this is intentional because default handler always produces WARN outputs in
             // logs with any unhandled Update event. The unhandled Update event means that it have
             // not reached to any `.endpoint` function, so it falls into `default_handler`.
@@ -42,13 +44,16 @@ pub(crate) async fn launch(bot_token: String) {
     // Command::repl(bot, answer).await;
 }
 
-pub(crate) fn get_users_safely() -> Option<Vec<String>> {
-    fn no_auth_users() -> Option<Vec<String>> {
+pub(crate) fn get_users_safely() -> Option<&'static Vec<String>> {
+    fn no_auth_users() -> Option<&'static Vec<String>> {
         warn!("Authorized users not specified. No one can use your bot.");
         None
     }
 
-    shared::state::get_tg_accepted_users()
-        .and_then(|users| (!users.is_empty()).then_some(users))
-        .or_else(no_auth_users)
+    let accepted_users = &CONFIG.telegram.accepted_users;
+    if accepted_users.is_empty() {
+        no_auth_users()
+    } else {
+        Some(accepted_users)
+    }
 }

@@ -1,11 +1,11 @@
 use reqwest::Client;
-use shared::{serde_extensions::get_json_value, state};
+use shared::{configuration::CONFIG, serde_extensions::get_json_value};
 
 use super::AiRequestError;
 
 pub async fn send_to_altas(req: String) -> Result<String, AiRequestError> {
     let client = Client::new();
-    let url = state::get_alta_s_addr().ok_or(AiRequestError::AltaSUrl)?;
+    let url = CONFIG.ai.alta_s_addr.clone();
 
     construct_and_send_reqwest(req, client, url.as_str())
         .await
