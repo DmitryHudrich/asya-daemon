@@ -6,7 +6,7 @@ members = [
   "src/crates/tgbot",
   "src/crates/macros",
   "src/crates/usecases"
-]
+, "src/crates/macros"]
 
 resolver = "2"
 
