@@ -50,18 +50,25 @@ pub fn load_any_file(pathes: Vec<String>) -> Result<(String, String), String> {
         .ok_or("Config file not found".to_owned())
 }
 
+/// Represents the configuration of the server.
+///
+/// For details see `asya-daemon/src/crates/macros/README.md`
 #[derive(Debug, Property)]
 #[property(name(ConfigProperty), derive(Deserialize, Default, Clone))]
 pub struct Config {
+    /// Net config group.
     #[property(default, use_type(NetProperty), mergeable)]
     pub net: Net,
 
+    /// Logging config group.
     #[property(default, use_type(LoggingProperty), mergeable)]
     pub logging: Logging,
 
+    // tg bot will be removed
     #[property(default, use_type(TelegramProperty), mergeable)]
     pub telegram: Telegram,
 
+    /// Ai config group.
     #[property(default, use_type(AiProperty), mergeable)]
     pub ai: Ai,
 }
@@ -69,18 +76,30 @@ pub struct Config {
 #[derive(Debug, Property)]
 #[property(name(AiProperty), derive(Deserialize, Default, Clone))]
 pub struct Ai {
+    /// Groq API token.
+    ///
+    /// Groq used for recognizing user input to commands and generating answers.
     #[property(default)]
     pub groq_token: String,
 
+    /// Method used for ai recognizing user input.
+    ///
+    /// Currently we have:
+    ///     * `Groq` - uses `console.groq.com`.
+    ///     * `AltaS` - uses own model made by alta_s, currently work in progress.
+    ///     * `None` - ai will not be used. This means you will be able to use only commands.
     #[property(default)]
     pub recognize_method: AiRecognizeMethod,
 
+    /// The address where the alta_s model is hosted.
     #[property(default)]
     pub alta_s_addr: String,
 
+    // Maybe remove this? alta_s model always should launch automatically.
     #[property(default)]
     pub autolaunch_alta_s: bool,
 
+    /// Path with alta_s model for automatically launch.
     #[property(default)]
     pub alta_s_path: String,
 }
@@ -102,10 +121,7 @@ pub struct Net {
     pub http_port: u16,
 
     #[property(default)]
-    pub grpc_port: u16,
-
-    #[property(default)]
-    pub proxy_addr: String,
+    pub proxy_addr: String, // todo
 }
 
 #[derive(Debug, Property)]
@@ -121,7 +137,7 @@ pub struct Logging {
     pub folder: String,
 
     #[property(default)]
-    pub filescount: usize,
+    pub filescount: usize, // todo
 
     #[property(default)]
     pub stdout: bool,
