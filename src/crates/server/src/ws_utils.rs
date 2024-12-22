@@ -77,7 +77,7 @@ async fn handle_request(request: Requests, session: Arc<RwLock<Session>>) {
             task::spawn(async move {
                 let response = Responses::Base {
                     is_err: false,
-                    message: event.to_string(),
+                    message: event.to_string().replace("\"", ""),
                 };
 
                 let res = session
