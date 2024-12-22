@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 pub fn get_json_value(content: &str, pointer: &str) -> Option<String> {
     get_value_by_pointer(
         serde_json::from_str::<serde_json::Value>(content).ok(),

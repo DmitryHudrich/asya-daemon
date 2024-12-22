@@ -6,7 +6,7 @@ use futures_util::StreamExt;
 use log::{info, warn};
 use serde_json::Value;
 use services::llm_api;
-use shared::{event_system, llm};
+use shared::event_system;
 use tokio::{sync::RwLock, task};
 use usecases::{usecases::Usecases, AsyaResponse};
 
