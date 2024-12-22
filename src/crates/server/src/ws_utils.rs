@@ -6,7 +6,7 @@ use futures_util::StreamExt;
 use log::{info, warn};
 use shared::event_system;
 use tokio::{sync::RwLock, task};
-use usecases::{AsyaResponse};
+use usecases::AsyaResponse;
 
 use crate::{requests::Requests, responses::Responses};
 
@@ -80,7 +80,7 @@ async fn handle_request(request: Requests, session: Arc<RwLock<Session>>) {
                     message: event.to_string(),
                 };
 
-                session
+                let res = session
                     .write()
                     .await
                     .text(
@@ -88,9 +88,11 @@ async fn handle_request(request: Requests, session: Arc<RwLock<Session>>) {
                             .expect(DEFAULT_EXPECT_MSG)
                             .to_string(),
                     )
-                    .await
-                    .unwrap(); // here should be handler for disconnect. asya panicks without it
-                               // after few seconds after disconnection
+                    .await;
+
+                if let Err(err) = res {
+                    warn!("Error sending response: {:?}", err);
+                }
             })
         }
     })
