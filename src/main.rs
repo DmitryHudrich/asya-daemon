@@ -16,6 +16,7 @@ async fn main() {
 
     preview::show_preview();
     logging::init_logging();
+    shared::plugin_system::load_plugins().await.unwrap();
     let server_launching = server::start();
     info!("Bootstrapping");
 

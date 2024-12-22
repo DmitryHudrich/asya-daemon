@@ -4,8 +4,10 @@ members = [
   "src/crates/services",
   "src/crates/shared",
   "src/crates/macros",
-  "src/crates/usecases"
-, "src/crates/macros"]
+  "src/crates/usecases",
+  "src/crates/macros",
+  "src/crates/plugin_interface",
+]
 
 resolver = "2"
 
@@ -25,6 +27,7 @@ services = { path = "src/crates/services" }
 shared = { path = "src/crates/shared" }
 macros = { path = "src/crates/macros" }
 usecases = { path = "src/crates/usecases" }
+plugin_interface = { path = "src/crates/plugin_interface" }
 
 ctrlc = "3.4.5"
 

@@ -7,7 +7,11 @@ edition = "2021"
 path = "./src/lib.rs"
 
 [dependencies]
-macros.path = "../macros"
+macros = { path = "../macros/" }
+plugin_interface = { path = "../plugin_interface/" }
+
+anyhow = "1.0.94"
+libloading = "0.8.6"
 
 log = "0.4.22"
 log4rs = "1.3.0"

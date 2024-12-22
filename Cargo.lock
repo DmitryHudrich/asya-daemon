@@ -340,9 +340,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.93"
+version = "1.0.95"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
+checksum = "34ac096ce696dc2fcabef30516bb13c0a68a11d30131d3df6f04711467681b04"
 
 [[package]]
 name = "arc-swap"
@@ -367,6 +367,7 @@ dependencies = [
  "macros",
  "merge-struct",
  "multimap",
+ "plugin_interface",
  "queues",
  "rand",
  "serde",
@@ -1414,6 +1415,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "433bfe06b8c75da9b2e3fbea6e5329ff87748f0b144ef75306e674c3f6f7c13f"
 
 [[package]]
+name = "libloading"
+version = "0.8.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc2f4eb4bc735547cfed7c0a4922cbd04a4655978c09b54f1f7b228750664c34"
+dependencies = [
+ "cfg-if",
+ "windows-targets 0.52.6",
+]
+
+[[package]]
 name = "linux-raw-sys"
 version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1822,6 +1833,10 @@ checksum = "51bae2ac328883f7acdfea3d66a7c35751187f870bc81f94563733a154d7a670"
 dependencies = [
  "plotters-backend",
 ]
+
+[[package]]
+name = "plugin_interface"
+version = "0.1.0"
 
 [[package]]
 name = "powerfmt"
@@ -2371,6 +2386,7 @@ dependencies = [
 name = "shared"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bytes",
  "chrono",
  "clap",
@@ -2381,6 +2397,7 @@ dependencies = [
  "http-body-util",
  "hyper",
  "lazy_static",
+ "libloading",
  "log",
  "log4rs",
  "macros",
@@ -2388,6 +2405,7 @@ dependencies = [
  "mlua",
  "mlua_serde",
  "multimap",
+ "plugin_interface",
  "queues",
  "rand",
  "serde",
