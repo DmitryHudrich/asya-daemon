@@ -16,11 +16,10 @@ async fn main() {
 
     preview::show_preview();
     logging::init_logging();
-    let tg_bot_launching = tgbot::run_telegram_bot();
     let server_launching = server::start();
     info!("Bootstrapping");
 
-    _ = join!(server_launching, tg_bot_launching);
+    _ = join!(server_launching);
 }
 
 /*

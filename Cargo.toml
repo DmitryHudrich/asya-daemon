@@ -3,7 +3,6 @@ members = [
   "src/crates/server",
   "src/crates/services",
   "src/crates/shared",
-  "src/crates/tgbot",
   "src/crates/macros",
   "src/crates/usecases"
 , "src/crates/macros"]
@@ -24,7 +23,6 @@ edition = "2021"
 server = { path = "src/crates/server" }
 services = { path = "src/crates/services" }
 shared = { path = "src/crates/shared" }
-tgbot = { path = "src/crates/tgbot"}
 macros = { path = "src/crates/macros" }
 usecases = { path = "src/crates/usecases" }
 
