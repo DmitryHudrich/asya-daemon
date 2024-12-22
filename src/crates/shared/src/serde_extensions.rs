@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 pub fn get_json_value(content: &str, pointer: &str) -> Option<String> {
     get_value_by_pointer(
         serde_json::from_str::<serde_json::Value>(content).ok(),
@@ -16,6 +18,6 @@ fn get_value_by_pointer(value: Option<serde_json::Value>, pointer: &str) -> Opti
     value.and_then(|value| {
         value
             .pointer(pointer)
-            .map(|val| val.to_string().replace("\"", ""))
+            .map(|val| serde_json::from_value(val.clone()).unwrap())
     })
 }

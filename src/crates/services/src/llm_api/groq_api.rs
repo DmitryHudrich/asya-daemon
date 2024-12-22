@@ -27,7 +27,7 @@ async fn construct_and_send_reqwest(
                 "content": req
             }
         ],
-        "model": "llama-3.1-70b-versatile",
+        "model": "llama-3.3-70b-versatile",
         "temperature": 0.7
     });
 
@@ -37,5 +37,5 @@ async fn construct_and_send_reqwest(
         &response.text().await.unwrap(),
         "/choices/0/message/content",
     )
-    .map(|s| s.replace("\\", ""))
+    // .map(|s| s.replace("\\", ""))
 }

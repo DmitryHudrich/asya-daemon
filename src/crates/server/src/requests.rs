@@ -21,5 +21,6 @@ use usecases::usecases::Usecases;
 #[serde(rename_all = "camelCase")]
 pub enum Requests {
     /// A general request that includes an `Usecases` to be performed.
-    General { action: Usecases },
+    Command { action: Usecases },
+    Human { message: String },
 }
