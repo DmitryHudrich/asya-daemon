@@ -11,8 +11,7 @@ use tokio::sync::{mpsc::Receiver, Mutex};
 // !! порядок полей менять НЕЛЬЗЯ тоже может быть сегфолт
 struct PluginRuntimeInfo {
     plugin_information: Box<PluginInformation>,
-    #[allow(dead_code)]
-    library: Library, // это поле вообще никгде не юзается, но без него сегфолт.
+    _library: Library, // это поле вообще никгде не юзается, но без него сегфолт.
     state: *const c_void,
 }
 
@@ -61,7 +60,7 @@ unsafe fn load_infos(libs: Vec<&str>) -> Vec<PluginRuntimeInfo> {
         let plugin_information = Box::from_raw(plugin_information().cast_mut());
 
         infos.push(PluginRuntimeInfo {
-            library,
+            _library: library,
             state: ptr::null(),
             plugin_information,
         });
