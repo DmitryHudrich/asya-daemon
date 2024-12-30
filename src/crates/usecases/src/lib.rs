@@ -2,6 +2,7 @@ use crate::scenarios::music_control;
 use crate::usecases::Usecases;
 use log::*;
 use scenarios::system_monitoring;
+use serde::Serialize;
 use services::llm_api;
 
 pub mod scenarios;
@@ -79,7 +80,7 @@ pub async fn dispatch_usecase(command: Usecases, userinput: String) {
 
 /// General response event. Use it to send responses to the client.
 /// How event works see [`shared::event_system`].
-#[derive(Debug, parse_display::Display)]
+#[derive(Debug, parse_display::Display, Serialize)]
 pub enum AsyaResponse {
     /// Success response with message from Asya.
     ///

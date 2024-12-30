@@ -1,5 +1,5 @@
+use serde::Serialize;
 use std::sync::atomic::{AtomicBool, Ordering};
-
 use services::services::info::hardware::{cpu, ram};
 use shared::event_system;
 use tokio::task;
@@ -15,7 +15,7 @@ use tokio::task;
 /// - `Ok`: Indicates that the hardware is functioning within normal parameters.
 ///   Contains the current CPU and memory usage.
 ///
-#[derive(Debug, parse_display::Display)]
+#[derive(Debug, parse_display::Display, Serialize)]
 pub enum HardwareStatus {
     /// Indicates that the hardware is functioning within normal parameters.
     ///

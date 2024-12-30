@@ -1,4 +1,5 @@
-use tokio::join;
+use shared::{event_system, plugin_system};
+use tokio::{join, sync::Mutex};
 
 #[macro_use]
 extern crate log;
@@ -14,9 +15,12 @@ async fn main() {
     })
     .expect("Error setting Ctrl-C handler");
 
+    let (sender, receiver) = tokio::sync::mpsc::channel(32);
+    event_system::init_event_dispatcher(sender).await;
+    plugin_system::load_plugins(Mutex::new(receiver));
     preview::show_preview();
     logging::init_logging();
-    shared::plugin_system::load_plugins().await.unwrap();
+    // чота хз
     let server_launching = server::start();
     info!("Bootstrapping");
 
