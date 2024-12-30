@@ -1,75 +1,77 @@
+use libloading::Library;
+use plugin_interface::{EventState, PluginInformation};
+use serde::Serialize;
 use std::{
-    ffi::{c_char, CString},
-    thread,
+    ffi::{c_void, CString},
+    ptr, thread,
     time::Duration,
 };
-
-use lazy_static::lazy_static;
-use libloading::Library;
-use log::info;
-use serde::Serialize;
-use tokio::sync::{
-    mpsc::{self, Receiver, Sender},
-    Mutex,
-};
-
-type CallbackVec = Vec<unsafe extern "C" fn(*const c_char)>;
+use tokio::sync::{mpsc::Receiver, Mutex};
 
 #[derive(Debug, Serialize)]
 pub enum Loaded {
     NeBilo { pochemu: String },
 }
 
-// lazy_static! {
-//     pub static ref INSTANCE: PluginManager = {
-//         let (sender, receiver) = mpsc::channel(32);
-//         PluginManager { sender, receiver }
-//     };
-// }
-//
-// pub struct PluginManager {
-//     pub sender: Sender<String>,
-//     pub receiver: Receiver<String>,
-// }
+struct PluginRuntimeInfo {
+    plugin_information: Box<PluginInformation>,
+    #[allow(dead_code)]
+    library: Library, // опасная темка
+    state: *const c_void,
+}
 
 pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
     unsafe {
         thread::spawn(move || {
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(async {
-                let library = Library::new("./plugins/libtest_dynamic_lib.so").unwrap();
-                let plugin_info = library
-                    .get::<*mut plugin_interface::PluginInfo>(b"plugin_info")
-                    .unwrap()
-                    .read();
+                let libs = vec!["./plugins/libtest_dynamic_lib.so"];
 
-                let plugin_information = Box::from_raw(plugin_info().cast_mut());
-                let plugin_name = CString::from_raw(plugin_information.name.cast_mut())
-                    .into_string()
-                    .unwrap();
+                let mut infos = vec![];
+                for lib in libs {
+                    let library = Library::new(lib).unwrap();
+                    let plugin_information = library
+                        .get::<*mut plugin_interface::PluginInfo>(b"plugin_info")
+                        .expect("lib is not loaded")
+                        .read();
 
-                info!("Loaded plugin {plugin_name}!");
+                    let plugin_information = Box::from_raw(plugin_information().cast_mut());
 
-                let callbacks = Vec::from_raw_parts(
-                    plugin_information.callback.cast_mut(),
-                    plugin_information.total_callbacks as usize,
-                    plugin_information.total_callbacks as usize,
-                );
+                    infos.push(PluginRuntimeInfo {
+                        library,
+                        state: ptr::null(),
+                        plugin_information,
+                    });
+                }
+
+                // run_inits(&infos); // ! сегфолтит  сука !
 
                 loop {
-                    for callback in callbacks.clone() {
-                        for _ in 0..1000 {
-                            // let input = if i == 999 { "я eblan" } else { "секс" };
-                            // let cstr = CString::new(input).unwrap();
-                            thread::sleep(Duration::from_micros(1_000));
-                            let mut recv = receiver.lock().await;
-                            let res = recv.recv().await;
-                            let ptr = CString::new(res.unwrap()).unwrap();
-                            callback(ptr.as_ptr());
-                        }
+                    for info in &mut infos {
+                        let event_callback = info.plugin_information.event_callback;
+                        thread::sleep(Duration::from_micros(1_000));
+                        let mut recv = receiver.lock().await;
+                        let res = recv.recv().await;
+                        let ptr = CString::new(res.unwrap()).unwrap();
+                        let state = event_callback(EventState {
+                            state: info.state,
+                            event: ptr.as_ptr(),
+                        });
+                        info.state = state.state;
                     }
                 }
             })
         })
     };
 }
+
+// #[allow(clippy::vec_box)] // рассмотрим это позже
+// fn run_inits(infos: &Vec<Box<plugin_interface::PluginInformation>>) {
+//     unsafe {
+//         for info in infos {
+//             println!("я еблан");
+//             let a = (info.init_callback)(); // state is not safe yet
+//             println!("я не еблан");
+//         }
+//     }
+// }
