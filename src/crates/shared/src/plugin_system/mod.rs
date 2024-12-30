@@ -27,24 +27,9 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
             rt.block_on(async {
                 let libs = vec!["./plugins/libtest_dynamic_lib.so"];
 
-                let mut infos = vec![];
-                for lib in libs {
-                    let library = Library::new(lib).unwrap();
-                    let plugin_information = library
-                        .get::<*mut plugin_interface::PluginInfo>(b"plugin_info")
-                        .expect("lib is not loaded")
-                        .read();
+                let mut infos = load_infos(libs);
 
-                    let plugin_information = Box::from_raw(plugin_information().cast_mut());
-
-                    infos.push(PluginRuntimeInfo {
-                        library,
-                        state: ptr::null(),
-                        plugin_information,
-                    });
-                }
-
-                // run_inits(&infos); // ! сегфолтит  сука !
+                run_inits(&mut infos); // ! сегфолтит  сука !
 
                 loop {
                     for info in &mut infos {
@@ -65,13 +50,32 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
     };
 }
 
-// #[allow(clippy::vec_box)] // рассмотрим это позже
-// fn run_inits(infos: &Vec<Box<plugin_interface::PluginInformation>>) {
-//     unsafe {
-//         for info in infos {
-//             println!("я еблан");
-//             let a = (info.init_callback)(); // state is not safe yet
-//             println!("я не еблан");
-//         }
-//     }
-// }
+unsafe fn load_infos(libs: Vec<&str>) -> Vec<PluginRuntimeInfo> {
+    let mut infos = vec![];
+    for lib in libs {
+        let library = Library::new(lib).unwrap();
+        let plugin_information = library
+            .get::<*mut plugin_interface::PluginInfo>(b"plugin_info")
+            .expect("lib is not loaded")
+            .read();
+
+        let plugin_information = Box::from_raw(plugin_information().cast_mut());
+
+        infos.push(PluginRuntimeInfo {
+            library,
+            state: ptr::null(),
+            plugin_information,
+        });
+    }
+    infos
+}
+
+#[allow(clippy::vec_box)] // рассмотрим это позже
+fn run_inits(infos: &mut Vec<PluginRuntimeInfo>) {
+    unsafe {
+        for info in infos {
+            let a = (info.plugin_information.init_callback)(); // state is not safe yet
+            info.state = a.state;
+        }
+    }
+}
