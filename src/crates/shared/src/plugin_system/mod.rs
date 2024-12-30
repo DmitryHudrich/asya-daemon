@@ -7,10 +7,12 @@ use std::{
 };
 use tokio::sync::{mpsc::Receiver, Mutex};
 
+// todo: редизайн типов чтобы такой хуеты как с Library не было
+// !! порядок полей менять НЕЛЬЗЯ тоже может быть сегфолт
 struct PluginRuntimeInfo {
     plugin_information: Box<PluginInformation>,
     #[allow(dead_code)]
-    library: Library, // это поле вообще никгде не юзается, но без него сегфолт
+    library: Library, // это поле вообще никгде не юзается, но без него сегфолт.
     state: *const c_void,
 }
 
