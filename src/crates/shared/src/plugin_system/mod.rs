@@ -111,8 +111,8 @@ async unsafe fn poll(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<Rec
                     };
                     event_system::publish(event).await;
                 }
-                // drop(Box::from_raw((*info.state).published_event));
-                // (*info.state).published_event = ptr::null_mut()
+                drop(Box::from_raw((*info.state).published_event));
+                (*info.state).published_event = ptr::null_mut()
             }
         }
         tokio::time::sleep(Duration::from_micros(1_000)).await;
