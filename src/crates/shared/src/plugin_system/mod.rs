@@ -1,12 +1,6 @@
 use libloading::Library;
-use plugin_interface::{EventState, PluginInformation};
-use std::{
-    ffi::{c_void, CString},
-    fs, io,
-    path::Path,
-    ptr, thread,
-    time::Duration,
-};
+use plugin_interface::{EventState, PluginInformation, State};
+use std::{ffi::CString, fs, io, path::Path, ptr, thread, time::Duration};
 use tokio::sync::{mpsc::Receiver, Mutex};
 
 use crate::configuration::CONFIG;
@@ -16,7 +10,7 @@ use crate::configuration::CONFIG;
 struct PluginRuntimeInfo {
     plugin_information: Box<PluginInformation>,
     _library: Library, // это поле вообще никгде не юзается, но без него сегфолт.
-    state: *const c_void,
+    state: State,
 }
 
 pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
@@ -30,7 +24,7 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
                 let mut plugins_data = load_plugin_data(libs);
 
                 run_inits(&mut plugins_data);
-                poll_execute(plugins_data, receiver).await
+                poll(&mut plugins_data, receiver).await
             })
         })
     };
@@ -68,23 +62,24 @@ fn find_files_with_extension(dir: &Path, extension: &str) -> io::Result<Vec<Stri
     Ok(files_with_extension)
 }
 
-async unsafe fn poll_execute(
-    mut plugins_data: Vec<PluginRuntimeInfo>,
-    receiver: Mutex<Receiver<String>>,
-) {
+async unsafe fn poll(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<Receiver<String>>) {
+    let mut recv = receiver.lock().await;
     loop {
-        for info in &mut plugins_data {
-            let event_callback = info.plugin_information.event_callback;
-            thread::sleep(Duration::from_micros(1_000));
-            let mut recv = receiver.lock().await;
-            let res = recv.recv().await;
-            let ptr = CString::new(res.unwrap()).unwrap();
-            let state = event_callback(EventState {
-                state: info.state,
-                event: ptr.as_ptr(),
-            });
-            info.state = state.state;
+        for info in &mut *plugins_data {
+            if !recv.is_empty() {
+                let event_callback = info.plugin_information.event_callback;
+                let res = recv.recv().await;
+                let ptr = CString::new(res.unwrap()).unwrap();
+                (event_callback)(EventState {
+                    state: info.state,
+                    event: ptr.as_ptr(),
+                });
+            } else {
+                let execute_callback = info.plugin_information.execute_callback;
+                (execute_callback)(info.state);
+            }
         }
+        tokio::time::sleep(Duration::from_micros(1_000)).await;
     }
 }
 
@@ -102,7 +97,7 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
 
         infos.push(PluginRuntimeInfo {
             _library: library,
-            state: ptr::null(),
+            state: State { data: ptr::null() },
             plugin_information,
         });
     }
@@ -111,7 +106,6 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
 
 unsafe fn run_inits(infos: &mut Vec<PluginRuntimeInfo>) {
     for info in infos {
-        let new_state = (info.plugin_information.init_callback)();
-        info.state = new_state.state;
+        (info.plugin_information.init_callback)(info.state);
     }
 }
