@@ -1,5 +1,4 @@
 use libloading::Library;
-use log::debug;
 use plugin_interface::{EventState, PluginInformation, State};
 use serde::Serialize;
 use std::{
@@ -110,9 +109,9 @@ async unsafe fn poll(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<Rec
                         data,
                     };
                     event_system::publish(event).await;
+                    drop(Box::from_raw((*info.state).published_event));
+                    (*info.state).published_event = ptr::null_mut()
                 }
-                drop(Box::from_raw((*info.state).published_event));
-                (*info.state).published_event = ptr::null_mut()
             }
         }
         tokio::time::sleep(Duration::from_micros(1_000)).await;

@@ -4,7 +4,7 @@ local config = {
     },
     logging = {
         place = false,
-        level = "debug",
+        level = "info",
         folder = "logs",
         filescount = 5,
         stdout = true
