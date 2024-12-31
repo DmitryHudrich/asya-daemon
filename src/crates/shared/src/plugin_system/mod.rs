@@ -2,10 +2,14 @@ use libloading::Library;
 use plugin_interface::{EventState, PluginInformation};
 use std::{
     ffi::{c_void, CString},
+    fs, io,
+    path::Path,
     ptr, thread,
     time::Duration,
 };
 use tokio::sync::{mpsc::Receiver, Mutex};
+
+use crate::configuration::CONFIG;
 
 // todo: редизайн типов чтобы такой хуеты как с Library не было
 // !! порядок полей менять НЕЛЬЗЯ тоже может быть сегфолт
@@ -20,7 +24,8 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
         thread::spawn(move || {
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(async {
-                let libs = vec!["./plugins/libtest_dynamic_lib.so"];
+                let libs = find_plugins();
+                dbg!(&libs);
 
                 let mut plugins_data = load_plugin_data(libs);
 
@@ -29,6 +34,38 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
             })
         })
     };
+}
+
+fn find_plugins() -> Vec<String> {
+    let plugins_folder = &CONFIG.plugins.plugins_folder;
+    let extension = if cfg!(target_family = "unix") {
+        "so"
+    } else {
+        "dll"
+    };
+
+    find_files_with_extension(Path::new(plugins_folder), extension).unwrap() //todo
+}
+
+fn find_files_with_extension(dir: &Path, extension: &str) -> io::Result<Vec<String>> {
+    let mut files_with_extension = Vec::new();
+
+    for entry in fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+
+        if !path.is_dir() {
+            if let Some(ext) = path.extension() {
+                if ext == extension {
+                    if let Some(path_str) = path.to_str() {
+                        files_with_extension.push(path_str.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(files_with_extension)
 }
 
 async unsafe fn poll_execute(
@@ -51,7 +88,7 @@ async unsafe fn poll_execute(
     }
 }
 
-unsafe fn load_plugin_data(libs: Vec<&str>) -> Vec<PluginRuntimeInfo> {
+unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
     const FN_PLUGIN_INFO: &[u8; 11] = b"plugin_info";
     let mut infos = vec![];
     for lib in libs {

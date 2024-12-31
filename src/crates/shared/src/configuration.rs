@@ -35,7 +35,7 @@ lazy_static! {
 
         let merged_config = lua_config.merge(serde_env::from_env().unwrap());
         merged_config.verify().unwrap();
-        dbg!(merged_config.unwrap_or_default())
+        merged_config.unwrap_or_default()
     };
 }
 
@@ -71,6 +71,18 @@ pub struct Config {
     /// Ai config group.
     #[property(default, use_type(AiProperty), mergeable)]
     pub ai: Ai,
+
+    /// Plugins config group.
+    #[property(default, use_type(PluginsProperty), mergeable)]
+    pub plugins: Plugins,
+}
+
+#[derive(Debug, Property)]
+#[property(name(PluginsProperty), derive(Deserialize, Default, Clone))]
+pub struct Plugins {
+    /// Folder which contains plugins.
+    #[property(default("plugins".to_string()))]
+    pub plugins_folder: String,
 }
 
 #[derive(Debug, Property)]
