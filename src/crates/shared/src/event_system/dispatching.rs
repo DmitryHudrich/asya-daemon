@@ -89,6 +89,8 @@ impl AsyncEventDispatcher {
             lock.send(serde_json::to_string(&*event).unwrap())
                 .await
                 .unwrap();
+        } else {
+            debug!("Event was not published: {}", event_type);
         }
     }
 }

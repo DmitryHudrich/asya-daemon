@@ -1,7 +1,9 @@
 use libloading::Library;
+use log::debug;
 use plugin_interface::{EventState, PluginInformation, State};
+use serde::Serialize;
 use std::{
-    ffi::CString,
+    ffi::{CStr, CString},
     fs, io,
     path::Path,
     ptr::{self},
@@ -10,14 +12,14 @@ use std::{
 };
 use tokio::sync::{mpsc::Receiver, Mutex};
 
-use crate::configuration::CONFIG;
+use crate::{configuration::CONFIG, event_system};
 
 // todo: редизайн типов чтобы такой хуеты как с Library не было
 // !! порядок полей менять НЕЛЬЗЯ тоже может быть сегфолт
 struct PluginRuntimeInfo {
     plugin_information: Box<PluginInformation>,
     _library: Library, // это поле вообще никгде не юзается, но без него сегфолт.
-    state: *const State,
+    state: *mut State,
 }
 
 pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
@@ -30,6 +32,7 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
 
                 let mut plugins_data = load_plugin_data(libs);
 
+                run_inits(&mut plugins_data);
                 poll(&mut plugins_data, receiver).await
             })
         })
@@ -68,6 +71,12 @@ fn find_files_with_extension(dir: &Path, extension: &str) -> io::Result<Vec<Stri
     Ok(files_with_extension)
 }
 
+#[derive(Debug, Serialize)]
+pub struct PluginEvent {
+    sender: String,
+    data: String,
+}
+
 async unsafe fn poll(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<Receiver<String>>) {
     let mut recv = receiver.lock().await;
     loop {
@@ -85,6 +94,26 @@ async unsafe fn poll(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<Rec
                 let execute_callback = info.plugin_information.execute_callback;
                 (execute_callback)(info.state);
             }
+            if !info.state.is_null() {
+                let state = *info.state;
+                if !state.published_event.is_null() {
+                    let event = state.published_event;
+                    let data = CStr::from_ptr(event)
+                        .to_str()
+                        .unwrap_or_default()
+                        .to_string();
+                    let event = PluginEvent {
+                        sender: CStr::from_ptr(info.plugin_information.name)
+                            .to_str()
+                            .unwrap()
+                            .to_string(),
+                        data,
+                    };
+                    event_system::publish(event).await;
+                }
+                // drop(Box::from_raw((*info.state).published_event));
+                // (*info.state).published_event = ptr::null_mut()
+            }
         }
         tokio::time::sleep(Duration::from_micros(1_000)).await;
     }
@@ -96,7 +125,7 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
     for lib in libs {
         let library = Library::new(lib).unwrap();
         let plugin_information = library
-            .get::<*mut plugin_interface::PluginInfo>(FN_PLUGIN_INFO)
+            .get::<*mut plugin_interface::PluginInfoCallback>(FN_PLUGIN_INFO)
             .expect("lib is not loaded")
             .read();
 
@@ -104,9 +133,15 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
 
         infos.push(PluginRuntimeInfo {
             _library: library,
-            state: (plugin_information.init_callback)(),
+            state: ptr::null_mut(),
             plugin_information,
         });
     }
     infos
+}
+
+unsafe fn run_inits(infos: &mut Vec<PluginRuntimeInfo>) {
+    for info in infos {
+        info.state = (info.plugin_information.init_callback)();
+    }
 }
