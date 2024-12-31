@@ -1,21 +1,22 @@
 use std::ffi::{c_char, c_void};
 
-pub type EventCallbalck = unsafe extern "C" fn(EventState);
-pub type ExecuteCallback = unsafe extern "C" fn(State);
-pub type InitCallback = unsafe extern "C" fn(State);
+pub type EventCallbalck = unsafe extern "C" fn(*const EventState);
+pub type ExecuteCallback = unsafe extern "C" fn(*const State);
+pub type InitCallback = unsafe extern "C" fn() -> *const State;
 
-pub type PluginInfo = unsafe extern fn() -> *const PluginInformation;
+pub type PluginInfo = unsafe extern "C" fn() -> *const PluginInformation;
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct EventState {
-    pub state: State,
+    pub state: *const State,
     pub event: *const c_char,
 }
 
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct State {
-    pub data: *const c_void
+    pub data: *const c_void,
 }
 
 #[repr(C)]
