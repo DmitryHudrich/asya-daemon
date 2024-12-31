@@ -22,18 +22,21 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
             rt.block_on(async {
                 let libs = vec!["./plugins/libtest_dynamic_lib.so"];
 
-                let mut infos = load_infos(libs);
+                let mut plugins_data = load_plugin_data(libs);
 
-                run_inits(&mut infos);
-                poll_execute(infos, receiver).await
+                run_inits(&mut plugins_data);
+                poll_execute(plugins_data, receiver).await
             })
         })
     };
 }
 
-async unsafe fn poll_execute(mut infos: Vec<PluginRuntimeInfo>, receiver: Mutex<Receiver<String>>) {
+async unsafe fn poll_execute(
+    mut plugins_data: Vec<PluginRuntimeInfo>,
+    receiver: Mutex<Receiver<String>>,
+) {
     loop {
-        for info in &mut infos {
+        for info in &mut plugins_data {
             let event_callback = info.plugin_information.event_callback;
             thread::sleep(Duration::from_micros(1_000));
             let mut recv = receiver.lock().await;
@@ -48,12 +51,13 @@ async unsafe fn poll_execute(mut infos: Vec<PluginRuntimeInfo>, receiver: Mutex<
     }
 }
 
-unsafe fn load_infos(libs: Vec<&str>) -> Vec<PluginRuntimeInfo> {
+unsafe fn load_plugin_data(libs: Vec<&str>) -> Vec<PluginRuntimeInfo> {
+    const FN_PLUGIN_INFO: &[u8; 11] = b"plugin_info";
     let mut infos = vec![];
     for lib in libs {
         let library = Library::new(lib).unwrap();
         let plugin_information = library
-            .get::<*mut plugin_interface::PluginInfo>(b"plugin_info")
+            .get::<*mut plugin_interface::PluginInfo>(FN_PLUGIN_INFO)
             .expect("lib is not loaded")
             .read();
 
@@ -70,7 +74,7 @@ unsafe fn load_infos(libs: Vec<&str>) -> Vec<PluginRuntimeInfo> {
 
 unsafe fn run_inits(infos: &mut Vec<PluginRuntimeInfo>) {
     for info in infos {
-        let a = (info.plugin_information.init_callback)(); // state is not safe yet
-        info.state = a.state;
+        let new_state = (info.plugin_information.init_callback)();
+        info.state = new_state.state;
     }
 }
