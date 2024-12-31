@@ -21,23 +21,31 @@ struct PluginRuntimeInfo {
     state: *mut State,
 }
 
+/// Event publishing from plugins.
+#[derive(Debug, Serialize)]
+pub struct PluginEvent {
+    sender: String,
+    data: String,
+}
+
+/// Loads plugins from path from config.
 pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
     unsafe {
         thread::spawn(move || {
             let rt = tokio::runtime::Runtime::new().unwrap();
             rt.block_on(async {
-                let libs = find_plugins();
-                dbg!(&libs);
+                let libraries_path = find_plugins();
 
-                let mut plugins_data = load_plugin_data(libs);
+                let mut plugins_data = load_plugin_data(libraries_path);
 
                 run_inits(&mut plugins_data);
-                poll(&mut plugins_data, receiver).await
+                do_loop(&mut plugins_data, receiver).await
             })
         })
     };
 }
 
+/// Finds plugins for user's OS and returs their pathes.
 fn find_plugins() -> Vec<String> {
     let plugins_folder = &CONFIG.plugins.plugins_folder;
     let extension = if cfg!(target_family = "unix") {
@@ -70,51 +78,55 @@ fn find_files_with_extension(dir: &Path, extension: &str) -> io::Result<Vec<Stri
     Ok(files_with_extension)
 }
 
-#[derive(Debug, Serialize)]
-pub struct PluginEvent {
-    sender: String,
-    data: String,
-}
-
-async unsafe fn poll(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<Receiver<String>>) {
+async unsafe fn do_loop(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<Receiver<String>>) {
     let mut recv = receiver.lock().await;
     loop {
         for info in &mut *plugins_data {
             if !recv.is_empty() {
-                let event_callback = info.plugin_information.event_callback;
-                let res = recv.recv().await;
-                let ptr = CString::new(res.unwrap()).unwrap();
-                let event_state = Box::into_raw(Box::new(EventState {
-                    state: info.state,
-                    event: ptr.as_ptr(),
-                }));
-                (event_callback)(event_state);
+                check_event_for_send(info, &mut recv).await;
             } else {
-                let execute_callback = info.plugin_information.execute_callback;
-                (execute_callback)(info.state);
+                (info.plugin_information.execute_callback)(info.state);
             }
-            if !info.state.is_null() {
-                let state = *info.state;
-                if !state.published_event.is_null() {
-                    let event = state.published_event;
-                    let data = CStr::from_ptr(event)
-                        .to_str()
-                        .unwrap_or_default()
-                        .to_string();
-                    let event = PluginEvent {
-                        sender: CStr::from_ptr(info.plugin_information.name)
-                            .to_str()
-                            .unwrap()
-                            .to_string(),
-                        data,
-                    };
-                    event_system::publish(event).await;
-                    drop(Box::from_raw((*info.state).published_event));
-                    (*info.state).published_event = ptr::null_mut()
-                }
-            }
+            check_event_for_publish(info).await;
         }
-        tokio::time::sleep(Duration::from_micros(1_000)).await;
+        tokio::time::sleep(Duration::from_micros(100)).await;
+    }
+}
+
+async unsafe fn check_event_for_send<'a>(
+    info: &mut PluginRuntimeInfo,
+    recv: &mut tokio::sync::MutexGuard<'a, Receiver<String>>,
+) {
+    let event_callback = info.plugin_information.event_callback;
+    let res = recv.recv().await;
+    let ptr = CString::new(res.unwrap()).unwrap();
+    let event_state = Box::into_raw(Box::new(EventState {
+        state: info.state,
+        event: ptr.as_ptr(),
+    }));
+    (event_callback)(event_state);
+}
+
+async unsafe fn check_event_for_publish(info: &mut PluginRuntimeInfo) {
+    if !info.state.is_null() {
+        let plugin_state = *info.state;
+        if !plugin_state.published_event.is_null() {
+            let published_event = plugin_state.published_event;
+            let published_event_data = CStr::from_ptr(published_event)
+                .to_str()
+                .unwrap_or_default()
+                .to_string();
+            let general_event = PluginEvent {
+                sender: CStr::from_ptr(info.plugin_information.name)
+                    .to_str()
+                    .unwrap()
+                    .to_string(),
+                data: published_event_data,
+            };
+            event_system::publish(general_event).await;
+        }
+        drop(Box::from_raw((*info.state).published_event));
+        (*info.state).published_event = ptr::null_mut()
     }
 }
 
@@ -123,17 +135,18 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
     let mut infos = vec![];
     for lib in libs {
         let library = Library::new(lib).unwrap();
-        let plugin_information = library
+        let plugin_information_callback = library
             .get::<*mut plugin_interface::PluginInfoCallback>(FN_PLUGIN_INFO)
             .expect("lib is not loaded")
             .read();
 
-        let plugin_information = Box::from_raw(plugin_information().cast_mut());
+        let boxed_plugin_information_callback =
+            Box::from_raw(plugin_information_callback().cast_mut());
 
         infos.push(PluginRuntimeInfo {
             _library: library,
             state: ptr::null_mut(),
-            plugin_information,
+            plugin_information: boxed_plugin_information_callback,
         });
     }
     infos
