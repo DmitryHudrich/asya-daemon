@@ -1,4 +1,5 @@
 use libloading::Library;
+use log::*;
 use plugin_interface::{EventState, PluginInformation, State};
 use serde::Serialize;
 use std::{
@@ -95,16 +96,27 @@ async unsafe fn do_loop(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<
 
 async unsafe fn check_event_for_send<'a>(
     info: &mut PluginRuntimeInfo,
-    recv: &mut tokio::sync::MutexGuard<'a, Receiver<String>>,
+    event_recv: &mut tokio::sync::MutexGuard<'a, Receiver<String>>,
 ) {
     let event_callback = info.plugin_information.event_callback;
-    let res = recv.recv().await;
-    let ptr = CString::new(res.unwrap()).unwrap();
+    let recieved_event = event_recv.recv().await;
+
+    let ptr = extract_ptr(recieved_event);
+
     let event_state = Box::into_raw(Box::new(EventState {
         state: info.state,
-        event: ptr.as_ptr(),
+        event: ptr,
     }));
     (event_callback)(event_state);
+}
+
+fn extract_ptr(res: Option<String>) -> *const std::ffi::c_char {
+    CString::new(res.expect("mpsc for events was closed. this is a bug."))
+        .map(|cstring| cstring.as_ptr())
+        .unwrap_or_else(|_| {
+            warn!("Event string representation contains zero byte, which is not allowed.");
+            ptr::null()
+        })
 }
 
 async unsafe fn check_event_for_publish(info: &mut PluginRuntimeInfo) {
@@ -112,18 +124,23 @@ async unsafe fn check_event_for_publish(info: &mut PluginRuntimeInfo) {
         let plugin_state = *info.state;
         if !plugin_state.published_event.is_null() {
             let published_event = plugin_state.published_event;
-            let published_event_data = CStr::from_ptr(published_event)
-                .to_str()
-                .unwrap_or_default()
-                .to_string();
-            let general_event = PluginEvent {
-                sender: CStr::from_ptr(info.plugin_information.name)
-                    .to_str()
-                    .unwrap()
-                    .to_string(),
-                data: published_event_data,
-            };
-            event_system::publish(general_event).await;
+            let published_event_data = CStr::from_ptr(published_event).to_str();
+            match published_event_data {
+                Ok(str_data) => {
+                    let general_event = PluginEvent {
+                        sender: CStr::from_ptr(info.plugin_information.name)
+                            .to_str()
+                            .unwrap() /* i think, plugin name will be not changed due asya
+                            lifetime, so that we don't have to check this every time. */
+                            .to_string(),
+                        data: str_data.to_string(),
+                    };
+                    event_system::publish(general_event).await;
+                }
+                Err(_) => {
+                    warn!("Plugin sent an event, that cannot be represent as a valid Utf8 string. Event wasn'n published.")
+                }
+            }
         }
         drop(Box::from_raw((*info.state).published_event));
         (*info.state).published_event = ptr::null_mut()
@@ -134,11 +151,27 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
     const FN_PLUGIN_INFO: &[u8; 11] = b"plugin_info";
     let mut infos = vec![];
     for lib in libs {
-        let library = Library::new(lib).unwrap();
-        let plugin_information_callback = library
+        let library = match Library::new(&lib) {
+            Ok(lib) => lib,
+            Err(err) => {
+                warn!("Library {} wasn't loaded due error: {}", lib, err);
+                continue;
+            }
+        };
+        let plugin_information_callback = match library
             .get::<*mut plugin_interface::PluginInfoCallback>(FN_PLUGIN_INFO)
-            .expect("lib is not loaded")
-            .read();
+        {
+            Ok(callback) => callback.read(),
+            Err(err) => {
+                warn!(
+                    "Library {} wasn't loaded 
+                    because lib doesn't containt valid FN_PLUGIN_INFO function or / and it's signature is incorrect. | {}",
+                    lib,
+                    err
+                );
+                continue;
+            }
+        };
 
         let boxed_plugin_information_callback =
             Box::from_raw(plugin_information_callback().cast_mut());
