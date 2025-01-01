@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use std::ffi::{c_char, c_void, CString};
+use std::ffi::{c_char, CString};
 
 use log::warn;
 use plugin_interface::ApiCallbacks;

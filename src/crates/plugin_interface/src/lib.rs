@@ -1,4 +1,4 @@
-use std::ffi::{c_char, c_void};
+use std::{ffi::{c_char, c_void}, ptr};
 
 pub type EventCallbalck = unsafe extern "C" fn(*const EventState, ApiCallbacks);
 pub type ExecuteCallback = unsafe extern "C" fn(*mut State, ApiCallbacks);
@@ -20,6 +20,17 @@ pub struct State {
     pub readable_message: *mut c_char,
     pub human_request: *mut c_char,
     pub data: *const c_void,
+}
+
+impl Default for State {
+    fn default() -> Self {
+        Self {
+            published_event: ptr::null_mut(),
+            readable_message: ptr::null_mut(),
+            human_request: ptr::null_mut(),
+            data: ptr::null_mut(),
+        }
+    }
 }
 
 #[repr(C)]
