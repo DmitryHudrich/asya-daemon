@@ -1,9 +1,14 @@
+use std::sync::Arc;
+
 use crate::scenarios::music_control;
 use crate::usecases::Usecases;
 use log::*;
 use scenarios::system_monitoring;
 use serde::Serialize;
 use services::llm_api;
+use shared::event_system;
+use shared::plugin_system::ReadableRequest;
+use tokio::task;
 
 pub mod scenarios;
 pub mod shared_workers;
@@ -15,6 +20,22 @@ fn process_response(llm_response: &str) -> Result<Usecases, Box<dyn std::error::
     let command = temp_value.pointer("/Command").ok_or("Command not found")?;
     let usecase = serde_json::from_value::<Usecases>(command.clone())?;
     Ok(usecase)
+}
+
+pub async fn subscribe_for_plugins() {
+    event_system::subscribe_once({
+        move |event: Arc<ReadableRequest>| {
+            task::spawn(async move {
+                let response = AsyaResponse::Ok {
+                    message: event.0.clone(),
+                };
+
+                dispatch_by_user_message(response.to_string()).await;
+
+                event_system::publish(response).await;
+            })
+        }
+    }).await
 }
 
 pub async fn dispatch_by_user_message(message: String) {
@@ -81,6 +102,8 @@ pub async fn dispatch_usecase(command: Usecases, userinput: String) {
 /// General response event. Use it to send responses to the client.
 /// How event works see [`shared::event_system`].
 #[derive(Debug, parse_display::Display, Serialize)]
+#[serde(tag = "asyaResponse")]
+#[serde(rename_all = "camelCase")]
 pub enum AsyaResponse {
     /// Success response with message from Asya.
     ///

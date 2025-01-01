@@ -123,35 +123,65 @@ fn extract_ptr(res: Option<String>) -> *const std::ffi::c_char {
 
 async unsafe fn check_event_for_publish(info: &mut PluginRuntimeInfo) {
     if let Some(plugin_state) = ptr::NonNull::new(info.state) {
-        if let Some(published_event) = ptr::NonNull::new(plugin_state.read().published_event) {
-            let published_event_data = CStr::from_ptr(published_event.as_ptr()).to_str();
-            match published_event_data {
-                Ok(str_data) => {
-                    let general_event = PluginEvent {
-                        sender: CStr::from_ptr(info.plugin_information.name)
-                            .to_str()
-                            .unwrap() /* i think, plugin name will be not changed due asya
-                            lifetime, so that we don't have to check this every time. */
-                            .to_string(),
-                        data: str_data.to_string(),
-                    };
-                    event_system::publish(general_event).await;
-                }
-                Err(_) => {
-                    warn!("Plugin sent an event, that cannot be represent as a valid Utf8 string. Event wasn'n published.")
-                }
-            }
-        }
-        free_event_memory(info);
+        check_event(plugin_state, info).await;
+        check_request(plugin_state).await;
+
+        free_memory(info);
     }
 }
 
-unsafe fn free_event_memory(info: &mut PluginRuntimeInfo) {
-    let raw = (*info.state).published_event;
-    if !raw.is_null() {
-        drop(Box::from_raw(raw)); // panics if plugins frees memory independently, e.g. if after
-                                  // casting event to CString
+#[derive(Debug, Clone, Serialize)]
+pub struct ReadableRequest(pub String);
+
+async unsafe fn check_request(plugin_state: ptr::NonNull<State>) {
+    if let Some(request_ptr) = ptr::NonNull::new(plugin_state.read().human_request) {
+        let request_data = CStr::from_ptr(request_ptr.as_ptr()).to_str();
+        if let Ok(str_data) = request_data {
+            event_system::publish(ReadableRequest(str_data.to_string())).await;
+        }
+    }
+}
+
+async unsafe fn check_event(plugin_state: ptr::NonNull<State>, info: &mut PluginRuntimeInfo) {
+    if let Some(published_event) = ptr::NonNull::new(plugin_state.read().published_event) {
+        let published_event_data = CStr::from_ptr(published_event.as_ptr()).to_str();
+        match published_event_data {
+            Ok(str_data) => {
+                let general_event = PluginEvent {
+                    sender: CStr::from_ptr(info.plugin_information.name)
+                        .to_str()
+                        .unwrap() /* i think, plugin name will be not changed due asya
+                        lifetime, so that we don't have to check this every time. */
+                        .to_string(),
+                    data: str_data.to_string(),
+                };
+                event_system::publish(general_event).await;
+            }
+            Err(_) => {
+                warn!("Plugin sent an event, that cannot be represent as a valid Utf8 string. Event wasn'n published.")
+            }
+        }
+    }
+}
+
+unsafe fn free_memory(info: &mut PluginRuntimeInfo) {
+    let event_raw = (*info.state).published_event;
+    if !event_raw.is_null() {
+        drop(Box::from_raw(event_raw)); // panics if plugins frees memory independently, e.g. if after
+                                        // casting event to CString
         (*info.state).published_event = ptr::null_mut()
+    }
+
+    let message_raw = (*info.state).readable_message;
+    if !message_raw.is_null() {
+        drop(Box::from_raw(message_raw)); // same as above
+        (*info.state).readable_message = ptr::null_mut()
+    }
+
+    let request_raw = (*info.state).human_request;
+    if !message_raw.is_null() {
+        drop(Box::from_raw(request_raw)); // same as above
+        (*info.state).human_request = ptr::null_mut()
     }
 }
 

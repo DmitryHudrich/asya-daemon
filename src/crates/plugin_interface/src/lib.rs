@@ -17,6 +17,8 @@ pub struct EventState {
 #[derive(Clone, Copy)]
 pub struct State {
     pub published_event: *mut c_char,
+    pub readable_message: *mut c_char,
+    pub human_request: *mut c_char,
     pub data: *const c_void,
 }
 

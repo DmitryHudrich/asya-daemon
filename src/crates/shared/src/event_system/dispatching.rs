@@ -87,7 +87,6 @@ impl AsyncEventDispatcher {
         debug!("Event published: {}", event_type);
 
         let lock = self.sender.write().await;
-        println!(" -------- {}", serde_json::to_string(&*event).unwrap());
         lock.send(serde_json::to_string(&*event).unwrap())
             .await
             .unwrap();
