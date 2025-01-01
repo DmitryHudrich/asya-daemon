@@ -70,6 +70,18 @@ async fn handle_error(err: serde_json::Error, session: Arc<RwLock<Session>>) {
 }
 
 async fn handle_request(request: Requests, session: Arc<RwLock<Session>>) {
+    subscribe_to_asya_response(session).await;
+    match request {
+        Requests::Command { action } => {
+            usecases::dispatch_usecase(action, "".to_string()).await;
+        }
+        Requests::Human { message } => {
+            usecases::dispatch_by_user_message(message).await;
+        }
+    }
+}
+
+async fn subscribe_to_asya_response(session: Arc<RwLock<Session>>) {
     event_system::subscribe_once({
         let session = session.clone();
         move |event: Arc<AsyaResponse>| {
@@ -97,12 +109,4 @@ async fn handle_request(request: Requests, session: Arc<RwLock<Session>>) {
         }
     })
     .await;
-    match request {
-        Requests::Command { action } => {
-            usecases::dispatch_usecase(action, "".to_string()).await;
-        }
-        Requests::Human { message } => {
-            usecases::dispatch_by_user_message(message).await;
-        }
-    }
 }

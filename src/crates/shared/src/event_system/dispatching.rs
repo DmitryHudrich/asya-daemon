@@ -76,21 +76,20 @@ impl AsyncEventDispatcher {
     {
         let listeners = self.listeners.read().await;
         let event_type = std::any::type_name::<E>().to_string();
+        let event = Arc::new(event);
         if let Some(handlers) = listeners.get(&event_type) {
-            let event = Arc::new(event);
-
             for handler in handlers {
                 let cloned_event = event.clone();
                 debug!("Publishing event: {} - {:?}", event_type, cloned_event);
                 handler(cloned_event).await.unwrap();
             }
-            // let plugins = PluginManager::get().await;
-            let lock = self.sender.write().await;
-            lock.send(serde_json::to_string(&*event).unwrap())
-                .await
-                .unwrap();
-        } else {
-            debug!("Event was not published: {}", event_type);
         }
+        debug!("Event published: {}", event_type);
+
+        let lock = self.sender.write().await;
+        println!(" -------- {}", serde_json::to_string(&*event).unwrap());
+        lock.send(serde_json::to_string(&*event).unwrap())
+            .await
+            .unwrap();
     }
 }

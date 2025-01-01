@@ -101,6 +101,7 @@ async unsafe fn check_event_for_send<'a>(
     let event_callback = info.plugin_information.event_callback;
     let recieved_event = event_recv.recv().await;
 
+    // Maybe we should pass some set of events instead one?
     let ptr = extract_ptr(recieved_event);
 
     let event_state = Box::into_raw(Box::new(EventState {
@@ -112,7 +113,8 @@ async unsafe fn check_event_for_send<'a>(
 
 fn extract_ptr(res: Option<String>) -> *const std::ffi::c_char {
     CString::new(res.expect("mpsc for events was closed. this is a bug."))
-        .map(|cstring| cstring.as_ptr())
+        // release ownership here because memory frees in free_event_memory()
+        .map(|cstring| cstring.into_raw().cast_const())
         .unwrap_or_else(|_| {
             warn!("Event string representation contains zero byte, which is not allowed.");
             ptr::null()
@@ -147,7 +149,8 @@ async unsafe fn check_event_for_publish(info: &mut PluginRuntimeInfo) {
 unsafe fn free_event_memory(info: &mut PluginRuntimeInfo) {
     let raw = (*info.state).published_event;
     if !raw.is_null() {
-        drop(Box::from_raw(raw));
+        drop(Box::from_raw(raw)); // panics if plugins frees memory independently, e.g. if after
+                                  // casting event to CString
         (*info.state).published_event = ptr::null_mut()
     }
 }
