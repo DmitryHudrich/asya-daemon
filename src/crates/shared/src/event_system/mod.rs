@@ -2,8 +2,8 @@ use serde::Serialize;
 use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::mpsc::Sender;
-use tokio::sync::{OnceCell, RwLock};
+use tokio::sync::mpsc::{self, Receiver, Sender};
+use tokio::sync::{Mutex, OnceCell, RwLock};
 use tokio::task;
 
 type AsyncEventHandler =
@@ -45,4 +45,14 @@ where
     E: 'static + Any + Send + Sync + std::fmt::Debug + Serialize,
 {
     get_event_dispatcher().await.publish(event).await;
+}
+
+
+pub async fn get_channel() -> &'static (Sender<String>, Mutex<Receiver<String>>) {
+    static ONCE: OnceCell<(Sender<String>, Mutex<Receiver<String>>)> = OnceCell::const_new();
+    ONCE.get_or_init(|| async {
+        let (tx, rx) = mpsc::channel(32);
+        (tx, Mutex::const_new(rx))
+    })
+    .await
 }

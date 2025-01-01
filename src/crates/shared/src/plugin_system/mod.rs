@@ -14,6 +14,8 @@ use tokio::sync::{mpsc::Receiver, Mutex};
 
 use crate::{configuration::CONFIG, event_system};
 
+mod api_callbacks;
+
 // todo: редизайн типов чтобы такой хуеты как с Library не было
 // !! порядок полей менять НЕЛЬЗЯ тоже может быть сегфолт
 struct PluginRuntimeInfo {
@@ -86,7 +88,7 @@ async unsafe fn do_loop(plugins_data: &mut [PluginRuntimeInfo], receiver: Mutex<
             if !recv.is_empty() {
                 check_event_for_send(info, &mut recv).await;
             } else {
-                (info.plugin_information.execute_callback)(info.state);
+                (info.plugin_information.execute_callback)(info.state, api_callbacks::get_api());
             }
             check_event_for_publish(info).await;
         }
@@ -108,7 +110,7 @@ async unsafe fn check_event_for_send<'a>(
         state: info.state,
         event: ptr,
     }));
-    (event_callback)(event_state);
+    (event_callback)(event_state, api_callbacks::get_api());
 }
 
 fn extract_ptr(res: Option<String>) -> *const std::ffi::c_char {
@@ -225,6 +227,6 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
 
 unsafe fn run_inits(infos: &mut Vec<PluginRuntimeInfo>) {
     for info in infos {
-        info.state = (info.plugin_information.init_callback)();
+        info.state = (info.plugin_information.init_callback)(api_callbacks::get_api());
     }
 }

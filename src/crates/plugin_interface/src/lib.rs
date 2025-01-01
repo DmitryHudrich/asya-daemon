@@ -1,8 +1,8 @@
 use std::ffi::{c_char, c_void};
 
-pub type EventCallbalck = unsafe extern "C" fn(*const EventState);
-pub type ExecuteCallback = unsafe extern "C" fn(*mut State);
-pub type InitCallback = unsafe extern "C" fn() -> *mut State;
+pub type EventCallbalck = unsafe extern "C" fn(*const EventState, ApiCallbacks);
+pub type ExecuteCallback = unsafe extern "C" fn(*mut State, ApiCallbacks);
+pub type InitCallback = unsafe extern "C" fn(ApiCallbacks) -> *mut State;
 
 pub type PluginInfoCallback = unsafe extern "C" fn() -> *const PluginInformation;
 
@@ -20,6 +20,13 @@ pub struct State {
     pub readable_message: *mut c_char,
     pub human_request: *mut c_char,
     pub data: *const c_void,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct ApiCallbacks {
+    pub send_human_request: unsafe extern "C" fn(*mut c_char),
+    pub subscribe_to_events: unsafe extern "C" fn(unsafe extern "C" fn(*const c_char)),
 }
 
 #[repr(C)]

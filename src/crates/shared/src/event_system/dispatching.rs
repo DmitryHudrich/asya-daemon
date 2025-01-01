@@ -3,8 +3,8 @@ use serde::Serialize;
 use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::mpsc::Sender;
-use tokio::sync::RwLock;
+use tokio::sync::mpsc::{self, Receiver, Sender};
+use tokio::sync::{Mutex, OnceCell, RwLock};
 use tokio::task;
 
 // use crate::plugin_system::PluginManager;
@@ -80,14 +80,18 @@ impl AsyncEventDispatcher {
         if let Some(handlers) = listeners.get(&event_type) {
             for handler in handlers {
                 let cloned_event = event.clone();
-                debug!("Publishing event: {} - {:?}", event_type, cloned_event);
                 handler(cloned_event).await.unwrap();
             }
         }
-        debug!("Event published: {}", event_type);
+        debug!("Publishing event: {} - {:?}", event_type, event);
 
         let lock = self.sender.write().await;
         lock.send(serde_json::to_string(&*event).unwrap())
+            .await
+            .unwrap();
+
+        let (tx, _) = crate::event_system::get_channel().await;
+        tx.send(serde_json::to_string(&*event).unwrap())
             .await
             .unwrap();
     }

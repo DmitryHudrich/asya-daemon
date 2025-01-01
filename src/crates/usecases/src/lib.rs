@@ -26,13 +26,7 @@ pub async fn subscribe_for_plugins() {
     event_system::subscribe_once({
         move |event: Arc<ReadableRequest>| {
             task::spawn(async move {
-                let response = AsyaResponse::Ok {
-                    message: event.0.clone(),
-                };
-
-                dispatch_by_user_message(response.to_string()).await;
-
-                event_system::publish(response).await;
+                dispatch_by_user_message(event.0.to_string()).await;
             })
         }
     }).await

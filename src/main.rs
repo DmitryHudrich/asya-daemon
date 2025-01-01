@@ -18,6 +18,7 @@ async fn main() {
     let (sender, receiver) = tokio::sync::mpsc::channel(32);
     event_system::init_event_dispatcher(sender).await;
     plugin_system::load_plugins(Mutex::new(receiver));
+    usecases::subscribe_for_plugins().await;
     preview::show_preview();
     logging::init_logging();
     // чота хз
