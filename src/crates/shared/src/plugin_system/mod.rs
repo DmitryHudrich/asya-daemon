@@ -120,11 +120,9 @@ fn extract_ptr(res: Option<String>) -> *const std::ffi::c_char {
 }
 
 async unsafe fn check_event_for_publish(info: &mut PluginRuntimeInfo) {
-    if !info.state.is_null() {
-        let plugin_state = *info.state;
-        if !plugin_state.published_event.is_null() {
-            let published_event = plugin_state.published_event;
-            let published_event_data = CStr::from_ptr(published_event).to_str();
+    if let Some(plugin_state) = ptr::NonNull::new(info.state) {
+        if let Some(published_event) = ptr::NonNull::new(plugin_state.read().published_event) {
+            let published_event_data = CStr::from_ptr(published_event.as_ptr()).to_str();
             match published_event_data {
                 Ok(str_data) => {
                     let general_event = PluginEvent {
@@ -142,7 +140,14 @@ async unsafe fn check_event_for_publish(info: &mut PluginRuntimeInfo) {
                 }
             }
         }
-        drop(Box::from_raw((*info.state).published_event));
+        free_event_memory(info);
+    }
+}
+
+unsafe fn free_event_memory(info: &mut PluginRuntimeInfo) {
+    let raw = (*info.state).published_event;
+    if !raw.is_null() {
+        drop(Box::from_raw(raw));
         (*info.state).published_event = ptr::null_mut()
     }
 }
