@@ -57,7 +57,7 @@ fn find_plugins() -> Vec<String> {
         "dll"
     };
 
-    find_files_with_extension(Path::new(plugins_folder), extension).unwrap() //todo
+    find_files_with_extension(Path::new(plugins_folder), extension).unwrap_or_default()
 }
 
 fn find_files_with_extension(dir: &Path, extension: &str) -> io::Result<Vec<String>> {
