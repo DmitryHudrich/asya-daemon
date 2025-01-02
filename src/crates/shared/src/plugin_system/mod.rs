@@ -3,6 +3,7 @@ use log::*;
 use plugin_interface::{EventState, PluginInformation, State};
 use serde::Serialize;
 use std::{
+    collections::HashMap,
     ffi::{CStr, CString},
     fs, io,
     path::Path,
@@ -12,7 +13,10 @@ use std::{
 };
 use tokio::sync::{mpsc::Receiver, Mutex};
 
-use crate::{configuration::CONFIG, event_system};
+use crate::{
+    configuration::{self, ConfigFieldType, CONFIG},
+    event_system,
+};
 
 mod api_callbacks;
 
@@ -231,8 +235,13 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
                 continue;
             }
         };
-        let plugin_config = CONFIG.plugins.config.get_key_value(str_plugin_name);
-        let config_ptr = extract_config_ptr(plugin_config);
+        let config_ptr = CONFIG
+            .plugins
+            .config
+            .get_key_value(str_plugin_name)
+            .map(|(_, v)| extract_config_ptr(v))
+            .unwrap_or(ptr::null_mut());
+
         let state = (boxed_plugin_information.init_callback)(
             config_ptr.cast_const(),
             api_callbacks::get_api(),
@@ -249,14 +258,33 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
     infos
 }
 
-fn extract_config_ptr(plugin_config: Option<(&String, &String)>) -> *mut i8 {
-    if let Some((_, config_json)) = plugin_config {
-        if let Ok(cstring) = CString::new(config_json.to_owned()) {
-            CString::into_raw(cstring)
-        } else {
-            ptr::null_mut()
-        }
+type ConfigEntry<'a> =
+    &'a std::collections::HashMap<std::string::String, configuration::ConfigFieldType>;
+
+fn extract_config_ptr(plugin_config: ConfigEntry) -> *mut i8 {
+    let normalized_plugin_config = normalize_config(plugin_config);
+    let stringified = serde_json::to_string(&normalized_plugin_config).unwrap();
+    if let Ok(cstring) = CString::new(stringified.to_owned()) {
+        CString::into_raw(cstring)
     } else {
         ptr::null_mut()
     }
+}
+
+fn normalize_config(
+    plugin_config: &HashMap<String, configuration::ConfigFieldType>,
+) -> HashMap<String, configuration::ConfigFieldType> {
+    let mut res = HashMap::new();
+    for (k, v) in plugin_config {
+        let mut value_for_insert = v.to_owned();
+        if let ConfigFieldType::Array(map) = v {
+            let mut array_field = Vec::with_capacity(map.len() - 1);
+            for (i, element) in map {
+                array_field.insert(i - 1, element.to_owned())
+            }
+            value_for_insert = ConfigFieldType::NormalizedArray(array_field);
+        }
+        res.insert(k.to_owned(), value_for_insert);
+    }
+    res
 }
