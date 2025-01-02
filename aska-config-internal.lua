@@ -1,3 +1,4 @@
+local allowed_user = "bebra"
 local config = {
   net = {
     http_port = 3001,
@@ -23,7 +24,8 @@ local config = {
     config = {
       asya_telegram = {
         allowed_users = {
-          "ohhh_i_l1ke_u"
+          "ohhh_i_l1ke_u",
+          allowed_user,
         }
       }
     }
