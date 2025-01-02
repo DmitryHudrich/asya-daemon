@@ -4,7 +4,7 @@
 <!-- PROJECT LOGO //TODO Add lodo -->
 <br />
 <div align="center">
-  <a href="https://github.com/DmitryHudrich/asya-daemon">
+  <a href="https://github.com/asya4u/asya-daemon">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -18,7 +18,7 @@
     <a href="https://github.com/DmitryHudrich/asya-daemon/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <!-- <a href="https://github.com/DmitryHudrich/asya-daemon">View Demo</a>  //TODO -->
+    <!-- <a href="https://github.com/asya4u/asya-daemon">View Demo</a>  //TODO -->
   </p>
 
   ![Badge Pull Requests]
@@ -30,7 +30,7 @@
   **[<kbd> <br> Report Bug <br> </kbd>][Bug]**
   **[<kbd> <br> Request Feature <br> </kbd>][Feature]**
 
-  ![](https://count.getloli.com/get/@DmitryHudrich.github.readme)
+  ![](https://count.getloli.com/get/@asya4u.github.readme)
 
   ---
 </div>
@@ -67,7 +67,7 @@ To get a local copy up and running follow these simple example steps.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/DmitryHudrich/asya-daemon
+   git clone https://github.com/asya4u/asya-daemon
    ```
 2. Build projects
    ```sh
@@ -119,8 +119,8 @@ Don't forget to give the project a star! Thanks again!
 
 ### Top contributors:
 
-<a href="https://github.com/DmitryHudrich/asya-daemon/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=DmitryHudrich/asya-daemon" alt="contrib.rocks image" />
+<a href="https://github.com/asya4u/asya-daemon/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=asya4u/asya-daemon" alt="contrib.rocks image" />
 </a>
 
 
