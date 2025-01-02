@@ -233,7 +233,10 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
         };
         let plugin_config = CONFIG.plugins.config.get_key_value(str_plugin_name);
         let config_ptr = extract_config_ptr(plugin_config);
-        let state = (boxed_plugin_information.init_callback)(config_ptr, api_callbacks::get_api());
+        let state = (boxed_plugin_information.init_callback)(
+            config_ptr.cast_const(),
+            api_callbacks::get_api(),
+        );
         info!("Plugin loaded: {}", str_plugin_name,);
 
         infos.push(PluginRuntimeInfo {
@@ -241,18 +244,19 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
             state,
             plugin_information: boxed_plugin_information,
         });
+        let _ = CString::from_raw(config_ptr);
     }
     infos
 }
 
-fn extract_config_ptr(plugin_config: Option<(&String, &String)>) -> *const i8 {
+fn extract_config_ptr(plugin_config: Option<(&String, &String)>) -> *mut i8 {
     if let Some((_, config_json)) = plugin_config {
         if let Ok(cstring) = CString::new(config_json.to_owned()) {
-            cstring.as_ptr()
+            CString::into_raw(cstring)
         } else {
-            ptr::null()
+            ptr::null_mut()
         }
     } else {
-        ptr::null()
+        ptr::null_mut()
     }
 }
