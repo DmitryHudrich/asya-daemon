@@ -41,7 +41,6 @@ pub fn load_plugins(receiver: Mutex<Receiver<String>>) {
 
                 let mut plugins_data = load_plugin_data(libraries_path);
 
-                run_inits(&mut plugins_data);
                 do_loop(&mut plugins_data, receiver).await
             })
         })
@@ -223,20 +222,14 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
             }
         };
 
-        let boxed_plugin_information_callback =
+        let boxed_plugin_information =
             Box::from_raw(plugin_information_callback().cast_mut());
 
         infos.push(PluginRuntimeInfo {
             _library: library,
-            state: ptr::null_mut(),
-            plugin_information: boxed_plugin_information_callback,
+            state: (boxed_plugin_information.init_callback)(api_callbacks::get_api()),
+            plugin_information: boxed_plugin_information,
         });
     }
     infos
-}
-
-unsafe fn run_inits(infos: &mut Vec<PluginRuntimeInfo>) {
-    for info in infos {
-        info.state = (info.plugin_information.init_callback)(api_callbacks::get_api());
-    }
 }
