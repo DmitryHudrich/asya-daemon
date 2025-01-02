@@ -16,12 +16,11 @@ async fn main() {
     .expect("Error setting Ctrl-C handler");
 
     let (sender, receiver) = tokio::sync::mpsc::channel(32);
+    preview::show_preview();
+    logging::init_logging();
     event_system::init_event_dispatcher(sender).await;
     plugin_system::load_plugins(Mutex::new(receiver));
     usecases::subscribe_for_plugins().await;
-    preview::show_preview();
-    logging::init_logging();
-    // чота хз
     let server_launching = server::start();
     info!("Bootstrapping");
 
