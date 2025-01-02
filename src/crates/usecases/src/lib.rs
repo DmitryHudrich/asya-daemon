@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::scenarios::music_control;
 use crate::usecases::Usecases;
 use log::*;
-use scenarios::system_monitoring;
+use scenarios::{open, system_monitoring};
 use serde::Serialize;
 use services::llm_api;
 use shared::event_system;
@@ -88,6 +88,7 @@ pub async fn dispatch_usecase(command: Usecases, userinput: String) {
         Usecases::StartBasicSystemMonitoring => {
             system_monitoring::start_basic_monitoring(userinput).await
         }
+        Usecases::Open{app_name}=> open::open(app_name).await,
     }
 }
 

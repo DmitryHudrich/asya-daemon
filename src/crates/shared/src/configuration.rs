@@ -4,7 +4,7 @@ use macros::Property;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Debug};
 
-use crate::types::AiRecognizeMethod;
+use crate::types::{AiRecognizeMethod};
 use homedir::my_home;
 use lazy_static::lazy_static;
 use log::LevelFilter;
@@ -75,6 +75,10 @@ pub struct Config {
     /// Plugins config group.
     #[property(default, use_type(PluginsProperty), mergeable)]
     pub plugins: Plugins,
+
+    /// Open apps (похуй)
+    #[property(default, use_type(OpenAppsProperty), mergeable)]
+    pub open: OpenApps
 }
 
 #[derive(Debug, Property)]
@@ -165,4 +169,14 @@ pub struct Logging {
 
     #[property(default)]
     pub stdout: bool,
+}
+
+#[derive(Debug, Property)]
+#[property(name(OpenAppsProperty), derive(Deserialize, Default, Clone))]
+pub struct OpenApps {
+    #[property(default)]
+    pub terminal: String,
+
+    #[property(default)]
+    pub browser: String,
 }
