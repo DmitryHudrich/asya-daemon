@@ -224,14 +224,17 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
 
         let boxed_plugin_information = Box::from_raw(plugin_information_callback().cast_mut());
 
-        let state = (boxed_plugin_information.init_callback)(api_callbacks::get_api());
-
-        info!(
-            "Plugin loaded: {}",
-            CStr::from_ptr(boxed_plugin_information.name)
-                .to_str()
-                .unwrap_or("PLUGIN NAME CONTAINS NON UTF-8 CHARS.")
-        );
+        let str_plugin_name = match CStr::from_ptr(boxed_plugin_information.name).to_str() {
+            Ok(res) => res,
+            Err(_) => {
+                warn!("Plugin not loaded: file '{}' represents a plugin with name, that contains non utf-8 characters.", lib);
+                continue;
+            }
+        };
+        let plugin_config = CONFIG.plugins.config.get_key_value(str_plugin_name);
+        let config_ptr = extract_config_ptr(plugin_config);
+        let state = (boxed_plugin_information.init_callback)(config_ptr, api_callbacks::get_api());
+        info!("Plugin loaded: {}", str_plugin_name,);
 
         infos.push(PluginRuntimeInfo {
             _library: library,
@@ -240,4 +243,16 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
         });
     }
     infos
+}
+
+fn extract_config_ptr(plugin_config: Option<(&String, &String)>) -> *const i8 {
+    if let Some((_, config_json)) = plugin_config {
+        if let Ok(cstring) = CString::new(config_json.to_owned()) {
+            cstring.as_ptr()
+        } else {
+            ptr::null()
+        }
+    } else {
+        ptr::null()
+    }
 }

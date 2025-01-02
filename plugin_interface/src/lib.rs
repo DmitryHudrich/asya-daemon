@@ -2,7 +2,7 @@ use std::{ffi::{c_char, c_void}, ptr};
 
 pub type EventCallbalck = unsafe extern "C" fn(*const EventState, ApiCallbacks);
 pub type ExecuteCallback = unsafe extern "C" fn(*mut State, ApiCallbacks);
-pub type InitCallback = unsafe extern "C" fn(ApiCallbacks) -> *mut State;
+pub type InitCallback = unsafe extern "C" fn(*const c_char, ApiCallbacks) -> *mut State;
 
 pub type PluginInfoCallback = unsafe extern "C" fn() -> *const PluginInformation;
 

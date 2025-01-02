@@ -2,7 +2,7 @@
 
 use macros::Property;
 use serde::Deserialize;
-use std::fmt::Debug;
+use std::{collections::HashMap, fmt::Debug};
 
 use crate::types::AiRecognizeMethod;
 use homedir::my_home;
@@ -83,6 +83,9 @@ pub struct Plugins {
     /// Folder which contains plugins.
     #[property(default("plugins".to_string()))]
     pub plugins_folder: String,
+
+    #[property(default)]
+    pub config: HashMap<String, String>,
 }
 
 #[derive(Debug, Property)]
