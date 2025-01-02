@@ -253,7 +253,10 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
             state,
             plugin_information: boxed_plugin_information,
         });
-        let _ = CString::from_raw(config_ptr);
+
+        if !config_ptr.is_null() {
+            let _ = CString::from_raw(config_ptr);
+        }
     }
     infos
 }
@@ -279,9 +282,9 @@ fn normalize_config(
         let mut value_for_insert = v.to_owned();
         if let ConfigFieldType::Array(map) = v {
             dbg!(&map.len());
-            let mut array_field = Vec::with_capacity(map.len());
+            let mut array_field = vec![String::new(); map.len()];
             for (i, element) in map {
-                array_field.insert(i - 1, element.to_owned())
+                array_field[i - 1] = element.to_owned()
             }
             value_for_insert = ConfigFieldType::NormalizedArray(array_field);
         }
