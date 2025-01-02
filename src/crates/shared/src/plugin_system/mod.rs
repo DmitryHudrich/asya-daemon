@@ -64,7 +64,7 @@ fn find_plugins() -> Vec<String> {
             dir.to_str().unwrap_or("ERROR DUE CASTING PLUGINS PATH")
         );
     } else {
-        info!("Loaded {} plugins: {:?}", plugins.len(), plugins);
+        info!("Found {} plugins: {:?}", plugins.len(), plugins);
     }
     plugins
 }
@@ -222,12 +222,20 @@ unsafe fn load_plugin_data(libs: Vec<String>) -> Vec<PluginRuntimeInfo> {
             }
         };
 
-        let boxed_plugin_information =
-            Box::from_raw(plugin_information_callback().cast_mut());
+        let boxed_plugin_information = Box::from_raw(plugin_information_callback().cast_mut());
+
+        let state = (boxed_plugin_information.init_callback)(api_callbacks::get_api());
+
+        info!(
+            "Plugin loaded: {}",
+            CStr::from_ptr(boxed_plugin_information.name)
+                .to_str()
+                .unwrap_or("PLUGIN NAME CONTAINS NON UTF-8 CHARS.")
+        );
 
         infos.push(PluginRuntimeInfo {
             _library: library,
-            state: (boxed_plugin_information.init_callback)(api_callbacks::get_api()),
+            state,
             plugin_information: boxed_plugin_information,
         });
     }
