@@ -1,7 +1,6 @@
 use log::*;
 use parse_display::Display;
 use serde::{Deserialize, Serialize};
-use strum::EnumIter;
 
 use crate::scenarios::*;
 
@@ -55,6 +54,18 @@ pub enum AppUI {
 }
 
 impl Usecases {
+    pub fn stringify() -> String {
+        r#"
+            turnOffMusic,
+            turnOnMusic,
+            getMusicStatus,
+            playNextTrack,
+            playPrevTrack,
+
+            startBasicSystemMonitoring,
+        "#
+        .to_string()
+    }
     pub async fn execute(self, userinput: String) {
         let command = self;
         debug!("Dispatching command: {:?}", command);
