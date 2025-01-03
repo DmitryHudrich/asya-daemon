@@ -40,31 +40,23 @@ pub async fn dispatch_by_user_message(message: String) {
 
     let req = format!(
         "
-            Generate json from enums by user response that will be used for parsing, so don't use any markdown please.
+            Generate json from enums by user response that will be used for parsing, so don't use anyд markdown please.
             Here is enums: {}
             Here user response: {}.
 
             Output must looks like:
-            ```
+           
                 {{
                     \"command\": {{
-                        \"action\": \"turnOffMusic\" 
+                        \"action\": \"{some action from given enums}\" 
                     }}
                 }}
-            ```
-            ```
-                {{
-                    \"command\": {{
-                        \"action\" {{
-                            \"open\": {{ 
-                                \"appKind\": \"terminal\" 
-                            }}
-                        }}
-                    }}
-                }}
-            ```
-            SEND ME ONLY GENERATED JSON.
             
+           
+                
+                }}
+            
+            SEND ME ONLY GENERATED JSON WITHOUT ANY OTHER EXTRA TEXT. DON'T USE ESCAPE CHARACTERS
         ",
         stringified_usecases, message
     );
