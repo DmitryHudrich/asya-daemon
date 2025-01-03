@@ -1,4 +1,5 @@
 use log::*;
+use parse_display::Display;
 use serde::{Deserialize, Serialize};
 use strum::EnumIter;
 
@@ -18,20 +19,39 @@ pub enum Usecases {
 
     #[serde(rename_all = "camelCase")]
     Open {
-        app_name: App,
+        app_kind: AppKind,
     },
 
     StartBasicSystemMonitoring,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, EnumIter)]
+#[derive(Serialize, Deserialize, Debug, Clone, Display)]
+#[display(style = "snake_case")]
 #[serde(rename_all = "camelCase")]
-pub enum App {
+pub enum AppKind {
     Terminal,
     Browser,
     Steam,
     Discord,
     Telegram,
+    #[display("{0}")]
+    Specific(App),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Display)]
+#[display("{command}")]
+#[serde(rename_all = "camelCase")]
+pub struct App {
+    pub ui: AppUI,
+    pub command: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Display)]
+#[display(style = "camelCase")]
+#[serde(rename_all = "camelCase")]
+pub enum AppUI {
+    T,
+    G,
 }
 
 impl Usecases {
@@ -50,7 +70,7 @@ impl Usecases {
             Usecases::StartBasicSystemMonitoring => {
                 system_monitoring::start_basic_monitoring(userinput).await
             }
-            Usecases::Open { app_name } => open::open(app_name).await,
+            Usecases::Open { app_kind } => open::open(app_kind).await,
         }
     }
 }
