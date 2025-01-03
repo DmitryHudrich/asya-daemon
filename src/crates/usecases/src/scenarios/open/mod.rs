@@ -117,7 +117,8 @@ async fn open_gui(app_name: String) -> Result<OpenOk, OpenError> {
 async fn open_specific(app: App) -> Result<OpenOk, OpenError> {
     match app {
         App::Gui(app_name) => open_gui(app_name).await,
-        _ => todo!(), // FIXME: кажется я обосрался с архитектурой. чтобы туи приложу открыть надо сначала
+        // _ => todo!(), 
+                      // FIXME: кажется я обосрался с архитектурой. чтобы туи приложу открыть надо сначала
                       // открыть терминал функцией open_generic(AppKind::Terminal),
                       // потом в нем уже то что надо. а чтобы в терминале чето открыть, надо
                       // ему аргументы передать, а функция такого не предполагает. кароче мне щас лень думать

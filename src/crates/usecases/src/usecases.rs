@@ -7,7 +7,7 @@ use crate::scenarios::*;
 /// Usecases are the main business logic of the application.
 ///
 /// This usecases module contains all the possible actions that the user can perform from client.
-#[derive(Debug, Stringify, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Stringify, serde::Serialize, serde::Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum Usecases {
     TurnOffMusic,
@@ -24,7 +24,7 @@ pub enum Usecases {
     StartBasicSystemMonitoring,
 }
 
-#[derive(Serialize, Stringify, Deserialize, Debug, Clone)]
+#[derive(Serialize, Stringify, Deserialize, Debug, Clone, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum AppKind {
     Terminal,
@@ -35,10 +35,10 @@ pub enum AppKind {
     Specific(App),
 }
 
-#[derive(Serialize, Stringify, Deserialize, Debug, Clone)]
+#[derive(Serialize, Stringify, Deserialize, Debug, Clone, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum App {
-    Tui(String),
+    // Tui(String),
     Gui(String),
 }
 
