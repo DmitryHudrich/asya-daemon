@@ -40,7 +40,7 @@ pub async fn dispatch_by_user_message(message: String) {
 
     let req = format!(
         "
-            Generate json from enums by user response that will be used for parsing, so don't use anyд markdown please.
+            Generate json from enums by user response that will be used for parsing, so don't use any markdown please.
             Here is enums: {}
             Here user response: {}.
 
