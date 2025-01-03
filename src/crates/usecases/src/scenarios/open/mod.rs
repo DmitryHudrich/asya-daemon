@@ -3,7 +3,7 @@ use std::{env, process::Command};
 use shared::{configuration::CONFIG, event_system};
 
 use crate::{
-    usecases::{App, AppKind, AppUI},
+    usecases::{App, AppKind},
     AsyaResponse,
 };
 
@@ -39,7 +39,7 @@ pub async fn open(kind: AppKind) {
         Err(err) => match err {
             OpenError::NotFound => {
                 event_system::publish(AsyaResponse::Ok {
-                    message: format!("Couldn't find {} on your pc.", kind),
+                    message: format!("Couldn't find {:?} on your pc.", kind),
                 })
                 .await
             }
@@ -101,22 +101,22 @@ async fn open_generic(app: AppKind, fallback: Vec<&str>) -> Result<OpenOk, OpenE
     }
 }
 
-async fn open_gui(app: App) -> Result<OpenOk, OpenError> {
-    let res = Command::new(app.command.clone())
+async fn open_gui(app_name: String) -> Result<OpenOk, OpenError> {
+    let res = Command::new(app_name.clone())
         .current_dir(env::var("HOME").unwrap())
         .spawn();
     match res {
-        Ok(_) => Ok(OpenOk { name: app.command }),
+        Ok(_) => Ok(OpenOk { name: app_name }),
         Err(err) => Err(OpenError::Other {
-            name: app.command,
+            name: app_name,
             message: err.to_string(),
         }),
     }
 }
 
 async fn open_specific(app: App) -> Result<OpenOk, OpenError> {
-    match app.ui {
-        AppUI::G => open_gui(app).await,
+    match app {
+        App::Gui(app_name) => open_gui(app_name).await,
         _ => todo!(), // FIXME: кажется я обосрался с архитектурой. чтобы туи приложу открыть надо сначала
                       // открыть терминал функцией open_generic(AppKind::Terminal),
                       // потом в нем уже то что надо. а чтобы в терминале чето открыть, надо

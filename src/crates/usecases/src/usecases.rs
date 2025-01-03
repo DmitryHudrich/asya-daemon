@@ -24,8 +24,7 @@ pub enum Usecases {
     StartBasicSystemMonitoring,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Display)]
-#[display(style = "snake_case")]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum AppKind {
     Terminal,
@@ -33,24 +32,14 @@ pub enum AppKind {
     Steam,
     Discord,
     Telegram,
-    #[display("{0}")]
     Specific(App),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Display)]
-#[display("{command}")]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct App {
-    pub ui: AppUI,
-    pub command: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Display)]
-#[display(style = "camelCase")]
-#[serde(rename_all = "camelCase")]
-pub enum AppUI {
-    T,
-    G,
+pub enum App {
+    Tui(String),
+    Gui(String),
 }
 
 impl Usecases {
