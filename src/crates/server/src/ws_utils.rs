@@ -73,7 +73,7 @@ async fn handle_request(request: Requests, session: Arc<RwLock<Session>>) {
     subscribe_to_asya_response(session).await;
     match request {
         Requests::Command { action } => {
-            usecases::dispatch_usecase(action, "".to_string()).await;
+            action.execute("".to_string()).await;
         }
         Requests::Human { message } => {
             usecases::dispatch_by_user_message(message).await;
