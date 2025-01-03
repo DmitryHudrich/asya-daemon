@@ -18,7 +18,7 @@ pub(crate) fn make_derive(item: TokenStream) -> TokenStream {
 
     quote! {
         impl #enum_name {
-            #enum_visibility fn stringify() -> &'static str {
+            #enum_visibility fn stringify_one() -> &'static str {
                 #stringified
             }
         }

@@ -43,6 +43,15 @@ pub enum App {
 }
 
 impl Usecases {
+    pub fn stringify_all() -> String {
+        let strings = [
+            Usecases::stringify_one(),
+            AppKind::stringify_one(),
+            App::stringify_one(),
+        ];
+        let iter = strings.iter().map(|el| el.to_string() + "\n\n");
+        String::from_iter(iter)
+    }
     pub async fn execute(self, userinput: String) {
         let command = self;
         debug!("Dispatching command: {:?}", command);

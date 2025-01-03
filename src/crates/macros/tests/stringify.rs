@@ -10,9 +10,9 @@ enum TestEnum {
 
 #[test]
 fn simple_test() {
-    println!("{}", TestEnum::stringify());
+    println!("{}", TestEnum::stringify_one());
     assert_eq!(
-        TestEnum::stringify(),
+        TestEnum::stringify_one(),
         "enum TestEnum {
     First,
     Second(i32, usize),

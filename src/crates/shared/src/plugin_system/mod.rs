@@ -281,7 +281,6 @@ fn normalize_config(
     for (k, v) in plugin_config {
         let mut value_for_insert = v.to_owned();
         if let ConfigFieldType::Array(map) = v {
-            dbg!(&map.len());
             let mut array_field = vec![String::new(); map.len()];
             for (i, element) in map {
                 array_field[i - 1] = element.to_owned()
