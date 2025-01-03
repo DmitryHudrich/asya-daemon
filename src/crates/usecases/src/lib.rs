@@ -66,21 +66,6 @@ pub async fn dispatch_by_user_message(message: String) {
             SEND ME ONLY GENERATED JSON.
             
         ",
-        // "
-        //     Generate json. your json will be used for parsing, so don't use any markdown.
-        //     use json templates:
-        //     ```
-        //         {{
-        //             \"command\": {{
-        //                 \"action\": \"turnOffMusic\" 
-        //             }}
-        //         }}
-        //     ```
-        //     Generate for the following query:
-        //     Here is commands which are available: {}. 
-        //     Choose command that mostly looks like this description: {}? 
-        //     SEND ME ONLY COMMAND AND POSSIBLE PARAMETERS
-        // ",
         stringified_usecases, message
     );
 
