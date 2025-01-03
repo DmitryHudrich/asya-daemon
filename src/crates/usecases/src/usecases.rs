@@ -1,5 +1,5 @@
 use log::*;
-use parse_display::Display;
+use macros::Stringify;
 use serde::{Deserialize, Serialize};
 
 use crate::scenarios::*;
@@ -7,7 +7,7 @@ use crate::scenarios::*;
 /// Usecases are the main business logic of the application.
 ///
 /// This usecases module contains all the possible actions that the user can perform from client.
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Stringify, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Usecases {
     TurnOffMusic,
@@ -24,7 +24,7 @@ pub enum Usecases {
     StartBasicSystemMonitoring,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Stringify, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum AppKind {
     Terminal,
@@ -35,7 +35,7 @@ pub enum AppKind {
     Specific(App),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Stringify, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub enum App {
     Tui(String),
@@ -43,18 +43,6 @@ pub enum App {
 }
 
 impl Usecases {
-    pub fn stringify() -> String {
-        r#"
-            turnOffMusic,
-            turnOnMusic,
-            getMusicStatus,
-            playNextTrack,
-            playPrevTrack,
-
-            startBasicSystemMonitoring,
-        "#
-        .to_string()
-    }
     pub async fn execute(self, userinput: String) {
         let command = self;
         debug!("Dispatching command: {:?}", command);
